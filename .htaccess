@@ -1,0 +1,9 @@
+Options +FollowSymlinks
+RewriteEngine On
+
+php_value post_max_size 200M
+
+RewriteCond %{REQUEST_URI} !^/(pma|game.php|api|ajax|manipulate-games.php)
+RewriteRule ^(.*)\.php	index.php [NC,QSA]
+RewriteCond %{REQUEST_URI} !^/(pma|game.php|api|ajax|manipulate-games.php)
+RewriteRule ^(.*)/$		index.php [NC,QSA]

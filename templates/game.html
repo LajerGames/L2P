@@ -1,0 +1,17 @@
+<input type="range" min="20" max="210" value="80" id="speed" /> <div style="display: inline-block;"><span id="speedShow">80</span> bpm</div> <button id="startGame" type="button">Start Game</button> <button id="stopGame" type="button">Stop Game</button><br>
+<canvas id="gameContainer" width="1333" height="500" style="display:none;"></canvas>
+<svg height="500" width="100%" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="svg_container" version="1.1">
+	<defs>
+		<g id="pointer" transform="scale(0.1875)">
+			<path id="svg_1" d="m0,0l0,100l86,-50l-87,-50"/>
+		</g>
+	</defs>
+	<g id="background"></g>
+	<g id="notes"></g>
+	<g id="start"></g>
+</svg>
+<div style="display:none;">
+	<div class="tuner">
+		<canvas></canvas>
+	</div>
+</div>

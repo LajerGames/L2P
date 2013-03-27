@@ -1,0 +1,195 @@
+body {
+	padding: 0px;
+	margin: 3vh 0 0 0;
+}
+body, div, p, span, td, a, button {
+	font-size: 2vmin;
+	font-family: 'Open Sans', Verdana;
+	color :#FFF
+}
+h2 {
+    font-size: 5vmin;
+}
+h3 {
+	font-size: 2vmin;
+}
+
+a {
+	text-decoration: none;
+}
+.opacity0 {
+	opacity: 0;
+}
+.clear {
+	float: none;
+	clear: both;
+}
+.clear--left {
+	float: none;
+	clear: left;
+}
+.clear--right {
+	float: none;
+	clear: right;
+}
+select, textarea, input[type="text"], input[type="password"], input[type="datetime"], input[type="datetime-local"], input[type="date"], input[type="month"], input[type="time"], input[type="week"], input[type="number"], input[type="email"], input[type="url"], input[type="search"], input[type="tel"], input[type="color"], .uneditable-input,
+.std {
+	width: 20.5vw;
+	height: 4vh;
+	font-size: 2vmin;
+	margin: 1vh 2vw 2vh 2vw;
+	box-sizing: content-box;
+}
+input.std::-webkit-input-placeholder {
+	color: #1DBAE7;
+}
+div.inputContainer {
+	position: relative;
+}
+div.inputContainer button.imgSubmit{
+	position: absolute;
+	right: 3vw;
+	top: 1.7vh;
+	height: 3.4vh;
+	border: 0;
+	background: transparent;
+}
+/*
+.innerSubmit {
+	height: 20px;
+	background-color: transparent;
+	position: absolute;
+	opacity: 0.8;
+	top: 15px;
+	right: 1.5vw;
+	margin-right: -5px;
+}
+.innerSubmit:hover,
+.innerSubmit:active {
+	background-image: url(../img/icons/submit.svg);
+	background-position: 0;
+	background-color: transparent;
+	opacity: 1;
+}*/
+a:hover {
+	text-decoration: underline;
+	color :#FFF
+}
+div#CenteringContainer {
+	width: 80%;
+	text-align: left;
+	margin-left: auto;
+	margin-right: auto;
+	position: relative;
+}
+#logo {
+	width: 12%;
+	display: inline-block;
+	margin-bottom: 10vh;
+}
+
+.popover {
+	z-index: 10002;
+}
+.popover .popover-title {
+	display: none;
+}
+.popover .popover-content p {
+	color: black;
+	font-size: 2vmin;
+}
+div#languages {
+	padding-right: 1.4vw;
+}
+div#languages img {
+	float: right;
+	height: 2vh;
+	padding-left: 0.6vw;
+	opacity:0.5;
+	filter:alpha(opacity=50);
+}
+div#languages img:hover {
+	opacity:1;
+	filter:alpha(opacity=100);
+}
+
+body > div.countdown {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	text-align: center;
+	background-color: rgba(0,0,0,0.5);
+	z-index: 100;
+	-webkit-transition-duration: 0.5s;
+}
+body > div.countdown > div.countdown-number {
+	margin-top: 25%;
+	font-weight: bold;
+	font-size:40vmin;
+	font-family: tahoma;
+	opacity: 1;
+}
+body > div.countdown > div.countdown-next {
+	margin-top: -37vmin;
+	font-size: 10vmin;
+}
+body > div.countdown > div.animateCountdown {
+	-webkit-animation-name: countdown;
+	-webkit-animation-duration: 1s;
+	-webkit-animation-iteration-count: infinite;
+}
+@-webkit-keyframes countdown {
+	0% { font-size:75vmin; opacity: 1;}
+	95% { font-size:20vmin; opacity: 0.5;}
+	100% { font-size:75vmin; opacity: 1;}
+}
+
+
+.CompassOuter {
+	width: 100%;
+	height: 7.5vh;
+	display: none;
+}
+.Compass {
+	position: relative;
+	text-align: center;
+	overflow: hidden;
+	background-image: -webkit-linear-gradient(left , rgb(153,0,0) 0%, rgb(153,153,0) 48%, rgb(0,153,0) 50%, rgb(153,153,27) 52%, rgb(153,0,0) 100%);
+}
+.Compass > * {
+	line-height: 7.5vh;
+}
+.Compass > .CompassTone {
+	position: relative;
+}
+.Compass > .CompassToneBefore,
+.Compass > .CompassToneAfter {
+	position: absolute;
+	top: 0;
+}
+.Compass > .CompassToneBefore {
+	left: 0;
+	right: auto;
+}
+.Compass > .CompassToneAfter {
+	left: auto;
+	right: 0;
+}
+.Compass > .CompassArrow {
+	border: 1px solid #000;
+	width: 0;
+	position: absolute;
+	top: 0;
+}
+
+
+/**
+* Statistic
+*/
+.statistic-graph {
+	width: 50%;
+	height: 30vmin;
+	float: left;
+}

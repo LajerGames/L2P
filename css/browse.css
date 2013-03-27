@@ -1,0 +1,51 @@
+div#PlaylistContainer {
+	float: right;
+	width: 25%;
+}
+div#SongContainer {
+	width: 74%;
+}
+div#SongContainer input {
+	width: 60%;
+	margin: 0;
+}
+div#SongContainer select {
+	width: 30%;
+	margin: 0;
+}
+div#list a {
+	display: block;
+	padding: 2px 0 2px 0;
+	margin: 2px 0 2px 0;
+}
+div#list a:hover {
+	background-color: #D0D0D0;
+}
+div#list .addToPlaylist,
+div#PlaylistItems .removeFromPlaylist {
+	float: right;
+	width: 1vw;
+	cursor: pointer;
+	padding: 3px 5px 3px 5px;
+}
+
+div#PlaylistContainer h2 {
+	position: relative;
+}
+div#PlaylistContainer img.newPlaylist,
+div#PlaylistContainer img.playPlaylist {
+	height: 4vmin;
+	position: absolute;
+	right: 5vmin;
+	top: 1vmin;
+	cursor: pointer;
+}
+div#PlaylistContainer img.playPlaylist {
+	right: 0;
+}
+div#PlaylistItems table {
+	width: 100%;
+}
+div#PlaylistItems table tr:hover {
+	background-color: #D0D0D0;
+}

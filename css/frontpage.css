@@ -1,0 +1,217 @@
+body {
+	height: 100%;
+	background-image: url(../img/layout/background-front.jpg);
+	background-size: 100% auto;
+	-o-background-size: 100% auto;
+	-webkit-background-size: 100% auto;
+	background-repeat: no-repeat;
+	background-position: 0 11vh;
+	background-color: #004959;
+}
+text.logo-text {
+	fill: #FFF;
+}
+body.song text.logo-text {
+	fill: #71C211;
+}
+body.scale text.logo-text {
+	fill: #E2A30C;
+}
+#logo {
+	text-decoration: none;
+}
+div.ContentBox {
+	width: 32%;
+	margin-right: 1vw;
+	float: left;
+}
+div.ContentBox > div {
+	position: relative;
+}
+div.ContentBoxEnd {
+	margin-right: 0; !important;
+}
+div.ContentBoxHeadline {
+	line-height: 7.5vh;
+	position: relative;
+	z-index: 20;
+}
+div.ContentBoxHeadline img {
+	height: 3vh;
+	margin-right: 5px;
+}
+
+div.ContentBoxHeadline img#EditUser {
+	margin: 0;
+	text-align: right;
+}
+div.ContentBoxHeadline div {
+	padding: 0 1.5vw 0 1.5vw;
+}
+div.ContentBoxHeadline div span {
+	font-size: 3vmin;
+}
+div.ContentBoxBody {
+	margin-top: 2px;
+	height: 30vh;
+	min-width: 160px;
+	overflow: hidden;
+	transition-duration: 1s;
+	-o-transition-duration: 1s;
+	-ms-transition-duration: 1s;
+	-moz-transition-duration: 1s;
+	-webkit-transition-duration: 1s;
+	width: 100%;
+	z-index: 10;
+}
+div.ContentBoxBody img, div.ContentBoxBody span {
+	display: block;
+	width: 3vmin;
+	float: right;
+}
+body.ShowGame div.ContentBoxBody {
+	height: 0;
+	position: absolute;
+}
+body.ShowGame div.ContentBox:hover div:not(.ContentBoxBlue) div.ContentBoxBody {
+	height: 30vh;
+}
+div.ContentBoxBody.upper {
+	margin-top: 2px;
+	height: 20vh;
+	min-width: 160px;
+}
+body.song {
+	background-image: url(../img/layout/background-song.jpg);
+	background-color: #EEE;
+}
+body.scale {
+	background-image: url(../img/layout/background-scale.jpg);
+	background-color: #EEE;
+}
+a.ContentBoxBody.lower {
+	margin-top: 2vh;
+	line-height: 8vh;
+	min-width: 160px;
+	display: block;
+	transition-duration: 1s;
+	-o-transition-duration: 1s;
+	-ms-transition-duration: 1s;
+	-moz-transition-duration: 1s;
+	-webkit-transition-duration: 1s;
+	height: 8vh;
+	overflow: hidden;
+}
+a.ContentBoxBody.lower span {
+	padding: 0 0 0 1.5vw;
+}
+div.ContentBoxBody div:first-child {
+	position: relative;
+}
+div.ContentBoxBody a {
+	display: block;
+	padding: 0 1.5vw 0 1.5vw;
+	line-height: 3.75vh;
+}
+div.ContentBoxBody .addToPlaylist {
+	position: absolute;
+	right: 10px;
+	cursor: pointer;
+}
+div.ContentBoxBody .ViewAllGames {
+	text-align: center;
+}
+div.ContentBoxHeadline h2 {
+	padding: 0 1.5vw 0 1.5vw;
+}
+div.ContentBox > div > div.ContentBoxHeadline {
+	height: 7.5vh;
+	overflow: hidden;
+	transition-duration: 1s;
+	-o-transition-duration: 1s;
+	-ms-transition-duration: 1s;
+	-moz-transition-duration: 1s;
+	-webkit-transition-duration: 1s;
+}
+div.ContentBoxGreen div {
+	background-color: #71C211;
+}
+div.ContentBoxOrange > div {
+	background-color: #E2A30C;
+}
+div.ContentBoxBlue > div {
+	background-color: #1DBAE7;
+}
+body.scale div.ContentBoxPoint > div {
+	background-color: #E2A30C;
+}
+body.song div.ContentBoxPoint > div {
+	background-color: #71C211;
+}
+div.ContentBoxBlue input {
+	color: #000;
+	border-radius: 0;
+}
+div.ContentBoxBlue div.upper {
+	background-color: #1DBAE7;
+}
+div.ContentBoxBlue a.lower {
+	background-color: #8D32B7;
+}
+body.ShowGame div.ContentBoxBlue > div,
+body.ShowGame div.ContentBoxBlue a {
+	height: 0;
+}
+body.ShowGame div.ContentBoxBlue {
+	height: 0;
+}
+
+div.ContentBoxPoint {
+	height: 0;
+	overflow: hidden;
+	transition-duration: 1s;
+	-o-transition-duration: 1s;
+	-ms-transition-duration: 1s;
+	-moz-transition-duration: 1s;
+	-webkit-transition-duration: 1s;
+}
+body.ShowGame div.ContentBoxPoint {
+	height: 7.5vh;
+}
+
+div#DialogContainer {
+	display: none;
+}
+div#game_container {
+	height: 0;
+	overflow: hidden;
+	transition-duration: 1s;
+	-o-transition-duration: 1s;
+	-ms-transition-duration: 1s;
+	-moz-transition-duration: 1s;
+	-webkit-transition-duration: 1s;
+}
+body.ShowGame div#game_container {
+	height: 531px;
+}
+a.edit {
+	float: right;
+}
+@media screen and (max-width: 620px) {
+	div.ContentBox {
+		float: none;
+		width: 100%;
+	}
+	div.ContentBoxBody {
+		height: 0;
+		transition: 1s;
+		-webkit-transition: 1s;
+		-moz-transition: 1s;
+		-ms-transition: 1s;
+		-o-transition: 1s;
+		overflow: hidden;
+	}
+	div.ContentBox:hover div.ContentBoxBody {
+		height: 30vh;
+	}
+}

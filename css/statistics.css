@@ -1,0 +1,16 @@
+div#FavouriteSongs {
+    color: #000;
+}
+div#FavouriteSongs a:first-of-type {
+    float: right;
+    margin-top: 1vh;
+}
+table.FavouriteSongList {
+    width: 100%;
+}
+table.FavouriteSongList tr:first-of-type:nth-child(1) {
+    border :#000 1px solid;
+}
+table.FavouriteSongList td {
+    color: #000;
+}
