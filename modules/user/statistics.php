@@ -21,11 +21,24 @@ else
 }
 
 // Create a instance of the new search class for the statistics
-$oStatisticsSearch = new AC_RenderStatisticsSearch();
-$oStatisticsSearch->iUserID = $oPathUser->iUserID > 0 ? $oPathUser->iUserID : $_SESSION['UserObject']->id;
+$oStatisticsSearchObject = new AC_RenderStatisticsSearch();
+$oStatisticsSearchObject->iUserID = $oPathUser->iUserID > 0 ? $oPathUser->iUserID : $_SESSION['UserObject']->id;
+//$oStatisticsSearchObject->arrGameHistoryIDs = array(519);
+
+if(is_object($oStatisticsSearch))
+{
+	if(strlen($oStatisticsSearch->arrSearch['game_history_ids']) > 0)
+	{
+		$oStatisticsSearchObject->arrGameHistoryIDs	= explode(',', $oStatisticsSearch->arrSearch['game_history_ids']);
+	}
+	if(strlen($oStatisticsSearch->arrSearch['game_ids']) > 0)
+	{
+		$oStatisticsSearchObject->arrGameIDs		= explode(',', $oStatisticsSearch->arrSearch['game_ids']);
+	}
+}
 
 // Create new instance of the statistics class
-$oStatistics = new Statistics($oSql, $oStatisticsSearch, $oLang);
+$oStatistics = new Statistics($oSql, $oStatisticsSearchObject, $oLang);
 
 $strDialog    = $oPageRenderer->RenderDialogInfo($oTemplate, $strHeadline, $oStatistics->RenderStatistics(), '#8D32B7', null, 'statistic');
 

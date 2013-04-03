@@ -238,7 +238,7 @@ class MySQLWrapper
 	*/
 	private function AddTheSeven($arrData, $strType)
 	{
-		$iUserID = intval($_SESSION['user_id']);
+		$iUserID = intval($_SESSION['UserObject']->id);
 		switch($strType)
 		{
 			case 'INSERT' :
@@ -319,6 +319,18 @@ class MySQLWrapper
                     {
                         $oObject->$strName = null;
                     }
+                }
+                elseif(substr($strName, 0, 3) === 'arr')
+                {
+					if(substr($strName, -8) === 'FromJSON')
+					{
+						$strName	= substr($strName, 0, -8);
+						$oObject->$strName	= json_decode($strValue, true);
+					}
+					else
+					{
+						$oObject->$strName	= empty($strValue) ? array () : explode(',', $strValue);
+					}
                 }
 		    }
         }

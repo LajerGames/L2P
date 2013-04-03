@@ -8,8 +8,19 @@ div#FavouriteSongs a:first-of-type {
 table.FavouriteSongList {
     width: 100%;
 }
-table.FavouriteSongList tr:first-of-type:nth-child(1) {
-    border :#000 1px solid;
+table.FavouriteSongList tr:not(:nth-child(1)):hover {
+    background-color: #DFDFDF;
+    cursor: pointer;
+}
+table.FavouriteSongList tr th:nth-child(1)
+{
+    width: 30px;
+}
+table.FavouriteSongList tr th:nth-child(3), table.FavouriteSongList tr th:nth-child(4) {
+    width: 150px;
+}
+table.FavouriteSongList tr td:nth-child(3), table.FavouriteSongList tr td:nth-child(4) {
+    text-align: right;
 }
 table.FavouriteSongList td {
     color: #000;

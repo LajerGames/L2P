@@ -43,7 +43,17 @@ define(['jquery'], function ($) {
 		lang:	function ( callback, keys ) {
 			new	_apiGetter( 'lang.php', {
 				keys:	keys
-			}, true)
+			})
+			.then( function ( data ) {
+				if( callback ) {
+					callback( data );
+				}
+			});
+		},
+		statistic_uuid:	function ( callback, search ) {
+			new _apiGetter( 'statistic.search.uuid.php', {
+				search:	search
+			})
 			.then( function ( data ) {
 				if( callback ) {
 					callback( data );

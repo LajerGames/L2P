@@ -1,10 +1,15 @@
 define(['jquery', 'l2p', 'playlist', 'api'], function ($, L2P, Playlist, api) {
 	return (function ($dialog) {
-		var	render;
+		var	render,
+			socket;
 		L2P.get.playlist(null, function (playlist) {
 			render	= L2P.render.playlist(playlist, $dialog.find('#PlaylistItems'));;
 		});
 		L2P.click.set($dialog);
+
+		function onSearch(data) {
+			console.log(data);
+		}
 
 		$dialog.find('img.newPlaylist').on('click', function () {
 			api.get.lang(function (lang) {
@@ -25,6 +30,12 @@ define(['jquery', 'l2p', 'playlist', 'api'], function ($, L2P, Playlist, api) {
 				oParam.type     	= $(this).attr('data-type');
 
 				$dialog.find("#list").load("/ajax/browse.render.music.php", oParam);
+				return;
+				if(!socket) {
+					socket	= L2P.io();
+					socket.on('statistic:search', onSearch);
+				}
+				socket.emit('statistic:search', oParam);
 			});
 	});
 })

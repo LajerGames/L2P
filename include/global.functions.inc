@@ -159,12 +159,12 @@ function GetMusic($oSql, $strType = 'song', $iLimit = 0, $strSearch = '')
 
 /**
 * Returns a object, contains strLoadFile nomatter what, and may return oPathUser aswell
-* 
+*
 * @param object $oSql
 * @param bool $bReturn404
 * @return AC_LoadFileInfo
 */
-function FindLoadFile($oSql, $bReturn404 = false)
+function FindLoadFile(MySQLWrapper $oSql, $bReturn404 = false)
 {
     $oLoadInfo = new AC_LoadFileInfo();
     if(is_file(SERVER_PROJECT_ROOT.REQUEST_URI))
@@ -186,7 +186,7 @@ function FindLoadFile($oSql, $bReturn404 = false)
     }
     else
     {
-        
+
         // If we wind up in here, there is a chance we're looking at a username in the permlink... Find out which part of the url we know, and see if we can identify the a username afterwards
         // Explode the URI
         $arrURI = explode('/', REQUEST_URI, 4);
@@ -245,6 +245,35 @@ function FindLoadFile($oSql, $bReturn404 = false)
 
                 $oLoadInfo->strLoadfile = SERVER_PROJECT_ROOT_MODULES.$strFolder.$strRemainingPath.'/index.php';
             }
+            elseif(substr($strRemainingPath, 0, 11) === 'statistics/')
+            {
+            	// We might have an UUID for a search here
+				$arrRemainingURI	= explode('/', $strRemainingPath);
+
+				// Test weither this looks like an UUID
+				if(!empty($arrRemainingURI[1]) && strlen($arrRemainingURI[1]) === 6)
+				{
+					$strUUID	= $arrRemainingURI[1];
+
+					$oStatisticsSearch	= $oSql->SelectSingleObject('
+						SELECT
+							users_statistics_search.id		AS iUserStatisticsSearchID,
+							users_statistics_search.search	AS arrSearchFromJSON
+						FROM
+							users_statistics_search
+						WHERE
+							users_statistics_search.user_id	= '.$oPathUser->iUserID.'
+						 &&	users_statistics_search.uuid	= "'.$strUUID.'"
+					');
+					if(!empty($oStatisticsSearch))
+					{
+						$bPageLoaded = true;
+
+						$oLoadInfo->oStatisticsSearch	= $oStatisticsSearch;
+						$oLoadInfo->strLoadfile 		= SERVER_PROJECT_ROOT_MODULES.$strFolder.'/statistics.php';
+					}
+				}
+            }
         }
 
         if(!$bPageLoaded)
@@ -262,11 +291,190 @@ function FindLoadFile($oSql, $bReturn404 = false)
         }
     }
 
-    return $oLoadInfo;   
+    return $oLoadInfo;
+}
+
+/**
+* Returns a nice datestring in the correct language
+*
+* @param string $strDate
+* @param object $oLang
+*/
+function RenderDate($strDate, $oLang)
+{
+    // Decide what to write, we'll always write the date in human words, unless it's more than two days ago
+    $iUnixTimeToday     = strtotime(date('Y-m-d H:i:s'));
+    $iUnixTimeDate      = strtotime($strDate);
+
+    // What is the timedifference in seconds
+    $iTimeDifferenceSeconds = $iUnixTimeToday - $iUnixTimeDate;
+    $iTimeDifferenceMinutes = floor($iTimeDifferenceSeconds / 60);
+    $iTimeDifferenceHours   = floor($iTimeDifferenceSeconds / 60 / 60);
+    $iTimeDifferenceDays    = floor($iTimeDifferenceSeconds / 60 / 60 / 24);
+
+    $bIsEnglish = $_COOKIE['country_code'] != 'da-DK';
+
+    // Now decide what to put out
+    $strRtrn = '';
+
+    // Are we in the same day as today?
+    if(date('Y-m-d') === date('Y-m-d', $iUnixTimeDate))
+    {
+        if($iTimeDifferenceSeconds < 60)
+        {
+            // Less than a minute
+            $strRtrn = $oLang->Get('time_less_than_minute');
+        }
+        elseif($iTimeDifferenceSeconds < 180)
+        {
+            // A few minutes ago
+            $strRtrn = $oLang->Get('time_few_minutes');
+        }
+        elseif($iTimeDifferenceSeconds < 3500)
+        {
+            // A specific amount of minutes
+            $strRtrn = $iTimeDifferenceMinutes.' '.$oLang->Get('time_minutes').' '.$oLang->Get('time_ago');
+        }
+        elseif($iTimeDifferenceSeconds < 7140)
+        {
+            // About an hour
+            $strRtrn = $oLang->Get('time_about_an_hour');
+        }
+        else
+        {
+            // XX hours ago
+            $strRtrn = $iTimeDifferenceHours.' '.$oLang->Get('time_hours').' '.$oLang->Get('time_ago');
+        }
+    }
+    else
+    {
+        // English time?
+        $strTime = $bIsEnglish ? 'at '.date('h:i a', $iUnixTimeDate) : 'klokken '.date('H:i', $iUnixTimeDate);
+        if(date('Y-m-d', strtotime('-1 day')) == date('Y-m-d', $iUnixTimeDate))
+        {
+            // Yesterday a XX o clock
+            $strRtrn = $oLang->Get('time_yesterday').' '.$strTime;
+        }
+        elseif($iTimeDifferenceDays < 7)
+        {
+            $strRtrn = $oLang->Get('global_last').' '.RenderWeekdayName($strDate, $oLang).' '.$strTime;
+        }
+        elseif($iTimeDifferenceDays < 365)
+        {
+            // Date and time
+            if($bIsEnglish)
+            {
+                $strRtrn = date('jS', $iUnixTimeDate).' of '.RenderMonthName($strDate, $oLang).' '.$strTime;
+            }
+            else
+            {
+                $strRtrn = 'D. '.date('j', $iUnixTimeDate).'. '.RenderMonthName($strDate, $oLang).' '.$strTime;
+            }
+        }
+        else
+        {
+            // More than a year ago
+            $strRtrn = $oLang->Get('time_more_than_a_year');
+        }
+    }
+
+    return $strRtrn;
+}
+/**
+* Returns a weekdayname in the correct language
+*
+* @param string $strDate
+* @param object $oLang
+*/
+function RenderWeekdayName($strDate, $oLang)
+{
+    $iWeekday = date('N', strtotime($strDate));
+
+    $strRtrn = '';
+    switch($iWeekday)
+    {
+        case 1 :
+            $strRtrn = $oLang->Get('time_monday');
+            break;
+        case 2 :
+            $strRtrn = $oLang->Get('time_tuesday');
+            break;
+        case 3 :
+            $strRtrn = $oLang->Get('time_wednesday');
+            break;
+        case 4 :
+            $strRtrn = $oLang->Get('time_thursday');
+            break;
+        case 5 :
+            $strRtrn = $oLang->Get('time_friday');
+            break;
+        case 6 :
+            $strRtrn = $oLang->Get('time_saturday');
+            break;
+        case 7 :
+            $strRtrn = $oLang->Get('time_sunday');
+            break;
+    }
+
+    return $strRtrn;
+}
+/**
+* Returns a monthname in the correct language
+*
+* @param string $strDate
+* @param object $oLang
+*/
+function RenderMonthName($strDate, $oLang)
+{
+    $iMonth = date('n', strtotime($strDate));
+
+    $strRtrn = '';
+    switch($iMonth)
+    {
+        case 1 :
+            $strRtrn = $oLang->Get('time_january');
+            break;
+        case 2 :
+            $strRtrn = $oLang->Get('time_febuary');
+            break;
+        case 3 :
+            $strRtrn = $oLang->Get('time_march');
+            break;
+        case 4 :
+            $strRtrn = $oLang->Get('time_april');
+            break;
+        case 5 :
+            $strRtrn = $oLang->Get('time_may');
+            break;
+        case 6 :
+            $strRtrn = $oLang->Get('time_june');
+            break;
+        case 7 :
+            $strRtrn = $oLang->Get('time_july');
+            break;
+        case 8 :
+            $strRtrn = $oLang->Get('time_august');
+            break;
+        case 9 :
+            $strRtrn = $oLang->Get('time_september');
+            break;
+        case 10 :
+            $strRtrn = $oLang->Get('time_october');
+            break;
+        case 11 :
+            $strRtrn = $oLang->Get('time_november');
+            break;
+        case 12 :
+            $strRtrn = $oLang->Get('time_december');
+            break;
+    }
+
+    return $strRtrn;
 }
 class AC_LoadFileInfo
 {
-    public $strLoadfile;   
-    public $oPathUser;   
+    public $strLoadfile;
+    public $oPathUser;
+    public $oStatisticsSearch;
 }
 ?>

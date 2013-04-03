@@ -15,6 +15,7 @@ $this
 ->Set('play', 'Spil')
 ->Set('delete', 'Slet')
 ->Set('new', 'Ny')
+->Set('last', 'Sidste')
 
 # Validation Errors
 ->SetMenu('validation_')
@@ -30,6 +31,33 @@ $this
 ->Set('minutes', 'minutter')
 ->Set('second', 'sekund')
 ->Set('seconds', 'sekunder')
+->Set('less_than_minute', 'Mindre end et minut siden')
+->Set('few_minutes', 'Et par minutter siden')
+->Set('about_an_hour', 'Onkring en time siden')
+->Set('yesterday', 'I går')
+->Set('more_than_a_year', 'Mere end et år siden')
+->Set('ago', 'siden')
+->Set('date', 'Dato')
+->Set('monday', 'mandag')
+->Set('tuesday', 'tirsdag')
+->Set('wednesday', 'onsdag')
+->Set('thursday', 'torsdag')
+->Set('friday', 'fredag')
+->Set('saturday', 'lørdag')
+->Set('sunday', 'søndag')
+->Set('january', 'januar')
+->Set('febuary', 'febuar')
+->Set('march', 'marts')
+->Set('april', 'april')
+->Set('may', 'maj')
+->Set('june', 'juni')
+->Set('july', 'juli')
+->Set('august', 'august')
+->Set('september', 'september')
+->Set('october', 'oktober')
+->Set('november', 'november')
+->Set('december', 'december')
+
 
 # Login
 ->SetMenu('login_')
@@ -79,13 +107,13 @@ $this
 	Hej #username#, <br /><br />
 	Velkommen til #system# :) <br /><br />
 	For at kunne logge ind, skal du bekræfte denne e-mail adresse. <br /><br />
-	FÃ¸rste gang du logger ind #system# vil du blive bedt om at udfylde en aktiveringsnøgle.<br />
-	Du kan ogsÃ¥ bekrÃ¦fte din mail direkte via dette link:<br />
+	Første gang du logger ind #system# vil du blive bedt om at udfylde en aktiveringsnøgle.<br />
+	Du kan også bekræfte din mail direkte via dette link:<br />
 	#confirmation_anchortag#<br /><br />
-	AktiveringsnÃ¸gle: #activationkey#<br />
+	Aktiveringsnøgle: #activationkey#<br />
 	Brugernavn: #username# <br />
 	Password: #password# <br /><br />
-	Hav det sjovt og udvid din awesomeness pÃ¥ #system# ;)<br /><br />
+	Hav det sjovt og udvid din awesomeness på #system# ;)<br /><br />
 	#system# Team
 ')
 
@@ -109,8 +137,8 @@ $this
 ->Set('reconfirmation_mail', '
     Hej #username#, <br /><br />
     Du har indtastet en forkert aktiveringsnøgle for mange gange.<br /><br />
-    Vi har sendt denne nye aktiveringsnÃ¸gle, for at beskytte din konto.<br /><br />
-    FÃ¸rste gang du logger ind #system# vil du blive bedt om at udfylde en aktiveringsnøgle.<br />
+    Vi har sendt denne nye aktiveringsnøgle, for at beskytte din konto.<br /><br />
+    Første gang du logger ind #system# vil du blive bedt om at udfylde en aktiveringsnøgle.<br />
 	Du kan også bekræfte din mail direkte via dette link:<br />
     #confirmation_anchortag#<br /><br />
     Aktiveringsnøgle: #activationkey#<br />
@@ -134,8 +162,17 @@ $this
 ->Set('favorite_songs', 'Favoritsange')
 ->Set('graph_precision', 'Præcision')
 ->Set('graph_pointsprminute', 'Points pr minut')
+->Set('graph_pointsprtact', 'Point pr takt')
 ->Set('favourites', 'Favoritter')
 ->Set('view_all', 'Vis alle')
+->Set('title', 'Titel')
+->Set('played', 'Spillet')
+->Set('avg_pts', 'Gns. point')
+->Set('times', 'Gange')
+->Set('time', 'Gang')
+->Set('plays', 'Spil')
+->Set('this_game', 'Dette spil')
+->Set('average_games', 'Gennemsnit')
 
 # Genres
 ->SetMenu('genre_')

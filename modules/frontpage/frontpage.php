@@ -58,7 +58,7 @@ if(isset($_SESSION['UserObject']))
 			</div>
 			<div class="ContentBoxBody">
                 <a href="/?mode=logout">Logout</a>
-				'.$oPageRenderer->RenderDialogLink('/user/statistics/', PageRenderer::DialogType_Info, 'Statistikker').'
+				'.$oPageRenderer->RenderDialogLink('/user/'.$_SESSION['UserObject']->username.'/statistics/', PageRenderer::DialogType_Info, 'Statistikker').'
 			</div>
 		</div>
 	';
@@ -99,7 +99,7 @@ echo $oPageRenderer->Renderpage($oLang, '
 			<div class="CompassOuter"></div>
 			<div class="ContentBoxHeadline">
 				<div>
-					<img src="'.HTTP_PROJECT_ROOT_IMG.'icons/sixteenthnote.svg" alt="" /><span id="song_title" data-default-text="'.htmlentities($oLang->Get('frontpage_choose_song')).'">'.$oLang->Get('frontpage_choose_song').'</span>
+					<img src="'.HTTP_PROJECT_ROOT_IMG.'icons/sixteenthnote.svg" alt="" /><span id="song_title" data-default-text="'.$oLang->Get('frontpage_choose_song').'">'.$oLang->Get('frontpage_choose_song').'</span>
 				</div>
 			</div>
 			<div class="ContentBoxBody">

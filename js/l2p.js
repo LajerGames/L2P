@@ -1,4 +1,4 @@
-define(['jquery', 'api', 'game/options', '/bootstrap/js/bootstrap.min.js'], function ($, api, options) {
+define(['jquery', 'api', 'game/options', 'socket.io', '/bootstrap/js/bootstrap.min.js'], function ($, api, options, io) {
 	function goBack(e, doGoBack) {
 		if(doGoBack !== false) {
 			window.history.back();
@@ -8,7 +8,8 @@ define(['jquery', 'api', 'game/options', '/bootstrap/js/bootstrap.min.js'], func
 		svgContainer,
 		$modal,
 		sound,
-		playlist;
+		playlist,
+		socket;
 
 	function Render($container, loader, render, kill) {
 		this.$container	= $container;
@@ -129,7 +130,6 @@ define(['jquery', 'api', 'game/options', '/bootstrap/js/bootstrap.min.js'], func
 						compassBox	= $('div.ContentBoxOrange div.CompassOuter'),
 						compass		= new Compass(compassBox);
 
-						console.log('generate', generate);
 					if(generate) {
 						$game_container.html(gameText);
 					}
@@ -251,6 +251,30 @@ define(['jquery', 'api', 'game/options', '/bootstrap/js/bootstrap.min.js'], func
 					if($modal) {
 						$modal.off('hide', goBack);
 						$modal.modal('hide');
+					}
+				});
+			},
+			url:	function (url) {
+				var	that	= this,
+					urlAjax	= '/dialog'+url;
+
+				$.get(urlAjax, function (data) {
+					switch(data.dialogType) {
+						case 'action':
+							L2P.dialog[data.dialogType](url, data.title, data.body, data.color, data.submitText, true);
+							break;
+						case 'info':
+							L2P.dialog[data.dialogType](url, data.title, data.body, data.color, data.buttons, data.script);
+							break;
+						case 'game':
+							if(that && that.nodeName === 'IMG') {
+								L2P.get.playlist(null, function () {
+									playlist.addGame(url, data.title, data.data, data.type);
+								});
+							} else {
+								L2P.dialog[data.dialogType](url, data.title, data.data, data.type);
+							}
+							break;
 					}
 				});
 			}
@@ -469,25 +493,7 @@ define(['jquery', 'api', 'game/options', '/bootstrap/js/bootstrap.min.js'], func
 					url			= urlRaw+(urlRaw.indexOf('?') === -1 ? (urlRaw.substr(urlRaw.length - 1, 1) === '/' ? '' : '/') : '')
 					urlAjax		= '/dialog'+url;
 
-				$.get(urlAjax, function (data) {
-					switch(data.dialogType) {
-						case 'action':
-							L2P.dialog[data.dialogType](url, data.title, data.body, data.color, data.submitText, true);
-							break;
-						case 'info':
-							L2P.dialog[data.dialogType](url, data.title, data.body, data.color, data.buttons, data.script);
-							break;
-						case 'game':
-							if(that.nodeName === 'IMG') {
-								L2P.get.playlist(null, function () {
-									playlist.addGame(url, data.title, data.data, data.type);
-								});
-							} else {
-								L2P.dialog[data.dialogType](url, data.title, data.data, data.type);
-							}
-							break;
-					}
-				});
+				L2P.navigate.url.call(this, url);
 			},
 			set:	function ($container) {
 				$container.on('click', 'a[data-dialog], img.addToPlaylist', L2P.click.on);
@@ -517,6 +523,13 @@ define(['jquery', 'api', 'game/options', '/bootstrap/js/bootstrap.min.js'], func
 
 				return storage.getAll(true);
 			}
+		},
+		io:		function () {
+			if(!socket) {
+				socket	= io.connect('http://l2p.fmads.dk:10001');
+			}
+
+			return socket;
 		}
 	};
 

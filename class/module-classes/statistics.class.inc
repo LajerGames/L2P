@@ -19,15 +19,52 @@ class statistics
     *
     * @return AC_GameData[]
     */
-    private function GetGameData($bReturnEntireGamestring = false)
+    private function GetGameData($bReturnEntireGamestring = false, $oCustomSearch = null)
     {
         // Do we limit the amount of songs we return?
         $strLimit = $iLimit > 0 ? 'LIMIT '.$iLimit : '';
-echo $strLimit;
+
+        if($oCustomSearch === null)
+        {
+			$oCustomSearch = $this->oSearch;
+		}
+
         // Build a conditions string
         $strConditions = '
-         && users_games_history.user_id     = '.$this->oSearch->iUserID.'
+         && users_games_history.user_id     = '.$oCustomSearch->iUserID.'
         ';
+
+        # GameIDs
+        if(is_array($oCustomSearch->arrGameIDs))
+        {
+            // Create a string which will contain CSV with GameIDs
+            $strINClause = '';
+            foreach($oCustomSearch->arrGameIDs as $iGameID)
+            {
+                $strINClause .= $iGameID.',';
+            }
+            $strINClause = empty($strINClause) ? 0 : rtrim($strINClause, ',');
+
+            $strConditions .= '
+             && users_games_history.game_id     IN('.$strINClause.')
+            ';
+        }
+
+        # GameHistoryIDs
+        if(is_array($oCustomSearch->arrGameHistoryIDs))
+        {
+            // Create a string whhich will contain CSV with GameHistoryIDs
+            $strINClause = '';
+            foreach($oCustomSearch->arrGameHistoryIDs as $iGameHistoryID)
+            {
+                $strINClause .= $iGameHistoryID.',';
+            }
+            $strINClause = empty($strINClause) ? 0 : rtrim($strINClause, ',');
+
+            $strConditions .= '
+             && users_games_history.id      IN('.$strINClause.')
+            ';
+        }
 
         // The entire gamestring is pretty damn huge, only fetch it if it's neccesary
         $strSelect = $bReturnEntireGamestring ? 'users_games_history.json_gamestring            AS strEntireGame' : '';
@@ -42,12 +79,15 @@ echo $strLimit;
                 users_games_history.game_finished           AS tGameFinished,
                 users_games_history.game_duration           AS fGameDuration,
                 '.$strSelect.'
-                users_games_history.json_statisticsstring   AS strGameStatistics
+                users_games_history.json_statisticsstring   AS strGameStatistics,
+                users_games_history.json_tactstats          AS strTactStatistics
             FROM
                 users_games_history
             WHERE
                 users_games_history.deleted                 = 0
                 '.$strConditions.'
+            ORDER BY
+                users_games_history.points                  DESC
             '.$strLimit.'
         ');
 
@@ -67,6 +107,7 @@ echo $strLimit;
             $oGameData->fGameDuration       = $oGameObject->fGameDuration;
             $oGameData->strEntireGame       = $oGameObject->strEntireGame;
             $oGameData->strGameStatistics   = $oGameObject->strGameStatistics;
+            $oGameData->strTactStatistics   = $oGameObject->strTactStatistics;
 
             $arrGameData[] = $oGameData;
         }
@@ -78,10 +119,68 @@ echo $strLimit;
     * Returns a array containing precision data matching the search criterias
     *
     * @param array $arrGameData
+    * @param array $arrAverageData
     */
-    private function GetPrecisionArray($arrGameData)
+    private function GetPrecisionArray($arrGameData, $arrAverageData = null)
     {
-        $arrNotesPrecision = array();
+    	// Get note precision
+    	$arrNotesPrecision = $this->CalculateNotePrecision($arrGameData);
+
+    	// If we have a average gamedata we'll need to put that into a neat array aswell
+    	$arrAverageNotePrecision = array();
+    	if(is_array($arrAverageData))
+    	{
+			$arrAverageNotePrecision = $this->CalculateNotePrecision($arrAverageData);
+		}
+
+        // Create HighChart friendly array to return
+        $arrChartData = array();
+
+        // Start building the array
+
+        //loop through the notes precision to build the x-axis
+        $arrXAxis = array();
+        foreach($arrNotesPrecision as $strNoteLetter => $arrNoteTotal)
+        {
+			$arrXAxis[] = $strNoteLetter;
+		}
+
+		// Create the x-axis
+		$arrChartData['categories'] = $arrXAxis;
+
+        // Loop through all the diffrent notes and calculate their true avrage and add it to the precision array "Series"
+        $arrNotePrecisionThisGame = array();
+        foreach($arrNotesPrecision as $strNoteLetter => $arrNoteTotals)
+        {
+            $arrNotePrecisionThisGame[] = ($arrNotesPrecision[$strNoteLetter]['accuracy_sum'] / $arrNotesPrecision[$strNoteLetter]['played']);
+        }
+
+        $arrChartData['series'][] = array(
+				'name' => $this->oLang->Get('statistics_this_game'),
+				'data' => $arrNotePrecisionThisGame
+		);
+
+		// Do this all over again if we have some average gamedata to show
+		if(sizeof($arrAverageNotePrecision) > 0)
+		{
+			// Loop through all the diffrent notes and calculate their true avrage and add it to the precision array "Series"
+	        $arrNotePrecisionaverageGame = '';
+	        foreach($arrAverageNotePrecision as $strNoteLetter => $arrNoteTotals)
+	        {
+	            $arrNotePrecisionaverageGame[] = ($arrNotesPrecision[$strNoteLetter]['accuracy_sum'] / $arrNotesPrecision[$strNoteLetter]['played']);
+	        }
+
+	        $arrChartData['series'][] = array(
+					'name' => $this->oLang->Get('statistics_average_games'),
+					'data' => $arrNotePrecisionaverageGame
+			);
+		}
+
+        return $arrChartData;
+    }
+    private function CalculateNotePrecision($arrGameData)
+    {
+		$arrNotesPrecision = array();
         foreach($arrGameData as $oGameData)
         {
             // Now loop through all of the game statistics in order to get avrage precision on all notes
@@ -108,20 +207,8 @@ echo $strLimit;
             }
         }
 
-        // Create HighChart friendly array to return
-        $arrChartData = array();
-
-        // Loop through all the diffrent notes and calculate their true avrage
-        foreach($arrNotesPrecision as $strNoteLetter => $arrNoteTotals)
-        {
-            $arrChartData[] = array(
-                'name'  => $strNoteLetter,
-                'y'     => ($arrNotesPrecision[$strNoteLetter]['accuracy_sum'] / $arrNotesPrecision[$strNoteLetter]['played'])
-            );
-        }
-
-        return $arrChartData;
-    }
+        return $arrNotesPrecision;
+	}
 
     /**
     * Returns a array containing points per minute pr. day user is playing
@@ -130,6 +217,18 @@ echo $strLimit;
     */
     private function GetPointsPerMinuteArray($arrGameData)
     {
+    	// Initialize the Chart data array
+    	$arrChartData = array();
+
+		// Create the x-axis and the series
+		$arrChartData['categories'] = array();
+		$arrChartData['series'] = array(
+			array(
+				'name' => $this->oLang->Get('statistics_this_game'),
+				'data' => array()
+			)
+		);
+
         // Initialize the array to contain sorted data about points each day
         $arrDailyPoints = array();
         foreach($arrGameData as $oGameData)
@@ -152,21 +251,18 @@ echo $strLimit;
         }
 
         // Now loop through each day and find the points per minute on that particular day
-        $arrChartData = array();
         foreach($arrDailyPoints as $strDate => $arrDayData)
         {
             // Calculate points per minute
-            $iPointsPerMinute = intval(($arrDayData['points'] / $arrDayData['playtime']) * 60);
-            $arrChartData[] = array(
-                'name'  => $strDate,
-                'y'     => $iPointsPerMinute
-            );
+            $iPointsPerMinute 						= intval(($arrDayData['points'] / $arrDayData['playtime']) * 60);
+            $arrChartData['categories'][] 			= $strDate;
+            $arrChartData['series'][0]['data'][]	= $iPointsPerMinute;
         }
 
         return $arrChartData;
     }
 
-    function SortArray (&$arrFavourites, $strKey)
+    private function SortArray (&$arrFavourites, $strKey)
     {
         $arrSorter  = array();
         $arrRet     = array();
@@ -188,7 +284,6 @@ echo $strLimit;
 
         $arrFavourites = $arrRet;
     }
-
 
     /**
     * Creates a array containing your favourite songs - sorted by most played
@@ -245,7 +340,92 @@ echo $strLimit;
         return $arrFavouriteSongs;
     }
 
-    private function RenderavouriteSongs($arrGameData)
+    /**
+    * Creates a array containing avg. accuracy in each tact
+    *
+    * @param array $arrGameData
+    */
+    private function GetTactAccuracyArray($arrGameData, $arrAverageData = null)
+    {
+        // We know how the game data looks, and we know that we cannot be in here unless we've received only one game from the game history, make that JSON string into a array which can be interped by the graph thingy
+        $strTactString = $arrGameData[0]->strTactStatistics;
+
+        // Make JSON string into a array
+        $arrTacts = json_decode($strTactString);
+
+        // Create HighChart friendly array to return
+        $arrChartData = array();
+
+        // Loop through the Tacts array to create the x-axis
+        $arrXAxis = array();
+        for($i = 1; $i <= sizeof($arrTacts); $i++)
+        {
+			$arrXAxis[] = $i;
+		}
+
+		// Create the x-axis
+		$arrChartData['categories'] = $arrXAxis;
+
+        // Create array with y-axis values for this game
+        $arrTactPrecisionThisGame = array();
+        foreach($arrTacts as $iAvgPct)
+        {
+        	$arrTactPrecisionThisGame[] = $iAvgPct;
+        }
+
+        // Add data to the series
+        $arrChartData['series'][] = array(
+				'name' => $this->oLang->Get('statistics_this_game'),
+				'data' => $arrTactPrecisionThisGame
+		);
+
+		// Now check if we need to add the average data to this array
+		if(is_array($arrAverageData))
+		{
+			// In here we need to loop through each game and get to an average on each tact in this game
+			$arrAverageTactData = array();
+			foreach($arrAverageData as $oAverageGameData)
+			{
+				// Add the pct of this game foreach tact foreach game
+				$arrTactAverageGame	= json_decode($oAverageGameData->strTactStatistics);
+
+				// Loop through each tact in this particular game
+				$iLoopNo = 0;
+				foreach($arrTactAverageGame as $iAvgPct)
+				{
+					$iLoopNo++;
+					if(!isset($arrAverageTactData[$iLoopNo]))
+					{
+						$arrAverageTactData[$iLoopNo] = 0;
+					}
+
+					$arrAverageTactData[$iLoopNo] += $iAvgPct;
+				}
+			}
+
+			// Loop through the average tact data and divide the percentage in the values by the amount of times this is played
+			$arrTactPrecisionAverageGame = array();
+			foreach($arrAverageTactData as $iTactNo => $iAvgPct)
+			{
+				$arrTactPrecisionAverageGame[] = $iAvgPct / sizeof($arrAverageData);
+			}
+
+			// Add data to the series
+	        $arrChartData['series'][] = array(
+					'name' => $this->oLang->Get('statistics_average_games'),
+					'data' => $arrTactPrecisionAverageGame
+			);
+		}
+
+        return $arrChartData;
+    }
+
+    /**
+    * Returns a "most played" html-songstring! - sorted by most played
+    *
+    * @param array $arrGameData
+    */
+    private function RenderFavouriteSongs($arrGameData)
     {
         // Get sorted array with favourite songs
         $arrFavouriteSongs = $this->GetFavouriteSongs($arrGameData);
@@ -255,12 +435,16 @@ echo $strLimit;
         $iLoopID = 1;
         foreach($arrFavouriteSongs as $iGameID => $arrGameInfo)
         {
+            // Is points and played plural?
+            $strPlayed = $arrGameInfo['played'] == 1 ? $this->oLang->Get('statistics_time') : $this->oLang->Get('statistics_times');
+            $strPoints = $arrGameInfo['avg_points'] == 1 ? $this->oLang->Get('global_point') : $this->oLang->Get('global_points');
+
             $strFavouriteSongs .= '
-                <tr>
+                <tr data-gameid="'.$iGameID.'">
                     <td>'.$iLoopID.'</td>
                     <td>'.$arrGameInfo['name'].'</td>
-                    <td>'.$arrGameInfo['played'].'</td>
-                    <td>'.$arrGameInfo['avg_points'].'</td>
+                    <td>'.$arrGameInfo['played'].' '.$strPlayed.'</td>
+                    <td>'.$arrGameInfo['avg_points'].' '.$strPoints.'</td>
                 </tr>
             ';
             $iLoopID++;
@@ -270,10 +454,10 @@ echo $strLimit;
             $strFavouriteSongs = '
             <table border="0" cellspacing="0" cellpadding="0" class="table FavouriteSongList">
                 <tr>
-                    <th style="width:100px;">#</th>
-                    <th>Name</th>
-                    <th style="width:50px;">Played</th>
-                    <th style="width:50px;">Avg. pts.</th>
+                    <th>#</th>
+                    <th>'.$this->oLang->Get('statistics_title').'</th>
+                    <th>'.$this->oLang->Get('statistics_played').'</th>
+                    <th>'.$this->oLang->Get('statistics_avg_pts').'</th>
                 </tr>
                 '.$strFavouriteSongs.'
             </table>
@@ -288,6 +472,105 @@ echo $strLimit;
             '.$strFavouriteSongs.'
         ';
     }
+
+    private function RenderTopPlayed($arrGameData)
+    {
+        // Create rows for the table containing top played - meaning most most points gain playing this particular song
+        $strTopPlayedRows = '';
+        $iLoopID = 1;
+        foreach($arrGameData as $oGameData)
+        {
+            // Is points plural?
+            $strPoints = $oGameData->points == 1 ? $this->oLang->Get('global_point') : $this->oLang->Get('global_points');
+
+            $strTopPlayedRows .= '
+                <tr data-gamehistoryid="'.$oGameData->iDataID.'">
+                    <td>'.$iLoopID.'</td>
+                    <td>'.RenderDate($oGameData->tGameStart, $this->oLang).'</td>
+                    <td>'.$oGameData->iPoints.' '.$strPoints.'</td>
+                </tr>
+            ';
+            $iLoopID++;
+        }
+
+        if(!empty($strTopPlayedRows))
+        {
+            $strTopPlayedRows = '
+            <table border="0" cellspacing="0" cellpadding="0" class="table FavouriteSongList">
+                <tr>
+                    <th>#</th>
+                    <th>'.$this->oLang->Get('time_date').'</th>
+                    <th>'.$this->oLang->Get('global_points').'</th>
+                </tr>
+                '.$strTopPlayedRows.'
+            </table>
+            ';
+        }
+
+        return '
+            <div id="FavouriteSongs">
+                <a href="">'.$this->oLang->Get('statistics_view_all').'</a>
+                <h3>'.$this->oLang->Get('statistics_plays').'</h3>
+            </div>
+            '.$strTopPlayedRows.'
+        ';
+    }
+
+    /**
+    * Returns 0-3 to tell which statistics screen we'll show, if 0 is returned you've got a bug!
+    *
+    * @param array $arrGameData
+    */
+    private function ChooseScreen($arrGameData)
+    {
+    	// Initialize return variable
+    	$iReturn = 0;
+
+		// Does the game have more then one GameID=
+		$bMultipleGameIDs 	= false;
+		$bIsFirstLoop 		= true;
+		$iGameID 			= 0;
+		foreach($arrGameData as $oGameData)
+		{
+			if($bIsFirstLoop)
+			{
+				$iGameID = 	$oGameData->iGameID;
+				$bIsFirstLoop = false;
+			}
+			else
+			{
+				if($iGameID !== $oGameData->iGameID)
+				{
+					$bMultipleGameIDs = true;
+					break;
+				}
+			}
+		}
+
+		// If we have multiple games, we'll need to show screen 1 nomatter what
+		if($bMultipleGameIDs)
+		{
+			$iReturn = 1;
+		}
+		else
+		{
+			// So we've only got 1 GameID (Or 0 but that would mean a bug)
+			// Find out if we've got more than one GameHistoryID
+			if(sizeof($arrGameData) == 1)
+			{
+				// We've only got one GameHistoryID - Hussah! Let's show screen 3
+				$iReturn = 3;
+			}
+			elseif(sizeof($arrGameData) > 1)
+			{
+				// Only 1 GameID but multiple GameHistoryID's let's show screen two
+				$iReturn = 2;
+			}
+		}
+
+		// Return the screen we found best to show, if we return 0, we didn't find anything and we've got ourselves a bug!
+		return $iReturn;
+	}
 
     /**
     * Renders an entire statistics viewport
@@ -308,21 +591,84 @@ echo $strLimit;
             // Get Gamedata
             $arrGameData = $this->GetGameData();
 
-            // Get array for user precision
-            $arrPrecision = $this->GetPrecisionArray($arrGameData);
+            /**
+            * Read this carefully if you wish to understand what's going on here!
+            * We have 3 optional screens to show.
+            * 1. The default screen, has no search besides the UserID needed
+            * 2. The Game screen, it requires the search provided to return nothing more than 1 Game - it has multiple GameHistoryIDs but only one GameID will be shown.
+            * 	We could get this if we've received a array containing multiple GameHistoryIDs which all leads to only one game, or we could get a search for this particular GameID, all of it will result in screen 2
+            * 3. A spicific GameHistoryScreen... shows a particular game the user has played, this screen provides additional info plus a extra demention to the graph which shows how well the user has performed compared to his average skill.
+            */
 
-            // Get array for userpoints
-            $arrPointsPerMinute = $this->GetPointsPerMinuteArray($arrGameData);
+            // First of all, find out which screen we will be showing
+            $iChosenScreen = $this->ChooseScreen($arrGameData);
 
-            // Create a string containing favourite songs
-            $strFavouriteSongs  = $this->RenderavouriteSongs($arrGameData);
+            // Render the correct screen
+            switch($iChosenScreen)
+            {
+				case 1 :
+					// Create a string containing favourite songs
+	                $strInfoList  = $this->RenderFavouriteSongs($arrGameData);
+
+	                // Get array for user precision
+		            $arrLeftChart = $this->GetPrecisionArray($arrGameData);
+
+		            // Get array for userpoints
+		            $arrRightChart = $this->GetPointsPerMinuteArray($arrGameData);
+					break;
+				case 2 :
+					// Create a string to contain top specific times this has been played
+	                $strInfoList  = $this->RenderTopPlayed($arrGameData);
+
+	                // Get array for user precision
+		            $arrLeftChart = $this->GetPrecisionArray($arrGameData);
+
+		            // Get array for userpoints
+		            $arrRightChart = $this->GetPointsPerMinuteArray($arrGameData);
+					break;
+				case 3 :
+					// If we only have one specific GameID we'll show a bit more statistics about this game
+
+					// Which GameID is this
+
+	                // Create a new instance of the search class in order to get GameData from the GameData function
+	                $oAverageData = new AC_RenderStatisticsSearch();
+	                $oAverageData->iUserID 		= $this->oSearch->iUserID;
+	                $oAverageData->arrGameIDs 	= array($arrGameData[0]->iGameID);
+
+	                $arrAverageGameData = $this->GetGameData(false, $oAverageData);
+
+	                // First of all, show a graph which will contain a graph over tacts
+	                $arrRightChart = $this->GetTactAccuracyArray($arrGameData, $arrAverageGameData);
+
+	                $arrLeftChart = $this->GetPrecisionArray($arrGameData, $arrAverageGameData);
+					break;
+				default :
+
+					break;
+			}
+            if(sizeof($this->oSearch->arrGameIDs) === 1)
+            {
+            }
+            elseif(sizeof($this->oSearch->arrGameHistoryIDs) === 1)
+            {
+
+            }
+            else
+            {
+
+            }
 
             $strReturn	= '
-            	<div class="hidden" data-statistic="'.htmlentities(json_encode(array($arrPrecision, $arrPointsPerMinute))).'"></div>
+            	<form class="hidden" name="search">
+					<input type="hidden" name="game_history_ids" value="'.implode(',', $this->oSearch->arrGameHistoryIDs).'" />
+					<input type="hidden" name="game_ids" value="'.implode(',', $this->oSearch->arrGameIDs).'" />
+            	</form>
+            	<div class="hidden" data-statistic="'.htmlentities(json_encode(array($arrLeftChart, $arrRightChart))).'"></div>
 				<div class="statistic-graph"></div>
 				<div class="statistic-graph"></div>
 				<div class="clear"></div>
-                '.$strFavouriteSongs.'
+                '.$strInfoList.'
             ';
         }
 
@@ -332,6 +678,8 @@ echo $strLimit;
 class AC_RenderStatisticsSearch
 {
     public $iUserID;
+    public $arrGameIDs;
+    public $arrGameHistoryIDs;
 }
 class AC_GameData
 {
@@ -343,4 +691,5 @@ class AC_GameData
     public $fGameDuration;
     public $strEntireGame;
     public $strGameStatistics;
+    public $strTactStatistics;
 }

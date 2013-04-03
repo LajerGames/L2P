@@ -1,9 +1,15 @@
 var svgController,
 	l2p;
 require.config({
+	paths:	{
+		'socket.io':	'/node/node_modules/socket.io/node_modules/socket.io-client/dist/socket.io.min'
+	},
 	shim:	{
 		highcharts:	{
 			exports:	'Highcharts'
+		},
+		'socket.io': {
+			exports:	'io'
 		}
 	}
 });
@@ -50,6 +56,11 @@ require(['jquery', 'fM', 'l2p'], function ($, fM, L2P) {
 			switch(document.location.pathname) {
 				case '/':
 					L2P.navigate.home(e);
+					break;
+				default:
+					if(hasFirstPopstate) {
+						//L2P.navigate.url(location.pathname);
+					}
 					break;
 			}
 			hasFirstPopstate	= true;

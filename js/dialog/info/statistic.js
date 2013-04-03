@@ -1,32 +1,34 @@
-define(['jquery', 'l2p', 'api', 'highcharts'], function ($, L2P, api, Highcharts) {
+define(['jquery', 'fM', 'l2p', 'api', 'highcharts'], function ($, fM, L2P, api, Highcharts) {
 	return (function ($dialog) {
 		var	data		= JSON.parse($dialog.find('[data-statistic]').attr('data-statistic')) || {},
 			$containers	= $dialog.find('.statistic-graph'),
+			$formSearch	= $dialog.find('form[name="search"]'),
 			precision,
 			pointsprminute,
 			formatter	= function () {
 				return '<b>'+this.x+':</b> '+this.y;
-			},
-			graphOptions	= {
-				chart:	{
-					type:		'column'
-				},
-				credits: {
-					enabled:	false
-				},
-				legend:	{
-					enabled:	false
-				},
-				yAxis:	{
-					min:	0
-				},
-				series:	[{
-					name:	''
-				}],
-				tooltip:	{
-					formatter:	formatter
-				}
 			};
+
+        $dialog.find('.FavouriteSongList tr').on('click', function() {
+            var	$tr		= $(this),
+            	gameid			= $tr.attr('data-gameid'),
+            	gamehistoryid	= $tr.attr('data-gamehistoryid');
+
+            if(gameid !== undefined) {
+            	$formSearch.find('input[name="game_ids"]').val(gameid);
+			}
+            if(gamehistoryid !== undefined) {
+            	$formSearch.find('input[name="game_history_ids"]').val(gamehistoryid);
+			}
+
+            api.get.statistic_uuid(function (data) {
+            	var	path	= location.pathname.split('/');
+            	path[4]	= data.uuid;
+            	path[5]	= '';
+
+            	L2P.navigate.url(path.join('/'));
+            }, fM.form.getElements.call($formSearch[0]));
+        });
 
 		api.get.lang(function (lang) {
 			precision	= new Highcharts.Chart({
@@ -38,15 +40,19 @@ define(['jquery', 'l2p', 'api', 'highcharts'], function ($, L2P, api, Highcharts
 					enabled:	false
 				},
 				legend:	{
-					enabled:	false
+					enabled:			data[0].series.length !== 1,
+					backgroundColor:	'#FFFFFF',
+					layout:				'vertical',
+					align:				'right',
+					verticalAlign:		'top',
+					floating:			true,
+					y:					5
 				},
 				title:	{
 					text:		lang.statistics_graph_precision
 				},
 				xAxis:	{
-					categories:	data[0].map(function (item) {
-						return item.name;
-					})
+					categories:	data[0].categories
 				},
 				yAxis:	{
 					min:	0,
@@ -55,12 +61,12 @@ define(['jquery', 'l2p', 'api', 'highcharts'], function ($, L2P, api, Highcharts
 						text:	'%'
 					}
 				},
-				series:	[{
-					name:	'',
-					data:	data[0].map(function (item) {
-						return item.y;
-					})
-				}],
+				series:	data[0].series.map(function (serie) {
+					serie.data	= serie.data.map(function (y) {
+						return +(+y).toFixed(2);
+					});
+					return serie;
+				}),
 				tooltip:	{
 					formatter:	formatter
 				}
@@ -74,15 +80,19 @@ define(['jquery', 'l2p', 'api', 'highcharts'], function ($, L2P, api, Highcharts
 					enabled:	false
 				},
 				legend:	{
-					enabled:	false
+					enabled:			data[1].series.length !== 1,
+					backgroundColor:	'#FFFFFF',
+					layout:				'vertical',
+					align:				'right',
+					verticalAlign:		'top',
+					floating:			true,
+					y:					5
 				},
 				title:	{
 					text:		lang.statistics_graph_pointsprminute
 				},
 				xAxis:	{
-					categories:	data[1].map(function (item) {
-						return item.name;
-					})
+					categories:	data[1].categories
 				},
 				yAxis:	{
 					min:	0,
@@ -90,16 +100,17 @@ define(['jquery', 'l2p', 'api', 'highcharts'], function ($, L2P, api, Highcharts
 						text:	lang.global_points
 					}
 				},
-				series:	[{
-					name:	'',
-					data:	data[1].map(function (item) {
-						return item.y;
-					})
-				}],
+				series:	data[1].series.map(function (serie) {
+					serie.data	= serie.data.map(function (y) {
+						return +(+y).toFixed(2);
+					});
+					return serie;
+				}),
 				tooltip:	{
 					formatter:	formatter
 				}
 			});
-		}, ['global_points', 'statistics_graph_precision', 'statistics_graph_pointsprminute']);
+		},
+        ['global_points', 'statistics_graph_precision', 'statistics_graph_pointsprminute']);
 	});
 });

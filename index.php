@@ -49,7 +49,7 @@ switch($_REQUEST['mode']) // Yep it makes sence to use request here!
 		#Hack 1
 		$oConfirmEmail  = new Form('activate');
 		$oConfirmEmail->TextField('user_id', '', '', null, 'hidden');
-		$oConfirmEmail->TextField('confirmation_password', '', $oLang->Get('activate_activationkey'), new FormFieldValidation(true, '[a-åA-Å0-9]{6}', $oLang->Get('activate_validation_activationkey'), true), null, false, array('autocomplete' => 'off'));
+		$oConfirmEmail->TextField('confirmation_password', '', $oLang->Get('activate_activationkey'), new FormFieldValidation(true, '[a-Ã¥A-Ã…0-9]{6}', $oLang->Get('activate_validation_activationkey'), true), null, false, array('autocomplete' => 'off'));
 
 		include(SERVER_PROJECT_ROOT_MODULES.'user/action/confirm-email.php');
 		break;
@@ -74,7 +74,21 @@ if(!IS_DIALOG)
 	// We cannot have everything point to frontpage, Google surely hate that
     // Find path to load
     $oLoadInfo = FindLoadFile($oSql);
-    
+
+    // Set oPathUser if needed
+    if(is_object($oLoadInfo->oPathUser))
+    {
+        // Hack #2
+        $oPathUser = $oLoadInfo->oPathUser;
+    }
+
+    // Set oStatisticsSearch if needed
+    if(is_object($oLoadInfo->oStatisticsSearch))
+    {
+        // Hack #2
+        $oStatisticsSearch = $oLoadInfo->oStatisticsSearch;
+    }
+
     if(REQUEST_URI == '/' || !empty($oLoadInfo->strLoadfile))
     {
         include(SERVER_PROJECT_ROOT_MODULES.'frontpage/frontpage.php');
@@ -90,6 +104,13 @@ else
     {
         // Hack #2
         $oPathUser = $oLoadInfo->oPathUser;
+    }
+
+    // Set oStatisticsSearch if needed
+    if(is_object($oLoadInfo->oStatisticsSearch))
+    {
+        // Hack #2
+        $oStatisticsSearch = $oLoadInfo->oStatisticsSearch;
     }
 
     // Include
