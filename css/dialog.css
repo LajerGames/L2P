@@ -1,6 +1,26 @@
+.modal .modal-header img.modal-header-back-icon {
+	float: left;
+	height: 3vmin;
+	margin: 10px 0;
+	opacity: 0.5;
+}
+.modal .modal-header img.modal-header-back-icon.modal-header-back-icon--clickable {
+	cursor: pointer;
+	opacity: 1;
+}
 .modal .modal-header h2 {
 	font-size: 4vmin;
 	line-height: 3vmin;
+	margin-left: 1vmin;
+	float: left;
+}
+.modal .modal-header:before,
+.modal .modal-header:after {
+	content: '';
+	display: table;
+}
+.modal .modal-header:after {
+	clear: both;
 }
 
 .modal.modal-action {

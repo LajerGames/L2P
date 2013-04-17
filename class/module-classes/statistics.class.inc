@@ -452,7 +452,7 @@ class statistics
         if(!empty($strFavouriteSongs))
         {
             $strFavouriteSongs = '
-            <table border="0" cellspacing="0" cellpadding="0" class="table FavouriteSongList">
+            <table border="0" cellspacing="0" cellpadding="0" class="table BottomTableView">
                 <tr>
                     <th>#</th>
                     <th>'.$this->oLang->Get('statistics_title').'</th>
@@ -465,7 +465,7 @@ class statistics
         }
 
         return '
-            <div id="FavouriteSongs">
+            <div id="BottomList">
                 <a href="">'.$this->oLang->Get('statistics_view_all').'</a>
                 <h3>'.$this->oLang->Get('statistics_favourites').' (Top 10)</h3>
             </div>
@@ -496,7 +496,7 @@ class statistics
         if(!empty($strTopPlayedRows))
         {
             $strTopPlayedRows = '
-            <table border="0" cellspacing="0" cellpadding="0" class="table FavouriteSongList">
+            <table border="0" cellspacing="0" cellpadding="0" class="table BottomTableView">
                 <tr>
                     <th>#</th>
                     <th>'.$this->oLang->Get('time_date').'</th>
@@ -508,11 +508,79 @@ class statistics
         }
 
         return '
-            <div id="FavouriteSongs">
+            <div id="BottomList">
                 <a href="">'.$this->oLang->Get('statistics_view_all').'</a>
                 <h3>'.$this->oLang->Get('statistics_plays').'</h3>
             </div>
             '.$strTopPlayedRows.'
+        ';
+    }
+
+    private function RenderSongAdditionalStats($arrGameData, $arrAverageGameData)
+    {
+        $oSongInfo = $this->oSql->SelectSingleObject('
+            SELECT
+                games.title     AS strSongTitle
+            FROM
+                games
+            WHERE
+                games.id = '.$arrGameData[0]->iGameID.'
+        ');
+
+        // Calculate averages
+        $iAveragePoints             = 0;
+        $iAveragePointsPerMinute    = 0;
+        foreach($arrAverageGameData as $oGameData)
+        {
+            $iAveragePoints             += $oGameData->iPoints;
+            $iAveragePointsPerMinute    += $oGameData->iPoints / ($oGameData->fGameDuration / 60); // This is currently a float, it will be re-int'ifyed soon... sry 'bout that :)
+        }
+
+        // Divide total amounts with amount of games played to get average
+        $iAveragePoints             = $iAveragePoints / count($arrAverageGameData);
+        $iAveragePointsPerMinute    = round($iAveragePointsPerMinute / count($arrAverageGameData));
+        
+        $iGamePointsPerMinute       = round($arrGameData[0]->iPoints / ($arrGameData[0]->fGameDuration / 60));
+
+        // Find out if we need to write plural or non-plural points on each value
+
+        # Points
+        $strAvgPointsPlural             = $iAveragePoints           == 1 ? $this->oLang->Get('global_point') : $this->oLang->Get('global_points');
+        $strGamePointsPlural            = $arrGameData[0]->iPoints  == 1 ? $this->oLang->Get('global_point') : $this->oLang->Get('global_points');
+
+        # Points per minute
+        $strAvgPointsPerMinutePlural    = $iAveragePointsPerMinute  == 1 ? $this->oLang->Get('global_point') : $this->oLang->Get('global_points');
+        $strGamePointsPerMinutePlural   = $iGamePointsPerMinute     == 1 ? $this->oLang->Get('global_point') : $this->oLang->Get('global_points');
+
+        return '
+            <div id="BottomList">
+                <h3>'.$this->oLang->Get('statistics_summery').'</h3>
+            </div>
+            <table border="0" cellspacing="0" cellpadding="0" class="table Summery">
+                <tr>
+                    <td>'.$this->oLang->Get('statistics_title').'</td>
+                    <td colspan="2">'.$oSongInfo->strSongTitle.'</td>
+                </tr>
+                <tr>
+                    <td>'.$this->oLang->Get('statistics_play_time').'</td>
+                    <td colspan="2">'.RenderGameDuration($arrGameData[0]->fGameDuration, $this->oLang).'</td>
+                </tr>
+                <tr>
+                    <th>&nbsp;</th>
+                    <th>'.$this->oLang->Get('statistics_played').'</th>
+                    <th>'.$this->oLang->Get('statistics_avg_pts').'</th>
+                </tr>
+                <tr>
+                    <td>'.$this->oLang->Get('global_points').'</td>
+                    <td>'.$iAveragePoints.' '.$strAvgPointsPlural.'</td>
+                    <td>'.$arrGameData[0]->iPoints.' '.$strGamePointsPlural.'</td>
+                </tr>
+                <tr>
+                    <td>'.$this->oLang->Get('statistics_graph_pointsprminute').'</td>
+                    <td>'.$iAveragePointsPerMinute.' '.$strAvgPointsPerMinutePlural.'</td>
+                    <td>'.$iGamePointsPerMinute.' '.$strGamePointsPerMinutePlural.'</td>
+                </tr>
+            </table>
         ';
     }
 
@@ -526,7 +594,7 @@ class statistics
     	// Initialize return variable
     	$iReturn = 0;
 
-		// Does the game have more then one GameID=
+		// Does the game have more then one GameID?
 		$bMultipleGameIDs 	= false;
 		$bIsFirstLoop 		= true;
 		$iGameID 			= 0;
@@ -642,11 +710,15 @@ class statistics
 	                $arrRightChart = $this->GetTactAccuracyArray($arrGameData, $arrAverageGameData);
 
 	                $arrLeftChart = $this->GetPrecisionArray($arrGameData, $arrAverageGameData);
+
+                    $strInfoList  = $this->RenderSongAdditionalStats($arrGameData, $arrAverageGameData);
 					break;
 				default :
 
 					break;
 			}
+            
+            /*
             if(sizeof($this->oSearch->arrGameIDs) === 1)
             {
             }
@@ -657,7 +729,7 @@ class statistics
             else
             {
 
-            }
+            }*/
 
             $strReturn	= '
             	<form class="hidden" name="search">

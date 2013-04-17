@@ -1,5 +1,7 @@
 define(['jquery'], function ($) {
 	var	link = (function () {
+		var	his			= [],
+			lastState	= null;
 		function get() {
 			var a = window.location.search.substr(1).split('&'),
 				r = {};
@@ -14,20 +16,36 @@ define(['jquery'], function ($) {
 			return location.pathname.substr(1);
 		}
 		function navigate(url, title, obj) {
+			title		= title || 'Play.now';
+			obj			= obj || {};
+			obj.title	= obj.title || title;
+
+			if(lastState) {
+				his.splice(lastState._id + 1);
+			}
+			his.push(obj);
+			obj._id	= his.length - 1;
+
 			if(url) {
 				window.history.pushState(obj, title, url);
 			}
-			$(window).trigger('popstate-force', {
-				originalEvent:	{
-					state:	obj
-				}
-			});
+			$(window).trigger('popstate');
+		}
+		function navigated(url, title) {
+			document.title	= title;
+			window.history.replaceState(history.state, title, document.location.pathname);
+			lastState	= history.state;
+		}
+		function getHistory() {
+			return his;
 		}
 
 		return {
 			get:		get,
 			fileName:	fileName,
-			navigate:	navigate
+			navigate:	navigate,
+			navigated:	navigated,
+			getHistory:	getHistory
 		};
 	}());
 

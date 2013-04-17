@@ -471,6 +471,50 @@ function RenderMonthName($strDate, $oLang)
 
     return $strRtrn;
 }
+/**
+* Returns game duration in xx min xx seconds in correct language also
+* 
+* @param mixed $fGameTime
+* @param object $oLang
+*/
+function RenderGameDuration($fGameTime, $oLang)
+{
+    $iGameTimeSeconds   = round($fGameTime);
+
+    $iGameTimeMinutes   = floor($iGameTimeSeconds / 60);
+    $iRemainingSeconds  = $iGameTimeSeconds % 60;
+
+    $strGameTime = '';
+    if($iGameTimeMinutes > 0)
+    {
+        $strMinutesPlural = $iGameTimeMinutes > 1 ? $oLang->Get('time_minutes') : $oLang->Get('time_minute');
+
+        $strGameTime .= $iGameTimeMinutes.' '.$strMinutesPlural;
+    }
+
+    if($iRemainingSeconds > 0)
+    {
+        $strSecondsPlural = $iRemainingSeconds > 1 ? $oLang->Get('time_seconds') : $oLang->Get('time_second');
+
+        $strGameTime .= $iRemainingSeconds.' '.$strSecondsPlural;
+    }
+
+    return $strGameTime;
+}
+/**
+* Returns a correct numberformat that matches the language you're currently using
+* 
+* @param float $fValue
+* @param int $iDecimals
+*/
+function LangNumberFormat($fValue, $iDecimals)
+{
+    $strCountryCode         = GetCountryCode();
+    $strThousindSeperator   = $strCountryCode === 'da-DK' ? '.' : ',';
+    $strDecimalSeperator    = $strCountryCode === 'da-DK' ? ',' : '.';
+
+    return number_format($fValue, $iDecimals, $strDecimalSeperator, $strThousindSeperator);
+}
 class AC_LoadFileInfo
 {
     public $strLoadfile;

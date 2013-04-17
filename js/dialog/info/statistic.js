@@ -1,15 +1,22 @@
 define(['jquery', 'fM', 'l2p', 'api', 'highcharts'], function ($, fM, L2P, api, Highcharts) {
 	return (function ($dialog) {
+		console.log('test');
+
 		var	data		= JSON.parse($dialog.find('[data-statistic]').attr('data-statistic')) || {},
 			$containers	= $dialog.find('.statistic-graph'),
 			$formSearch	= $dialog.find('form[name="search"]'),
+            path		= location.pathname.split('/'),
 			precision,
 			pointsprminute,
 			formatter	= function () {
 				return '<b>'+this.x+':</b> '+this.y;
 			};
 
-        $dialog.find('.FavouriteSongList tr').on('click', function() {
+		if(path[4] && path[4] !== undefined && path !== '') {
+			$dialog.find('.modal-header-back-icon').addClass('modal-header-back-icon--clickable');
+		}
+
+        $dialog.find('.BottomTableView tr').on('click', function() {
             var	$tr		= $(this),
             	gameid			= $tr.attr('data-gameid'),
             	gamehistoryid	= $tr.attr('data-gamehistoryid');
@@ -21,12 +28,15 @@ define(['jquery', 'fM', 'l2p', 'api', 'highcharts'], function ($, fM, L2P, api, 
             	$formSearch.find('input[name="game_history_ids"]').val(gamehistoryid);
 			}
 
+           	$dialog.find('.BottomTableView tr').off('click');
+
             api.get.statistic_uuid(function (data) {
             	var	path	= location.pathname.split('/');
             	path[4]	= data.uuid;
             	path[5]	= '';
 
-            	L2P.navigate.url(path.join('/'));
+            	console.log('nav', path);
+            	fM.link.navigate(path.join('/'));
             }, fM.form.getElements.call($formSearch[0]));
         });
 

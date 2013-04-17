@@ -6,7 +6,6 @@ define(['jquery', 'api', 'game/options', 'socket.io', '/bootstrap/js/bootstrap.m
 	}
 	var	gameController,
 		svgContainer,
-		$modal,
 		sound,
 		playlist,
 		socket;
@@ -28,18 +27,19 @@ define(['jquery', 'api', 'game/options', 'socket.io', '/bootstrap/js/bootstrap.m
 	};
 
 	var	L2P	= {
+		$modal:	undefined,
 		gameController:	undefined,
 		dialog:	{
 			action:	function (url, title, html, color, submitText, normalPost, callback) {
 				api.get.lang(function (lang) {
 					require(['fM', 'text!/templates/modal.html', '/bootstrap/js/bootstrap.min.js'], function (fM, modalText) {
-						$modal	= $(modalText).addClass('modal-action');
-						$modal.find('.modal-header').css('background-color', color).find(' h2').text(title);
-						$modal.find('.modal-body').html(html);
-						$modal.find('.modal-footer button.btn-primary').html(submitText);
-						$modal.find('button.btn[data-dismiss]').text(lang.global_button_close);
+						L2P.$modal	= $(modalText).addClass('modal-action');
+						L2P.$modal.find('.modal-header').css('background-color', color).find(' h2').text(title);
+						L2P.$modal.find('.modal-body').html(html);
+						L2P.$modal.find('.modal-footer button.btn-primary').html(submitText);
+						L2P.$modal.find('button.btn[data-dismiss]').text(lang.global_button_close);
 
-						$modal.on('hide', goBack);
+						//L2P.$modal.on('hide', goBack);
 
 						if(normalPost) {
 
@@ -49,18 +49,18 @@ define(['jquery', 'api', 'game/options', 'socket.io', '/bootstrap/js/bootstrap.m
 								action += "?" + getQueryString();
 							}
 
-							$modal.attr('action', action).attr('method', 'post');
+							L2P.$modal.attr('action', action).attr('method', 'post');
 						}
 
 						function onSubmit(a, b, c) {
 							if(callback) {
 								var	response	= callback.call(this, a, b, c);
 								if(response !== false && typeof(response) !== 'function') {
-									$modal.modal('hide');
+									//L2P.$modal.modal('hide');
 								} else if(typeof(response) === 'function') {
 									response(function (shouldHide) {
 										if(shouldHide) {
-											$modal.modal('hide');
+											//L2P.$modal.modal('hide');
 										}
 									});
 								}
@@ -68,12 +68,12 @@ define(['jquery', 'api', 'game/options', 'socket.io', '/bootstrap/js/bootstrap.m
 							return normalPost ? true : false;
 						}
 
-						$modal.modal('show');
-						$modal.on('submit', onSubmit);
+						L2P.$modal.modal('show');
+						L2P.$modal.on('submit', onSubmit);
 
-						fM.form.autofocus($modal);
+						fM.form.autofocus(L2P.$modal);
 
-						fM.link.navigate(url, title, {
+						fM.link.navigated(url, title, {
 							title:	'Play.now - '+title
 						});
 					});
@@ -86,32 +86,34 @@ define(['jquery', 'api', 'game/options', 'socket.io', '/bootstrap/js/bootstrap.m
 						requireScripts.push('dialog/info/'+script);
 					}
 					require(requireScripts, function (fM, modalText, UNUSE, infoScript) {
-						$modal	= $(modalText).addClass('modal-info');
-						$modal.find('.modal-header').css('background-color', color).find(' h2').text(title);
-						$modal.find('.modal-body').html(html);
-
-						var	$modalFooter	= $modal.find('.modal-footer');
+						if(L2P.$modal) {
+							//L2P.$modal.off('hide').modal('hide');
+						}
+						L2P.$modal	= $(modalText).addClass('modal-info');
+						L2P.$modal.find('.modal-header').css('background-color', color).find(' h2').text(title);
+						L2P.$modal.find('.modal-body').html(html);
+						var	$modalFooter	= L2P.$modal.find('.modal-footer');
 						if(buttons) {
 							buttons.forEach(function (button) {
 								$modalFooter.prepend('<button class="btn">'+button+'</button>');
 							});
 						}
-						$modal.find('button.btn[data-dismiss]').text(lang.global_button_close);
+						L2P.$modal.find('button.btn[data-dismiss]').text(lang.global_button_close);
 
-						$modal.on('hide', goBack);
-						$modal.on('hide-no-back', function () {
-							$modal.off('hide').modal('hide');
+						//L2P.$modal.on('hide', goBack);
+						L2P.$modal.on('hide-no-back', function () {
+							//L2P.$modal.off('hide').modal('hide');
 						});
 
-						$modal.modal('show');
-
-						if(infoScript) {
-							infoScript($modal);
-						}
-
-						fM.link.navigate(url, title, {
+						fM.link.navigated(url, title, {
 							title:	'Play.now - '+title
 						});
+
+						L2P.$modal.modal('show');
+
+						if(infoScript) {
+							infoScript(L2P.$modal);
+						}
 					});
 				}, ['global_button_close']);
 			},
@@ -120,9 +122,9 @@ define(['jquery', 'api', 'game/options', 'socket.io', '/bootstrap/js/bootstrap.m
 					$game_container	= $('#game_container'),
 					then;
 
-				if($modal && $modal.is(':visible')) {
+				if(L2P.$modal && L2P.$modal.is(':visible')) {
 					console.log('close modal');
-					$modal.trigger('hide-no-back');
+					//L2P.$modal.trigger('hide-no-back');
 				}
 
 				require(['fM', 'text!/templates/game.html', 'game/game-controller', 'game/sound', 'sound-input', 'compass', '/bootstrap/js/bootstrap.min.js', 'underscore-min'], function (fM, gameText, GameController, Sound, SoundInput, Compass) {
@@ -194,7 +196,7 @@ define(['jquery', 'api', 'game/options', 'socket.io', '/bootstrap/js/bootstrap.m
 						}, $.proxy(L2P.gameController.soundInput, L2P.gameController));
 					}
 
-					fM.link.navigate(url, title, {
+					fM.link.navigated(url, title, {
 						title:	'Play.now - '+title
 					});
 
@@ -244,13 +246,13 @@ define(['jquery', 'api', 'game/options', 'socket.io', '/bootstrap/js/bootstrap.m
 					$body_container.removeClass('song');
 					$body_container.removeClass('scale');
 
-					fM.link.navigate('/', title, {
+					fM.link.navigated('/', title, {
 						title:	title
 					});
 
-					if($modal) {
-						$modal.off('hide', goBack);
-						$modal.modal('hide');
+					if(L2P.$modal && false) {
+						//L2P.$modal.off('hide', goBack);
+						//L2P.$modal.modal('hide');
 					}
 				});
 			},
@@ -259,12 +261,13 @@ define(['jquery', 'api', 'game/options', 'socket.io', '/bootstrap/js/bootstrap.m
 					urlAjax	= '/dialog'+url;
 
 				$.get(urlAjax, function (data) {
+					console.log(data);
 					switch(data.dialogType) {
 						case 'action':
-							L2P.dialog[data.dialogType](url, data.title, data.body, data.color, data.submitText, true);
+							L2P.dialog.action(url, data.title, data.body, data.color, data.submitText, true);
 							break;
 						case 'info':
-							L2P.dialog[data.dialogType](url, data.title, data.body, data.color, data.buttons, data.script);
+							L2P.dialog.info(url, data.title, data.body, data.color, data.buttons, data.script);
 							break;
 						case 'game':
 							if(that && that.nodeName === 'IMG') {
@@ -272,7 +275,7 @@ define(['jquery', 'api', 'game/options', 'socket.io', '/bootstrap/js/bootstrap.m
 									playlist.addGame(url, data.title, data.data, data.type);
 								});
 							} else {
-								L2P.dialog[data.dialogType](url, data.title, data.data, data.type);
+								L2P.dialog.game(url, data.title, data.data, data.type);
 							}
 							break;
 					}
@@ -486,14 +489,16 @@ define(['jquery', 'api', 'game/options', 'socket.io', '/bootstrap/js/bootstrap.m
 		click:	{
 			on:		function (e) {
 				e.preventDefault();
-				console.log(this);
 				var	that		= this,
 					$this		= that.nodeName === 'IMG' ? $(this).next() : $(this),
 					urlRaw		= $this.attr('href'),
-					url			= urlRaw+(urlRaw.indexOf('?') === -1 ? (urlRaw.substr(urlRaw.length - 1, 1) === '/' ? '' : '/') : '')
-					urlAjax		= '/dialog'+url;
+					url			= urlRaw+(urlRaw.indexOf('?') === -1 ? (urlRaw.substr(urlRaw.length - 1, 1) === '/' ? '' : '/') : '');
 
-				L2P.navigate.url.call(this, url);
+				require(['fM'], function (fM) {
+					fM.link.navigate(url, 'Play.now', {
+						title:	'Play.now'
+					});
+				});
 			},
 			set:	function ($container) {
 				$container.on('click', 'a[data-dialog], img.addToPlaylist', L2P.click.on);

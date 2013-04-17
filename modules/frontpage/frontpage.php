@@ -153,7 +153,6 @@ echo $oPageRenderer->Renderpage($oLang, '
 	</div>
 	<div style="clear: both; float: none;"></div>
 </div>
-'.$strDialog.'
 ',
 $oLang->Get('system_title_welcome'),
 $arrCSS

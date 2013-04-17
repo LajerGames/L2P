@@ -1,5 +1,6 @@
 var svgController,
-	l2p;
+	l2p,
+	fm;
 require.config({
 	paths:	{
 		'socket.io':	'/node/node_modules/socket.io/node_modules/socket.io-client/dist/socket.io.min'
@@ -15,6 +16,7 @@ require.config({
 });
 require(['jquery', 'fM', 'l2p'], function ($, fM, L2P) {
 	l2p	= L2P;
+	fm	= fM;
 	switch(fM.link.fileName()) {
 		case 'game.php':
 			require(['fragments/game']);
@@ -26,10 +28,14 @@ require(['jquery', 'fM', 'l2p'], function ($, fM, L2P) {
 		L2P.click.set($CenteringContainer);
 
 		$CenteringContainer.on('click', 'a[data-internal-navigation]', function (e) {
+			e.preventDefault();
 			var	$this		= $(this),
-				navigateTo	= $this.attr('data-internal-navigation');
+				navigateTo	= $this.attr('data-internal-navigation'),
+				url			= $this.attr('href');
 
-			L2P.navigate[navigateTo](e);
+			fM.link.navigate(url, 'Play.now', {
+				title:	'Play.now'
+			});
 
 			return false;
 		});
@@ -48,27 +54,27 @@ require(['jquery', 'fM', 'l2p'], function ($, fM, L2P) {
 			}
 		}
 		var	hasFirstPopstate	= false;
-		$(window).on('popstate', function (e, a) {
-			console.log('popstate', e, a);
+		$(window).on('popstate', function (e, a, b, c) {
+			console.log(e, a, b, c);
+			if(L2P.$modal && L2P.$modal.is(':visible')) {
+				L2P.$modal.modal('hide');
+			}
 			if(hasFirstPopstate) {
 				popstateTitle(e);
 			}
 			switch(document.location.pathname) {
 				case '/':
-					L2P.navigate.home(e);
+					L2P.navigate.home(e, false);
 					break;
 				default:
 					if(hasFirstPopstate) {
-						//L2P.navigate.url(location.pathname);
+						L2P.navigate.url(location.pathname, false);
 					}
 					break;
 			}
 			hasFirstPopstate	= true;
 		});
-		$(window).on('popstate-force', function (e, a) {
-			//console.log('popstate-force', e, a);
-			popstateTitle(a);
-		});
+		fM.link.navigate(document.location.pathname);
 
 		$('#DialogContainer').each(function () {
 			var	$this		= $(this),

@@ -169,7 +169,9 @@ $this
 ->Set('avg_pts', 'Avg. points')
 ->Set('times', 'Times')
 ->Set('time', 'Time')
+->Set('play_time', 'Duration')
 ->Set('plays', 'Plays')
+->Set('summery', 'Summery')
 ->Set('this_game', 'This game')
 ->Set('average_games', 'Average')
 

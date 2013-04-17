@@ -1,27 +1,42 @@
-div#FavouriteSongs {
+div#BottomList {
     color: #000;
 }
-div#FavouriteSongs a:first-of-type {
+div#BottomList a:first-of-type {
     float: right;
     margin-top: 1vh;
 }
-table.FavouriteSongList {
+table.BottomTableView {
     width: 100%;
 }
-table.FavouriteSongList tr:not(:nth-child(1)):hover {
+table.BottomTableView tr:not(:nth-child(1)):hover {
     background-color: #DFDFDF;
     cursor: pointer;
 }
-table.FavouriteSongList tr th:nth-child(1)
+table.BottomTableView tr th:nth-child(1)
 {
     width: 30px;
 }
-table.FavouriteSongList tr th:nth-child(3), table.FavouriteSongList tr th:nth-child(4) {
+table.BottomTableView tr th:nth-child(3), table.BottomTableView tr th:nth-child(4) {
     width: 150px;
 }
-table.FavouriteSongList tr td:nth-child(3), table.FavouriteSongList tr td:nth-child(4) {
+table.BottomTableView tr td:nth-child(3), table.BottomTableView tr td:nth-child(4) {
     text-align: right;
 }
-table.FavouriteSongList td {
+table.BottomTableView td {
     color: #000;
+}
+table.summery {
+   width: 100%;
+}
+table.Summery tr th {
+    padding-top: 4vh;   
+}
+table.Summery tr th:not(:nth-child(1)) {
+    width: 150px; 
+}
+table.Summery tr td:not(:nth-child(1)) {
+    text-align: right;   
+}
+table.Summery td, table.summery th {
+   color: #000;
 }

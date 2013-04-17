@@ -40,7 +40,7 @@ if(is_object($oStatisticsSearch))
 // Create new instance of the statistics class
 $oStatistics = new Statistics($oSql, $oStatisticsSearchObject, $oLang);
 
-$strDialog    = $oPageRenderer->RenderDialogInfo($oTemplate, $strHeadline, $oStatistics->RenderStatistics(), '#8D32B7', null, 'statistic');
+$strDialog    = $oPageRenderer->RenderDialogInfo($oTemplate, $strHeadline, $oStatistics->RenderStatistics(), '#1DBAE7', null, 'statistic');
 
 if(IS_DIALOG)
 {

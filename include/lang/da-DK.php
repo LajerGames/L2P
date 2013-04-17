@@ -58,7 +58,6 @@ $this
 ->Set('november', 'november')
 ->Set('december', 'december')
 
-
 # Login
 ->SetMenu('login_')
 ->Set('username', 'Brugernavn')
@@ -170,7 +169,9 @@ $this
 ->Set('avg_pts', 'Gns. point')
 ->Set('times', 'Gange')
 ->Set('time', 'Gang')
+->Set('play_time', 'Varighed')
 ->Set('plays', 'Spil')
+->Set('summery', 'Opsummering')
 ->Set('this_game', 'Dette spil')
 ->Set('average_games', 'Gennemsnit')
 
