@@ -12,10 +12,6 @@ define(['jquery', 'fM', 'l2p', 'api', 'highcharts'], function ($, fM, L2P, api, 
 				return '<b>'+this.x+':</b> '+this.y;
 			};
 
-		if(path[4] && path[4] !== undefined && path !== '') {
-			$dialog.find('.modal-header-back-icon').addClass('modal-header-back-icon--clickable');
-		}
-
         $dialog.find('.BottomTableView tr').on('click', function() {
             var	$tr		= $(this),
             	gameid			= $tr.attr('data-gameid'),

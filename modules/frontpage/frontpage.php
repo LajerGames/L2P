@@ -61,6 +61,16 @@ if(isset($_SESSION['UserObject']))
 				'.$oPageRenderer->RenderDialogLink('/user/'.$_SESSION['UserObject']->username.'/statistics/', PageRenderer::DialogType_Info, 'Statistikker').'
 			</div>
 		</div>
+		<div class="ContentBoxPoint">
+			<div class="ContentBoxHeadline">
+				<div>
+					<span data-standard-text="'.$oLang->Get('global_points').'"><span id="pointContainer"></span> '.$oLang->Get('global_points').'</span>
+				</div>
+			</div>
+			<div class="ContentBoxBody">
+				Pointdims
+			</div>
+		</div>
 	';
 }
 else

@@ -27,9 +27,9 @@ define('SYSETM_DOMANE', 'http://l2p.fmads.dk/');
 define('DEFAULT_LANGUAGE', 'da-DK');
 
 # Patterns
-define('PATTERN_USERNAME', '[\wæøåÆØÅ_-]{2,16}');
-define('PATTERN_FIRST_NAME', '[\wæøåÆØÅ]{0,20}');
-define('PATTERN_LAST_NAME', '[\wæøåÆØÅ]{0,30}');
+define('PATTERN_USERNAME', '[\w'.utf8_decode('æøåÆØÅ.').'_-]{2,16}');
+define('PATTERN_FIRST_NAME', '[\w'.utf8_decode('æøåÆØÅ.').']{0,20}');
+define('PATTERN_LAST_NAME', '[\w'.utf8_decode('æøåÆØÅ.').']{0,30}');
 define('PATTERN_PASSWORD', '^(?=.*\d).{6,}$');
 define('PATTERN_MAIL', '');
 

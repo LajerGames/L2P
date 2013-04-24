@@ -31,21 +31,34 @@ define(['jquery'], function ($) {
 			}
 			$(window).trigger('popstate');
 		}
-		function navigated(url, title) {
+		function navigated(url, title, obj) {
 			document.title	= title;
-			window.history.replaceState(history.state, title, document.location.pathname);
-			lastState	= history.state;
+
+			obj			= $.extend(history.state, obj);
+			obj.title	= title;
+
+			his[obj._id]	= obj;
+			window.history.replaceState(obj, title, document.location.pathname);
+			lastState	= obj;
 		}
 		function getHistory() {
 			return his;
 		}
+		function getParentHistory() {
+			return his.slice(0, lastState._id);
+		}
+		function getParent() {
+			return his[lastState._id - 1];
+		}
 
 		return {
-			get:		get,
-			fileName:	fileName,
-			navigate:	navigate,
-			navigated:	navigated,
-			getHistory:	getHistory
+			get:				get,
+			fileName:			fileName,
+			navigate:			navigate,
+			navigated:			navigated,
+			getHistory:			getHistory,
+			getParentHistory:	getParentHistory,
+			getParent:			getParent
 		};
 	}());
 

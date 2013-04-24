@@ -532,14 +532,17 @@ class statistics
         $iAveragePointsPerMinute    = 0;
         foreach($arrAverageGameData as $oGameData)
         {
+            //printr($oGameData);
             $iAveragePoints             += $oGameData->iPoints;
             $iAveragePointsPerMinute    += $oGameData->iPoints / ($oGameData->fGameDuration / 60); // This is currently a float, it will be re-int'ifyed soon... sry 'bout that :)
+
+            //$iGamePrecision             += $this->CalculateGamePrecision($oGameData->$strGameStatistics);
         }
 
         // Divide total amounts with amount of games played to get average
         $iAveragePoints             = $iAveragePoints / count($arrAverageGameData);
         $iAveragePointsPerMinute    = round($iAveragePointsPerMinute / count($arrAverageGameData));
-        
+
         $iGamePointsPerMinute       = round($arrGameData[0]->iPoints / ($arrGameData[0]->fGameDuration / 60));
 
         // Find out if we need to write plural or non-plural points on each value
@@ -577,11 +580,22 @@ class statistics
                 </tr>
                 <tr>
                     <td>'.$this->oLang->Get('statistics_graph_pointsprminute').'</td>
-                    <td>'.$iAveragePointsPerMinute.' '.$strAvgPointsPerMinutePlural.'</td>
                     <td>'.$iGamePointsPerMinute.' '.$strGamePointsPerMinutePlural.'</td>
+                    <td>'.$iAveragePointsPerMinute.' '.$strAvgPointsPerMinutePlural.'</td>
                 </tr>
+                <!--tr>
+                    <td>'.$this->oLang->Get('statistics_graph_precision').'</td>
+                    <td>xx</td>
+                    <td>xx</td>
+                </tr-->
             </table>
         ';
+    }
+    private function CalculateGamePrecision($strGameStatistics)
+    {
+        //echo $strGameStatistics;
+
+        return;   
     }
 
     /**
@@ -717,19 +731,6 @@ class statistics
 
 					break;
 			}
-            
-            /*
-            if(sizeof($this->oSearch->arrGameIDs) === 1)
-            {
-            }
-            elseif(sizeof($this->oSearch->arrGameHistoryIDs) === 1)
-            {
-
-            }
-            else
-            {
-
-            }*/
 
             $strReturn	= '
             	<form class="hidden" name="search">

@@ -11,11 +11,11 @@ if(!isset($oCreateUserForm))
 
 $strBody	= $oHandleUserForm->RenderFields(false);
 
-$strDialog	= $oPageRenderer->RenderDialogAction($oTemplate, $oLang->Get('handle_user_headline'), $strBody, '#1DBAE7', $oLang->Get('global_button_save'));
+$strDialog	= $oPageRenderer->RenderDialogAction($oTemplate, $oLang->Get('handle_user_headline'), $strBody, '#8D32B7', $oLang->Get('global_button_save'));
 
 if(IS_DIALOG)
 {
-	header('Content-type: application/json');
+	header('Content-type: application/json; charset=utf-8');
 	echo $strDialog;
 }
 ?>

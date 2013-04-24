@@ -55,7 +55,7 @@ require(['jquery', 'fM', 'l2p'], function ($, fM, L2P) {
 		}
 		var	hasFirstPopstate	= false;
 		$(window).on('popstate', function (e, a, b, c) {
-			console.log(e, a, b, c);
+			//console.log(e, a, b, c);
 			if(L2P.$modal && L2P.$modal.is(':visible')) {
 				L2P.$modal.modal('hide');
 			}
