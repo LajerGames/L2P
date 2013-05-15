@@ -55,3 +55,7 @@
 .modal-body h2 {
 	color: #000;
 }
+
+table.FormTable td {
+    color: #000;   
+}

@@ -11,9 +11,14 @@ define(['jquery', 'l2p', 'playlist', 'api'], function ($, L2P, Playlist, api) {
 			console.log(data);
 		}
 
+		$dialog.find('img.playPlaylist').on('click', function () {
+			L2P.get.playlist(null, function (playlist) {
+				playlist.start();
+			});
+		});
 		$dialog.find('img.newPlaylist').on('click', function () {
 			api.get.lang(function (lang) {
-				var	name	= prompt('Navn');
+				var	name	= prompt(lang.global_new);
 				if(name) {
 					render.kill();
 					L2P.get.playlist('new', function (playlist) {
@@ -25,7 +30,7 @@ define(['jquery', 'l2p', 'playlist', 'api'], function ($, L2P, Playlist, api) {
 		});
 		$dialog.find("#musicSearch")
 			.on("keyup", function() {
-				oParam = {}
+				var	oParam = {}
 				oParam.searchstring	= $(this).val();
 				oParam.type     	= $(this).attr('data-type');
 

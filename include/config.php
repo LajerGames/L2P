@@ -32,6 +32,7 @@ define('PATTERN_FIRST_NAME', '[\w'.utf8_decode('æøåÆØÅ.').']{0,20}');
 define('PATTERN_LAST_NAME', '[\w'.utf8_decode('æøåÆØÅ.').']{0,30}');
 define('PATTERN_PASSWORD', '^(?=.*\d).{6,}$');
 define('PATTERN_MAIL', '');
+define('PATTERN_INT', '[0-9]{3}');
 
 define('IS_DIALOG', strpos($_SERVER['REQUEST_URI'], '/dialog') !== false);
 // Request URI should only be till the questionmark
@@ -69,4 +70,8 @@ $oTemplate	= new Template($oSql);
 # Language
 require_once(SERVER_PROJECT_ROOT_CLASS.'/language.class.inc');
 $oLang = new Language(GetCountryCode());
+
+# Game
+require_once(SERVER_PROJECT_ROOT_CLASS.'/game.class.inc');
+$oIllustrations = new Illustrations($oSql);
 ?>

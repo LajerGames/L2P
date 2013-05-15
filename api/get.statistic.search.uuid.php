@@ -3,12 +3,6 @@ include($_SERVER['DOCUMENT_ROOT'].'/include/config.php');
 header('Content-Type: application/json; charset=utf-8');
 
 
-// Make sure user is logged in
-if($_SESSION['UserObject']->id == 0)
-{
-    exit; // Don't proceed due to error
-}
-
 // JSON-encode the search
 $strSearch	= json_encode($_GET['search']);
 $strUUID	= '';
@@ -24,8 +18,7 @@ while(empty($strUUID))
 		FROM
 			users_statistics_search
 		WHERE
-			users_statistics_search.user_id	= '.$_SESSION['UserObject']->id.'
-		 &&	users_statistics_search.uuid	= "'.$strUUID.'"
+			users_statistics_search.uuid	= "'.$strUUID.'"
 	');
 
 	// If we found any rows with this UUID for this user, we empty the UUID and try again
@@ -37,7 +30,6 @@ while(empty($strUUID))
 
 // Insert the UUID
 $oSql->Insert('users_statistics_search', array(
-	'user_id'	=> $_SESSION['UserObject']->id,
 	'uuid'		=> $strUUID,
 	'search'	=> $strSearch
 ));

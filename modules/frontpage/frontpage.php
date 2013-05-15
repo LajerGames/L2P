@@ -53,12 +53,13 @@ if(isset($_SESSION['UserObject']))
 			<div class="ContentBoxHeadline">
 				<div>
 					<img src="'.HTTP_PROJECT_ROOT_IMG.'icons/user.svg" alt="" /><span>'.$strHeadline.'</span>
-					<a href="/user/handle/" title="'.$oLang->Get('frontpage_edit').'"><img id="EditUser" src="'.HTTP_PROJECT_ROOT_IMG.'icons/pen.svg" alt="" /></a>
+					<a href="/user/handle/" title="'.$oLang->Get('frontpage_edit').'" data-internal-navigation><img id="EditUser" src="'.HTTP_PROJECT_ROOT_IMG.'icons/pen.svg" alt="" /></a>
 				</div>
 			</div>
 			<div class="ContentBoxBody">
-                <a href="/?mode=logout">Logout</a>
-				'.$oPageRenderer->RenderDialogLink('/user/'.$_SESSION['UserObject']->username.'/statistics/', PageRenderer::DialogType_Info, 'Statistikker').'
+                <a href="/?mode=logout">'.$oLang->Get('frontpage_user_logout').'</a>
+				'.$oPageRenderer->RenderDialogLink('/user/'.$_SESSION['UserObject']->username.'/statistics/', PageRenderer::DialogType_Info, $oLang->Get('frontpage_user_statistics')).'
+                <a href="/user/settings/" title="'.$oLang->Get('frontpage_user_settings').'" data-internal-navigation>'.$oLang->Get('frontpage_user_settings').'</a>
 			</div>
 		</div>
 		<div class="ContentBoxPoint">

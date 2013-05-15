@@ -35,6 +35,11 @@ class PageRenderer
 				'.$strCSSFiles.'
 
 				<script data-main="'.HTTP_PROJECT_ROOT_JAVASCRIPT.'main" src="'.HTTP_PROJECT_ROOT_JAVASCRIPT.'require-jquery.js"></script>
+				<script>
+					var	L2P_global	= {
+						username:	"'.$_SESSION['UserObject']->username.'"
+					};
+				</script>
 				<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 			</head>
 			<body>

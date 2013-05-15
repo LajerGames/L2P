@@ -4,6 +4,10 @@ define(['jquery', 'api', 'game/options', 'socket.io', '/bootstrap/js/bootstrap.m
 			window.history.back();
 		}
 	}
+	function getAjax(urlAjax, callback) {
+		$.get(urlAjax, callback);
+	}
+
 	var	gameController,
 		svgContainer,
 		sound,
@@ -81,7 +85,8 @@ define(['jquery', 'api', 'game/options', 'socket.io', '/bootstrap/js/bootstrap.m
 						fM.link.navigated(url, title, {
 							is_dialog:	true
 						});
-						if(fM.link.getParent().is_dialog) {
+						var	parent	= fM.link.getParent();
+						if(parent && parent.is_dialog) {
 							L2P.$modal
 								.find('.modal-header-back-icon')
 									.addClass('modal-header-back-icon--clickable')
@@ -123,7 +128,8 @@ define(['jquery', 'api', 'game/options', 'socket.io', '/bootstrap/js/bootstrap.m
 						fM.link.navigated(url, title, {
 							is_dialog:	true
 						});
-						if(fM.link.getParent().is_dialog) {
+						var	parent	= fM.link.getParent();
+						if(parent && parent.is_dialog) {
 							L2P.$modal
 								.find('.modal-header-back-icon')
 									.addClass('modal-header-back-icon--clickable')
@@ -152,7 +158,10 @@ define(['jquery', 'api', 'game/options', 'socket.io', '/bootstrap/js/bootstrap.m
 				require(['fM', 'text!/templates/game.html', 'game/game-controller', 'game/sound', 'sound-input', 'compass', '/bootstrap/js/bootstrap.min.js', 'underscore-min'], function (fM, gameText, GameController, Sound, SoundInput, Compass) {
 					var	generate	= !L2P.gameController,
 						compassBox	= $('div.ContentBoxOrange div.CompassOuter'),
-						compass		= new Compass(compassBox);
+						compass		= new Compass(compassBox),
+						state		= fM.link.getCurrentNavigate() || {};
+
+					state.is_game	= true;
 
 					if(generate) {
 						$game_container.html(gameText);
@@ -187,23 +196,34 @@ define(['jquery', 'api', 'game/options', 'socket.io', '/bootstrap/js/bootstrap.m
 						L2P.gameController.setGameSpeed(+this.value);
 						$speedShow.html(this.value);
 					});
-					$(L2P.gameController).on({
-						gameLoadSpeedChange:	function (e, speed) {
-							$speed.val(speed).trigger('change');
-						},
-						gameStart:	function () {
-							compass.show();
-						},
-						gameStop:	function () {
-							compass.hide();
-						},
-						notePoints:	function (note) {
-							//console.log(note);
-						}
-					});
+					if(generate) {
+						$(L2P.gameController).on({
+							gameLoadSpeedChange:	function (e, speed) {
+								$speed.val(speed).trigger('change');
+							},
+							gameStart:	function () {
+								compass.show();
+							},
+							gameEnd:	function (e, gameInfo) {
+								compass.hide();
+								var	currentState	= fM.link.getCurrent() || {};
 
-					$startGame.on('click', $.proxy(L2P.gameController.startGame, L2P.gameController));
-					$stopGame.on('click', $.proxy(L2P.gameController.stopGame, L2P.gameController));
+								if(!currentState || !currentState.from_playlist) {
+									api.get.statistic_uuid(function (data) {
+										fM.link.navigate('/user/'+L2P_global.username+'/statistics/'+data.uuid+'/');
+									}, {
+										game_history_ids:	gameInfo.game_history_id
+									});
+								}
+							},
+							notePoints:	function (note) {
+								//console.log(note);
+							}
+						});
+
+						$startGame.on('click', $.proxy(L2P.gameController.startGame, L2P.gameController));
+						$stopGame.on('click', $.proxy(L2P.gameController.stopGame, L2P.gameController));
+					}
 
 					L2P.gameController.importGame(data, title);
 					if(url) {
@@ -218,9 +238,18 @@ define(['jquery', 'api', 'game/options', 'socket.io', '/bootstrap/js/bootstrap.m
 						}, $.proxy(L2P.gameController.soundInput, L2P.gameController));
 					}
 
-					fM.link.navigated(url, title, {
-						is_game:	true
-					});
+					state.is_game	= true;
+					fM.link.navigated(url, title, state);
+
+					if(state) {
+						if(state.autostart) {
+							L2P.gameController.useCountdown	= state.use_countdown || state.use_countdown === undefined;
+							L2P.gameController.startGame();
+						}
+						if(state.onstart) {
+							$(L2P).trigger(state.onstart, [L2P.gameController]);
+						}
+					}
 
 					if(callback) {
 						callback(L2P.gameController);
@@ -282,8 +311,7 @@ define(['jquery', 'api', 'game/options', 'socket.io', '/bootstrap/js/bootstrap.m
 				var	that	= this,
 					urlAjax	= '/dialog'+url;
 
-				$.get(urlAjax, function (data) {
-					//console.log(data);
+				getAjax(urlAjax, function (data) {
 					switch(data.dialogType) {
 						case 'action':
 							L2P.dialog.action(url, data.title, data.body, data.color, data.submitText, true);
@@ -381,7 +409,23 @@ define(['jquery', 'api', 'game/options', 'socket.io', '/bootstrap/js/bootstrap.m
 					return t;
 				},
 				getCloseTone:	function (freq, defTone, tone) {
-					var	octav, tempTone, diff, closestTone, closestDiff, closestFreq, newTone, newFreq, octavDiff;
+					var	octav, tempTone, diff, closestTone, closestDiff, closestFreq, newTone, newFreq, octavDiff, defToneType, defTonePos, defToneClose;
+
+					if(defTone && tone && defTone.name !== tone.name && defTone.name.length === 2) {
+						defToneType	= defTone.name.substr(1, 1);
+						defTonePos	= options.tones.all.indexOf(defTone);
+
+						if(defToneType === '#') {
+							defToneClose	= options.tones.all[defTonePos + 1];
+						} else if(defToneType === 'b') {
+							defToneClose	= options.tones.all[defTonePos - 1];
+						}
+
+						console.log(defTone.name, defToneClose.name, defToneClose.name === tone.name);
+						if(defToneClose.name === tone.name) {
+							defTone	= defToneClose;
+						}
+					}
 
 					for(octav = 3; octav <= 6; octav += 1) {
 						tempTone	= options.tones.names[octav][tone.name];
@@ -396,6 +440,9 @@ define(['jquery', 'api', 'game/options', 'socket.io', '/bootstrap/js/bootstrap.m
 
 					if(closestTone && defTone) {
 						octavDiff	= tone.octav - closestTone.octav;
+						if(options.tones.names[defTone.octav + octavDiff] === undefined) {
+							console.error('TONE NOT FOUND', defTone.octav, octavDiff, defTone.octav + octavDiff);
+						}
 						newTone	= options.tones.names[defTone.octav + octavDiff][defTone.name];
 						newFreq	= freq * Math.pow(2, octavDiff)
 					}
@@ -517,9 +564,17 @@ define(['jquery', 'api', 'game/options', 'socket.io', '/bootstrap/js/bootstrap.m
 					url			= urlRaw+(urlRaw.indexOf('?') === -1 ? (urlRaw.substr(urlRaw.length - 1, 1) === '/' ? '' : '/') : '');
 
 				require(['fM'], function (fM) {
-					fM.link.navigate(url, 'Play.now', {
-						title:	'Play.now'
-					});
+					if(that && that.nodeName === 'IMG') {
+						getAjax('/dialog'+url, function (data) {
+							L2P.get.playlist(null, function () {
+								playlist.addGame(url, data.title, data.data, data.type);
+							});
+						});
+					} else {
+						fM.link.navigate(url, 'Play.now', {
+							title:	'Play.now'
+						});
+					}
 				});
 			},
 			set:	function ($container) {

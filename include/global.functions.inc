@@ -262,8 +262,7 @@ function FindLoadFile(MySQLWrapper $oSql, $bReturn404 = false)
 						FROM
 							users_statistics_search
 						WHERE
-							users_statistics_search.user_id	= '.$oPathUser->iUserID.'
-						 &&	users_statistics_search.uuid	= "'.$strUUID.'"
+							users_statistics_search.uuid	= "'.$strUUID.'"
 					');
 					if(!empty($oStatisticsSearch))
 					{
@@ -473,7 +472,7 @@ function RenderMonthName($strDate, $oLang)
 }
 /**
 * Returns game duration in xx min xx seconds in correct language also
-* 
+*
 * @param mixed $fGameTime
 * @param object $oLang
 */
@@ -503,7 +502,7 @@ function RenderGameDuration($fGameTime, $oLang)
 }
 /**
 * Returns a correct numberformat that matches the language you're currently using
-* 
+*
 * @param float $fValue
 * @param int $iDecimals
 */

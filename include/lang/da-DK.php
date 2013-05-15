@@ -78,6 +78,9 @@ $this
 ->Set('view_all', 'Vis alle')
 ->Set('view_all_songs_title', 'Åbn hele sanglisten')
 ->Set('view_all_scales_title', 'Åbn hele skalalisten')
+->Set('user_logout', 'Log ud')
+->Set('user_statistics', 'Statistikker')
+->Set('user_settings', 'Indstillinger')
 
 # Browse
 ->SetMenu('browse_')
@@ -123,6 +126,12 @@ $this
 ->Set('last_name', 'Efternavn')
 ->Set('validation_first_name', 'Dit foravn må max være 20 karaktere langt, og kun indeholde bogstaver')
 ->Set('validation_last_name', 'Dit efternavn må max være 30 karaktere langt, og kun indeholde bogstaver')
+
+# User settings
+->SetMenu('user_settings_')
+->Set('concert_pitch', 'Kammertone')
+->Set('color_notes', 'Farvede noder')
+->Set('validation_concert_pitch', 'Kammertonen skal være numerisk')
 
 # Activate user
 ->SetMenu('activate_')

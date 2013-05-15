@@ -1,4 +1,4 @@
-define(['jquery', 'l2p', 'api'], function ($, L2P, api) {
+define(['jquery', 'l2p', 'api', 'fM'], function ($, L2P, api, fM) {
 	function Playlist(options, id) {
 		var	that		= this;
 		this.$this		= $(this);
@@ -13,6 +13,7 @@ define(['jquery', 'l2p', 'api'], function ($, L2P, api) {
 		this.playing	= false;
 		this.playNow	= -1;
 		this.loop		= -1;
+		this.game_history_ids	= [];
 		this.gameController;
 
 		this.storage	= new L2P.storage('PlayList');
@@ -58,33 +59,37 @@ define(['jquery', 'l2p', 'api'], function ($, L2P, api) {
 		}
 	};
 	Playlist.prototype.start		= function () {
-		this.playing	= true;
-		this.loop		+= 1;
+		this.game_history_ids	= [];
+		this.restart();
+	};
+	Playlist.prototype.restart		= function () {
+		this.playing			= true;
+		this.loop				+= 1;
 		this.nextGame();
 	};
 	Playlist.prototype.startGame	= function (game) {
-		var	that	= this;
-		L2P.dialog.game(game.url, game.title, game.data, game.type, function (gameController) {
-			if(!that.gameController) {
-				console.log('playlist got new gameController');
+		var	that		= this,
+			linkObject	= {
+				title:			game.title,
+				from_playlist:	true,
+				autostart:		!this.firstPlay,
+				use_countdown:	this.options.mode === 'countdown'
+			};
+
+		if(!this.gameController) {
+			linkObject.onstart	= 'gameStart-'+Date.now();
+			$(L2P).on(linkObject.onstart, function (e, gameController) {
+				console.log(that, 'got new gameController');
 				that.gameController	= gameController;
 
-				$(that.gameController).on('gameEnd', function (points) {
-					console.log('gameEnd', points);
+				$(that.gameController).on('gameEnd', function (e, gameInfo) {
+					console.log('gameEnd', gameInfo.points, gameInfo);
+					that.game_history_ids.push(gameInfo.game_history_id);
 					that.nextGame();
 				});
-			}
-
-			if(!this.firstPlay) {
-				if(that.options.mode === 'auto') {
-					that.gameController.useCountdown	= false;
-					that.gameController.startGame();
-				} else if(that.options.mode === 'countdown') {
-					that.gameController.useCountdown	= true;
-					that.gameController.startGame();
-				}
-			}
-		});
+			});
+		}
+		fM.link.navigate(game.url, game.title, linkObject);
 	};
 	Playlist.prototype.nextGame		= function () {
 		this.playNow	+= 1;
@@ -100,7 +105,14 @@ define(['jquery', 'l2p', 'api'], function ($, L2P, api) {
 
 			if(this.options.loop === -1 || this.loop < this.options.loop) {
 				this.firstPlay	= false;
-				this.start();
+				this.restart();
+			} else {
+				console.log('playlist done', this.game_history_ids, this);
+				api.get.statistic_uuid(function (data) {
+					fM.link.navigate('/user/'+L2P_global.username+'/statistics/'+data.uuid+'/');
+				}, {
+					game_history_ids:	this.game_history_ids.join(',')
+				});
 			}
 		}
 	};

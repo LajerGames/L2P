@@ -13,19 +13,24 @@ class UserHandler
         // Fetch data to put into userobject
         $rUserInfo = $this->oSql->Select('
             SELECT
-                id,
-                username,
-                email,
-                first_name,
-                last_name,
-                points,
-                games_started,
-                games_finished,
-                game_time
+                users.id,
+                users.username,
+                users.email,
+                users.first_name,
+                users.last_name,
+                users.points,
+                users.games_started,
+                users.games_finished,
+                users.game_time,
+                users_settings.concert_pitch,
+                users_settings.colored_notes
             FROM
                 users
+            LEFT JOIN
+                users_settings ON
+                    users_settings.user_id = users.id
             WHERE
-                id = '.$iUserID.'
+                users.id = '.$iUserID.'
         ');
 
         $_SESSION['UserObject'] = $rUserInfo->fetch_object();
@@ -36,12 +41,12 @@ class UserHandler
     {
         $rUserdata = $this->oSql->Select('
             SELECT
-                username,
-                email
+                users.username,
+                users.email
             FROM
                 users
             WHERE
-                id = '.$iUserID.'
+                users.id = '.$iUserID.'
         ');
 
         $oUserdata = $rUserdata->fetch_object();

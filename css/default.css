@@ -32,13 +32,16 @@ a {
 	float: none;
 	clear: right;
 }
-select, textarea, input[type="text"], input[type="password"], input[type="datetime"], input[type="datetime-local"], input[type="date"], input[type="month"], input[type="time"], input[type="week"], input[type="number"], input[type="email"], input[type="url"], input[type="search"], input[type="tel"], input[type="color"], .uneditable-input,
+select, textarea, input[type="text"], input[type="password"], input[type="datetime"], input[type="datetime-local"], input[type="date"], input[type="month"], input[type="time"], input[type="week"], input[type="number"], input[type="email"], input[type="url"], input[type="search"], input[type="tel"], input[type="color"] .uneditable-input,
 .std {
 	width: 20.5vw;
 	height: 4vh;
 	font-size: 2vmin;
 	margin: 1vh 2vw 2vh 2vw;
 	box-sizing: content-box;
+}
+input[type="checkbox"], input[type="radio"] {
+    margin: 1vh 2vw 2vh 2vw;
 }
 input.std::-webkit-input-placeholder {
 	color: #1DBAE7;
@@ -182,6 +185,16 @@ body > div.countdown > div.animateCountdown {
 	width: 0;
 	position: absolute;
 	top: 0;
+}
+
+/**
+* Illustrations class
+*/
+div#ViolinFingerBoard {
+    width: 140px;
+    height: 350px;
+    background-image: url(/img/game/start-position/fingerboard.png);
+    position: relative;
 }
 
 

@@ -16,7 +16,8 @@ define(['jquery', 'dsp', 'game/tones'], function ($, dsp, tones) {
 		GraphicalEq			= dsp.GraphicalEq,
 		MultiDelay			= dsp.MultiDelay,
 		SingleDelay			= dsp.SingleDelay,
-		Reverb				= dsp.Reverb;
+		Reverb				= dsp.Reverb,
+		abekat = 0;
 
 	var Tuner, frequencies, root,
 		__hasProp = {}.hasOwnProperty;
@@ -79,8 +80,8 @@ define(['jquery', 'dsp', 'game/tones'], function ($, dsp, tones) {
 		hp.Q = 0.1;
 		success = function(stream) {
 			function tickDone(freq, note, diff) {
-				toneChange(freq, note, diff);
 				requestAnimationFrame(process);
+				toneChange(freq, note, diff);
 			}
 
 			var getPitch, maxPeaks, maxTime, noiseCount, noiseThreshold, process, src;
@@ -119,7 +120,7 @@ define(['jquery', 'dsp', 'game/tones'], function ($, dsp, tones) {
 						upsampled.push(0);
 					}
 					fft.forward(upsampled);
-					if (noiseCount < 10) {
+					if (noiseCount < 50) {
 						noiseThreshold = _.reduce(fft.spectrum, (function(max, next) {
 							if (next > max) {
 								return next;
@@ -146,7 +147,7 @@ define(['jquery', 'dsp', 'game/tones'], function ($, dsp, tones) {
 					});
 					peaks = [];
 					for (p = _k = 0; _k < 8; p = ++_k) {
-						if (spectrumPoints[p].y > noiseThreshold * 10) {
+						if (spectrumPoints[p].y > noiseThreshold * 5) {
 							peaks.push(spectrumPoints[p]);
 						}
 					}

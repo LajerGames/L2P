@@ -78,6 +78,9 @@ $this
 ->Set('view_all', 'View all')
 ->Set('view_all_songs_title', 'Open entire songlist')
 ->Set('view_all_scales_title', 'Open entire scalelist')
+->Set('user_logout', 'Logout')
+->Set('user_statistics', 'Statistics')
+->Set('user_settings', 'Settings')
 
 # Browse
 ->SetMenu('browse_')
@@ -123,6 +126,12 @@ $this
 ->Set('last_name', 'Efternavn')
 ->Set('validation_first_name', 'Your first name may not contain more than 20 characters and it may only contain letters')
 ->Set('validation_last_name', 'Your last may not contain more than 30 characters and it may only contain letters')
+
+# User settings
+->SetMenu('user_settings_')
+->Set('concert_pitch', 'Concert pitch')
+->Set('color_notes', 'Colored notes')
+->Set('validation_concert_pitch', 'Concert pitch must be numeric')
 
 # Activate user
 ->SetMenu('activate_')

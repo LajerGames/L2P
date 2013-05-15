@@ -87,7 +87,7 @@ class statistics
                 users_games_history.deleted                 = 0
                 '.$strConditions.'
             ORDER BY
-                users_games_history.points                  DESC
+                users_games_history.id                      ASC
             '.$strLimit.'
         ');
 
@@ -125,7 +125,6 @@ class statistics
     {
     	// Get note precision
     	$arrNotesPrecision = $this->CalculateNotePrecision($arrGameData);
-
     	// If we have a average gamedata we'll need to put that into a neat array aswell
     	$arrAverageNotePrecision = array();
     	if(is_array($arrAverageData))
@@ -164,10 +163,10 @@ class statistics
 		if(sizeof($arrAverageNotePrecision) > 0)
 		{
 			// Loop through all the diffrent notes and calculate their true avrage and add it to the precision array "Series"
-	        $arrNotePrecisionaverageGame = '';
+	        $arrNotePrecisionaverageGame = array();
 	        foreach($arrAverageNotePrecision as $strNoteLetter => $arrNoteTotals)
 	        {
-	            $arrNotePrecisionaverageGame[] = ($arrNotesPrecision[$strNoteLetter]['accuracy_sum'] / $arrNotesPrecision[$strNoteLetter]['played']);
+	            $arrNotePrecisionaverageGame[] = ($arrAverageNotePrecision[$strNoteLetter]['accuracy_sum'] / $arrAverageNotePrecision[$strNoteLetter]['played']);
 	        }
 
 	        $arrChartData['series'][] = array(
@@ -540,7 +539,7 @@ class statistics
         }
 
         // Divide total amounts with amount of games played to get average
-        $iAveragePoints             = $iAveragePoints / count($arrAverageGameData);
+        $iAveragePoints             = round($iAveragePoints / count($arrAverageGameData));
         $iAveragePointsPerMinute    = round($iAveragePointsPerMinute / count($arrAverageGameData));
 
         $iGamePointsPerMinute       = round($arrGameData[0]->iPoints / ($arrGameData[0]->fGameDuration / 60));
@@ -575,8 +574,8 @@ class statistics
                 </tr>
                 <tr>
                     <td>'.$this->oLang->Get('global_points').'</td>
-                    <td>'.$iAveragePoints.' '.$strAvgPointsPlural.'</td>
                     <td>'.$arrGameData[0]->iPoints.' '.$strGamePointsPlural.'</td>
+                    <td>'.$iAveragePoints.' '.$strAvgPointsPlural.'</td>
                 </tr>
                 <tr>
                     <td>'.$this->oLang->Get('statistics_graph_pointsprminute').'</td>

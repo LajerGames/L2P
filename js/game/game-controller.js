@@ -1,15 +1,29 @@
 define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], function ($, SVGElement, options, fM, api, L2P, Tick) {
-	function getImagePath(note) {
+	function getImagePath(note, connect) {
 		var	path	= options.gameImagePath;
 		if(note.isRest) {
 			path	+= note.type.name.substr(4, 1).toLowerCase() + note.type.name.substr(5) + 'rest';
 		} else if(note.isPeriod) {
 			path	+= note.type.name.substr(0, note.type.name.length - 6) + 'note-period';
 		} else {
-			path	+= note.type.name + 'note';
+			if(connect) {
+				path	+= 'quarter' + 'note';
+			} else {
+				path	+= note.type.name + 'note';
+			}
 		}
 
 		return path + options.gameImageType;
+	}
+	function flipNote(note) {
+		note.svgElement.setPos(note.svgElement.getX(), -175 - note.svgElement.getY() + 2 * 4);
+		note.svgElement.node.style.webkitTransform	= 'scaleY(-1)';
+		note.svgElement.options.flip				= true;
+	}
+	function unFlipNote(note) {
+		note.svgElement.setPos(note.svgElement.getX(), note.svgElement.options.defY);
+		note.svgElement.node.style.webkitTransform	= 'scaleY(1)';
+		note.svgElement.options.flip				= false;
 	}
 
 	var	GameController	= function (svg) {
@@ -276,7 +290,10 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 			this.game.tacts.forEach(function (tact) {
 				var tactWidth	= tact.type.length * that.defWidth,
 					tactPos		= that.startPos + tactLeftPos,
-					noteLeftPos	= 0;
+					noteLeftPos	= 0,
+					lastNote	= null,
+					noteTime	= 0,
+					connections	= [];
 
 				tactLeftPos	+= tactWidth;
 
@@ -289,17 +306,27 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 				tact.nodes.forEach(function (note) {
 					var noteWidth	= note.type.length * that.defWidth,
 						notePos		= tactPos + that.defWidth / 16 + noteLeftPos,
-						tonePos 	= (note.tone.pos + 11) * options.lineHeight / 2 + 4;
+						tonePos 	= (note.tone.pos + 11) * options.lineHeight / 2 + 4,
+						connect		= false;
+
+					noteTime	+= note.type.length;
 
 					noteLeftPos	+= noteWidth;
+					svgElement	= null;
 
 					if(note.type.img) {
+						if(note.length <= 1/8 && !note.isRest) {
+							connections.push(note);
+						}
+
 						note.svgElement	= new SVGElement(options.gameImageNodeType)
 											.setRef(note)
-											.setLink('/'+getImagePath(note))
+											.setLink('/'+getImagePath(note, connect))
 											.setPos(notePos, tonePos)
 											.setDimensions(50, 100)
 											.appendTo(tact.svgElement.node);
+
+						note.svgElement.options.defY	= tonePos;
 
 						if(note.isSharp || note.isFlat || note.isRemoveKey) {
 							var	text	= '',
@@ -316,23 +343,16 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 								.setInnerText(text, 36, 'bold')
 								.setPos(notePos - 25, tonePos + y)
 								.appendTo(tact.svgElement.node);
+
 						}
 
 						if(note.tone.pos <= 0) {
-							note.svgElement.setPos(note.svgElement.node.x.baseVal.value, -175 - note.svgElement.node.y.baseVal.value + 2 * 4);
-							note.svgElement.node.style.webkitTransform	= 'scaleY(-1)';
-						}/*
-						if(note.tone.pos <= 0) {
-							if(lastNote) {
-								lastNote.svgElement.setPos(lastNote.svgElement.node.x.baseVal.value, -175 - lastNote.svgElement.node.y.baseVal.value + 2 * 4);
-								lastNote.svgElement.node.style.webkitTransform	= 'scaleY(-1)';
-							}
+							flipNote(note);
 						}
-						if(note.tone.pos === 0) {
-							lastNote	= note;
-						}*/
-					} else {
-						lastNote	= null;
+
+						if(connect) {
+
+						}
 					}
 					if(note.isSlur) {
 						lastSlur	= note;
@@ -342,6 +362,84 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 							lastSlur	= null;
 						}
 						firstSlur	= note;
+					}
+
+					while(noteTime >= 1/4) {
+						if(connections.length > 1) {
+							(function (connections) {
+								var	first	= connections[0],
+									last	= connections[connections.length - 1],
+									flip	= first.svgElement.options.flip;
+
+								connections.forEach(function (note) {
+									note.svgElement.setLink('/'+getImagePath(note, true));
+									if(note !== first) {
+										if(flip && !note.svgElement.options.flip) {
+											flipNote(note);
+										} else if(!flip && note.svgElement.options.flip) {
+											unFlipNote(note);
+										}
+									}
+								});
+
+								var	y1		= first.svgElement.options.defY + 11 + (flip ? 147 : 0),
+									y2		= last.svgElement.options.defY + 11 + (flip ? 147 : 0),
+									x		= last.length - first.length,
+									a		= (y2 - y1) / x,
+									moveY	= 0;
+
+								if(connections.length > 2) {
+									var	notePos		= 0 - first.length;
+									connections.forEach(function (note) {
+										var	realY	= note.svgElement.options.defY + 11 + (flip ? 147 : 0),
+											diffY	= y1 - realY;
+
+										if(!flip)
+											console.log(realY, diffY, connections);
+
+										if(flip && diffY < 0 && diffY < -moveY) {
+											moveY	= -diffY;
+										} else if(!flip && diffY > 0 && diffY > -moveY) {
+											moveY	= -diffY;
+										}
+
+										notePos	+= note.length;
+									});
+
+									connections.forEach(function (note) {
+										if(note.svgElement.getY() !== y1 + moveY) {
+											new SVGElement('line')
+												.setLine(note.svgElement.getX() + 25, note.svgElement.options.defY + 11 + (flip ? 147 : 0), note.svgElement.getX() + 25, y1 + moveY)
+												.setStroke('#000', 2)
+												.appendTo(tact.svgElement.node);
+										}
+									});
+
+									y2	= y1;
+								}
+
+								var	lastNote	= null;
+								connections.forEach(function (note) {
+									if(lastNote) {
+										if(lastNote.length === 1/16 && note.length === 1/16) {
+											new	SVGElement('line')
+												.setRef(connections)
+												.setLine(lastNote.svgElement.getX() + 24, y1 + moveY + (flip ? -10 : +10), note.svgElement.getX() + 26, y2 + moveY + (flip ? -10 : +10))
+												.setStroke('#000', 5)
+												.appendTo(tact.svgElement.node);
+										}
+										new	SVGElement('line')
+											.setRef(connections)
+											.setLine(lastNote.svgElement.getX() + 24, y1 + moveY, note.svgElement.getX() + 26, y2 + moveY)
+											.setStroke('#000', 5)
+											.appendTo(tact.svgElement.node);
+									}
+									lastNote	= note;
+								});
+							}(connections));
+						}
+						connections	= [];
+						noteTime	-= 1/4;
 					}
 				});
 			});
@@ -595,7 +693,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 					return;
 				}
 				tact.nodes.forEach(function (note) {
-					var	noteLeftPos	= note.svgElement.node.x.baseVal.value - newPos;
+					var	noteLeftPos	= note.svgElement.getX() - newPos;
 
 					if(noteLeftPos <= (options.markerPos + options.leftMargin + 10) && (noteLeftPos + note.type.length * that.defWidth) > (options.markerPos + options.leftMargin + 10)) {
 						if(that.currentNote === undefined) {
@@ -734,23 +832,21 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 
 		this.stopGame();
 
-		var	data	= this.generateGameData();
-		$.ajax({
-			url:	'/api/save.game.php',
-			type:	'post',
-			data:	{
-				data:	data
-			}
+		var	data	= this.generateGameData(),
+			that	= this;
+		$.post('/api/save.game.php', {
+			data:	data
+		}, function (gameInfo) {
+			that.$this.trigger('gameEnd', {
+				points: {
+					status:	that.status,
+					plus:	that.plus,
+					minus:	that.minus
+				},
+				game_history_id:	gameInfo.game_history_id
+			});
 		});
-		console.log(this.status, this.plus, this.minus);
-
-		this.$this.trigger('gameEnd', {
-			points: {
-				status:	this.status,
-				plus:	this.plus,
-				minus:	this.minus
-			}
-		});
+		//console.log(this.status, this.plus, this.minus);
 	}
 
 	return GameController;

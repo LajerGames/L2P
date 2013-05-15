@@ -1,8 +1,10 @@
 define(['jquery'], function ($) {
 	var	link = (function () {
 		var	his			= [],
-			lastState	= null;
-		function get() {
+			lastState	= null,
+			that		= {},
+			$that		= $(that);
+		that.get	= function () {
 			var a = window.location.search.substr(1).split('&'),
 				r = {};
 			for(var i = 0; i < a.length; i += 1) {
@@ -12,10 +14,10 @@ define(['jquery'], function ($) {
 
 			return r;
 		}
-		function fileName() {
+		that.fileName	= function () {
 			return location.pathname.substr(1);
 		}
-		function navigate(url, title, obj) {
+		that.navigate	= function (url, title, obj) {
 			title		= title || 'Play.now';
 			obj			= obj || {};
 			obj.title	= obj.title || title;
@@ -31,7 +33,7 @@ define(['jquery'], function ($) {
 			}
 			$(window).trigger('popstate');
 		}
-		function navigated(url, title, obj) {
+		that.navigated	= function (url, title, obj) {
 			document.title	= title;
 
 			obj			= $.extend(history.state, obj);
@@ -40,26 +42,26 @@ define(['jquery'], function ($) {
 			his[obj._id]	= obj;
 			window.history.replaceState(obj, title, document.location.pathname);
 			lastState	= obj;
+
+			$that.trigger('navigate-done', [lastState]);
 		}
-		function getHistory() {
+		that.getHistory	= function () {
 			return his;
 		}
-		function getParentHistory() {
+		that.getParentHistory	= function () {
 			return his.slice(0, lastState._id);
 		}
-		function getParent() {
+		that.getParent	= function () {
 			return his[lastState._id - 1];
 		}
+		that.getCurrent	= function () {
+			return lastState ? his[lastState._id] : undefined;
+		}
+		that.getCurrentNavigate	= function () {
+			return lastState ? his[lastState._id + 1] : undefined;
+		}
 
-		return {
-			get:				get,
-			fileName:			fileName,
-			navigate:			navigate,
-			navigated:			navigated,
-			getHistory:			getHistory,
-			getParentHistory:	getParentHistory,
-			getParent:			getParent
-		};
+		return that;
 	}());
 
 	var	requestAnimationFrame	= (function () {

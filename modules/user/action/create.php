@@ -75,6 +75,13 @@ if($oCreateUserForm->Validate($_POST))
         // Insert the user
         $iUserID = $oSql->Insert('users', $arrUser, 'User '.$oSql->RealEscape($strUsername).' created');
 
+        // We need to insert a record for defauls user settings
+        $arrUserSettings = array(
+            'user_id'   => $iUserID
+        );
+
+        $oSql->Insert('users_settings', $arrUserSettings);
+
         // Create a array of keys and values to insert into the confirmationmail
         $arrConfirmationMailValues = array(
             '#username#'                => $strUsername,

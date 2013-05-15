@@ -78,6 +78,25 @@ class Form
 		return $this;
 	}
 
+    public function Box($bIsRadio, $strName, $bIsChecked, $strLabel = '', $arrProperties = array())
+    {
+        $strType = $bIsRadio ? FormField::FieldType_Radio : FormField::FieldType_Checkbox;
+
+        $strName = empty($strName) ? 'unnamed' : $strName;
+
+        $oField     = new FormField($strType);
+        $oField->strName        = $strName;
+        $oField->strValue       = 1;
+        $oField->bIsChecked     = $bIsChecked;
+        $oField->strLabel       = $strLabel;
+        $oField->oValidation    = $oValidation;
+        $oField->arrProperties  = $arrProperties;
+
+        $this->AddField($oField);
+
+        return $this;
+    }
+
 	/**
 	* Adds a button
 	*
@@ -160,13 +179,31 @@ class Form
 	*
 	* @return string
 	*/
-	public function RenderFields($bIncludeSubmitArea = true, $strSubmitButtonName = 'Save changes', $strCancelButtonName = '')
+	public function RenderFields($bIncludeSubmitArea = true, $strSubmitButtonName = 'Save changes', $strCancelButtonName = '', $bUseTableView = false)
 	{
 		$strHtml	= $this->RenderFormStart();
-		foreach($this->arrFields as $strName => $oField)
-		{
-			$strHtml	.= $oField->RenderField();
-		}
+
+        if($bUseTableView)
+        {
+            $strHtml .= '<table border="0" cellspacing="0" cellpadding="0" class="FormTable">';
+            foreach($this->arrFields as $strName => $oField)
+            {
+                $strHtml    .= '
+                    <tr>
+                        <td>'.$oField->strLabel.'</td>
+                        <td>'.$oField->RenderField().'</td>
+                    </tr>
+                ';
+            }
+            $strHtml .= '</table>';
+        }
+        else
+        {
+            foreach($this->arrFields as $strName => $oField)
+            {
+                $strHtml    .= $oField->RenderField();
+            }
+        }
 		$strHtml	.= $this->RenderFormEnd($bIncludeSubmitArea, $strSubmitButtonName, $strCancelButtonName);
 
 		return $strHtml;
@@ -197,12 +234,15 @@ class FormField
 	const	FieldType_Text		= 'text',
 			FieldType_Number	= 'number',
 			FieldType_Password	= 'password',
-			FieldType_Button	= 'button',
+            FieldType_Button    = 'button',
+            FieldType_Radio     = 'radio',
+			FieldType_Checkbox	= 'checkbox',
 			FieldType_Date		= 'date';
 
 	public	$strFieldType		= '',
 			$strName			= '',
-			$strValue			= '',
+            $strValue           = '',
+			$bIsChecked			= false,
 			$strLabel			= '',
 			$strType			= '',
 			$strPattern			= '',
@@ -239,11 +279,17 @@ class FormField
 		switch($this->strFieldType)
 		{
 			case FormField::FieldType_Text:
-				$strHtml	.= $this->RenderTextField($this);
+				$strHtml	.= $this->RenderTextField();
 				break;
 			case FormField::FieldType_Button:
-				$strHtml	.= $this->RenderButton($this);
+				$strHtml	.= $this->RenderButton();
 				break;
+            case FormField::FieldType_Checkbox :
+                $strHtml    .= $this->RenderCheckbox();
+                break;
+            case FormField::FieldType_Radio :
+            
+                break;
 		}
 
 		return $strHtml;
@@ -360,6 +406,26 @@ class FormField
 
 		return $strRtrn;
 	}
+
+    private function RenderCheckbox()
+    {
+        $strChecked = $this->bIsChecked ? 'checked="checked"' : '';
+
+        if(empty($this->strLabel))
+        {
+            $strRtrn = '<input type="checkbox" value="'.$this->strValue.'" name="'.$this->strName.'" '.$strChecked.' />';
+        }
+        else
+        {
+            $strRtrn = '
+            <label class="checkbox">
+              <input type="checkbox" value="'.$this->strValue.'" id="'.$this->strName.'" name="'.$this->strName.'" '.$strChecked.' /> '.$this->strLabel.'
+            </label>
+            ';
+        }
+
+        return $strRtrn;
+    }
 
 	/**
 	* Render the button

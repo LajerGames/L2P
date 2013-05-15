@@ -11,6 +11,32 @@ define(function () {
 	var	SVGElement	= function (node) {
 		this.node;
 		this.ref;
+		this.options	= {};
+		this.x			= 0;
+		this.y			= 0;
+		this.width		= 0;
+		this.height		= 0;
+		this.x1			= 0;
+		this.y1			= 0;
+		this.x2			= 0;
+		this.y2			= 0;
+		this.cx			= 0;
+		this.cy			= 0;
+		this.r			= 0;
+		this.rx			= 0;
+		this.ry			= 0;
+		this.link		= {
+			href:	''
+		};
+		this.fill		= '';
+		this.stroke			= '';
+		this.strokeWidth	= 0;
+		this.d				= '';
+		this.innerText		= '';
+		this.fontSize		= 0;
+		this.fontWeight		= '';
+		this.borderRadius	= [];
+		this.text			= '';
 
 		this.setNode(node);
 	};
@@ -41,11 +67,17 @@ define(function () {
 		this.node.setAttributeNS(null, 'x', x);
 		this.node.setAttributeNS(null, 'y', y);
 
+		this.x	= x;
+		this.y	= y;
+
 		return this;
 	};
 	SVGElement.prototype.setDimensions	= function (width, height) {
 		this.node.setAttributeNS(null, 'width', width);
 		this.node.setAttributeNS(null, 'height', height);
+
+		this.width	= width;
+		this.height	= height;
 
 		return this;
 	};
@@ -55,12 +87,21 @@ define(function () {
 		this.node.setAttributeNS(null, 'x2', x2);
 		this.node.setAttributeNS(null, 'y2', y2);
 
+		this.x1	= x1;
+		this.y1	= y1;
+		this.x2	= x2;
+		this.y2	= y2;
+
 		return this;
 	};
 	SVGElement.prototype.setCircle	= function (cx, cy, r) {
 		this.node.setAttributeNS(null, 'cx', cx);
 		this.node.setAttributeNS(null, 'cy', cy);
 		this.node.setAttributeNS(null, 'r', r);
+
+		this.cx	= cx;
+		this.cy	= cy;
+		this.r	= r;
 
 		return this;
 	};
@@ -70,15 +111,24 @@ define(function () {
 		this.node.setAttributeNS(null, 'rx', rx);
 		this.node.setAttributeNS(null, 'ry', ry);
 
+		this.cx	= cx;
+		this.cy	= cy;
+		this.rx	= rx;
+		this.ry	= ry;
+
 		return this;
 	};
 	SVGElement.prototype.setLink	= function (url) {
 		this.node.setAttributeNS(nameSpace.xlink, 'xlink:href', url);
 
+		this.link.href	= url;
+
 		return this;
 	};
 	SVGElement.prototype.setFill	= function (fill) {
 		this.node.setAttributeNS(null, 'fill', fill);
+
+		this.fill	= '';
 
 		return this;
 	};
@@ -88,31 +138,43 @@ define(function () {
 			this.setStrokeWidth(width);
 		}
 
+		this.stroke	= stroke;
+
 		return this;
 	};
 	SVGElement.prototype.setStrokeWidth	= function (strokeWidth) {
 		this.node.setAttributeNS(null, 'stroke-width', strokeWidth);
+
+		this.strokeWidth	= strokeWidth;
 
 		return this;
 	};
 	SVGElement.prototype.setAttribute	= function (name, value) {
 		this.node.setAttributeNS(null, name, value);
 
+		this[name]	= value;
+
 		return this;
 	};
 	SVGElement.prototype.setLinkAttribute	= function (name, value) {
 		this.node.setAttributeNS(nameSpace.xlink, 'xlink:'+name, value);
+
+		this.link[name]	= value;
 
 		return this;
 	};
 	SVGElement.prototype.setPath	= function (path) {
 		this.node.setAttributeNS(null, 'd', path);
 
+		this.d	= path;
+
 		return this;
 	};
 	SVGElement.prototype.setInnerText	= function (text, fontSize, fontWeight) {
 		var	textNode	= document.createTextNode(text);
 		this.node.appendChild(textNode);
+
+		this.innerText	= text;
 
 		if(fontSize) {
 			this.setFontSize(fontSize);
@@ -126,10 +188,14 @@ define(function () {
 	SVGElement.prototype.setFontSize	= function (size) {
 		this.node.style.fontSize	= size + 'px';
 
+		this.fontSize	= size;
+
 		return this;
 	};
 	SVGElement.prototype.setFontWeight	= function (weight) {
 		this.node.style.fontWeight	= weight;
+
+		this.fontWeight	= weight;
 
 		return this;
 	};
@@ -140,10 +206,14 @@ define(function () {
 		this.node.setAttributeNS(null, 'rx', rx);
 		this.node.setAttributeNS(null, 'ry', ry);
 
+		this.borderRadius	= [rx, ry];
+
 		return this;
 	};
 	SVGElement.prototype.setText	= function (text) {
 		this.node.textContent	= text;
+
+		this.text	= text;
 
 		return this;
 	}
@@ -215,6 +285,12 @@ define(function () {
 		}
 
 		return this;
+	};
+	SVGElement.prototype.getX		= function () {
+		return this.node.x.baseVal.value;
+	};
+	SVGElement.prototype.getY		= function () {
+		return this.node.y.baseVal.value;
 	};
 
 	return SVGElement;

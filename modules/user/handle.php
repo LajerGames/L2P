@@ -2,7 +2,7 @@
 require_once($_SERVER['DOCUMENT_ROOT'].'/include/config.php');
 
 #Hack 1
-if(!isset($oCreateUserForm))
+if(!isset($oHandleUserForm))
 {
     $oHandleUserForm = new Form('handle');
     $oHandleUserForm->TextField('first_name', $_SESSION['UserObject']->first_name, $oLang->Get('handle_user_first_name'), new FormFieldValidation(false, PATTERN_FIRST_NAME, $oLang->Get('handle_user_validation_first_name'), false), null, false, array('autocomplete' => 'off', 'maxlength' => 20));
