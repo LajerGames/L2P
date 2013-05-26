@@ -146,7 +146,7 @@ define(['jquery', 'api', 'game/options', 'socket.io', '/bootstrap/js/bootstrap.m
 					});
 				}, ['global_button_close']);
 			},
-			game: function (url, title, data, type, callback) {
+			game: function (url, title, data, type, octave, callback) {
 				var	$body_container	= $('body'),
 					$game_container	= $('#game_container'),
 					then;
@@ -225,7 +225,7 @@ define(['jquery', 'api', 'game/options', 'socket.io', '/bootstrap/js/bootstrap.m
 						$stopGame.on('click', $.proxy(L2P.gameController.stopGame, L2P.gameController));
 					}
 
-					L2P.gameController.importGame(data, title);
+					L2P.gameController.importGame(data, title, octave);
 					if(url) {
 						L2P.gameController.permlink	= url.match(/\/game\/([^\/]+)/g)[0].substr(6);
 					} else {
@@ -325,41 +325,41 @@ define(['jquery', 'api', 'game/options', 'socket.io', '/bootstrap/js/bootstrap.m
 									playlist.addGame(url, data.title, data.data, data.type);
 								});
 							} else {
-								L2P.dialog.game(url, data.title, data.data, data.type);
+								L2P.dialog.game(url, data.title, data.data, data.type, data.octave);
 							}
 							break;
 					}
 				});
 			}
 		},
-		countdown: function (sec, text, next, callback) {
-			var	countdownBox	= $('body > div.countdown-box').show(),
+		countdown: function (sec, text, next, illustration, callback) {
+			var	$countdownBox	= $('body > div.countdown-box').remove(),
 				i				= sec;
-			if(countdownBox.length === 0) {
-				countdownBox	= $('body').append('<div class="countdown-box opacity0"><div class="countdown-number animateCountdown"></div><div class="countdown-next"></div></div>').find('> div.countdown-box');
-			}
 
-			var	textBox	= countdownBox.css('opacity', 1).addClass('countdown').find('> div.countdown-number').text(i),
-				nextBox	= countdownBox.find('> div.countdown-next').text(next),
+			$countdownBox	= $('body').append('<div class="countdown-box opacity0"><div class="countdown-number animateCountdown"></div><div class="countdown-next"></div><div class="countdown-illustration"></div></div>').find('> div.countdown-box');
+
+			var	$textBox	= $countdownBox.css('opacity', 1).addClass('countdown').find('> div.countdown-number').text(i),
+				$nextBox	= $countdownBox.find('> div.countdown-next').text(next),
+				$illuBox	= $countdownBox.find('> div.countdown-illustration').html(illustration),
 				interval;
 
 			function decrement() {
 				i	-= 1;
 				if(i === 0) {
 					clearInterval(interval);
-					textBox.text(text).removeClass('animateCountdown');
+					$textBox.text(text).removeClass('animateCountdown');
 					setTimeout(function () {
-						countdownBox.css('opacity', 0);
+						$countdownBox.css('opacity', 0);
 
 						setTimeout(function () {
 							callback();
 						}, 250);
 						setTimeout(function () {
-							countdownBox.hide().removeClass('countdown');
+							$countdownBox.hide().removeClass('countdown');
 						}, 1000);
 					}, 500);
 				} else {
-					textBox.text(i);
+					$textBox.text(i);
 				}
 			}
 			interval	= setInterval(decrement, 1000);
@@ -396,13 +396,21 @@ define(['jquery', 'api', 'game/options', 'socket.io', '/bootstrap/js/bootstrap.m
 
 					if(higher) {
 						t	= options.tones.all[pos - 1];
-						if(t.hz === tone.hz) {
-							t	= options.tones.all[pos - 2]
+						if(t) {
+							if(t.hz === tone.hz) {
+								t	= options.tones.all[pos - 2]
+							}
+						} else {
+							t	= tone;
 						}
 					} else {
 						t	= options.tones.all[pos + 1];
-						if(t.hz === tone.hz) {
-							t	= options.tones.all[pos + 2]
+						if(t) {
+							if(t.hz === tone.hz) {
+								t	= options.tones.all[pos + 2]
+							}
+						} else {
+							t	= tone;
 						}
 					}
 
@@ -421,7 +429,6 @@ define(['jquery', 'api', 'game/options', 'socket.io', '/bootstrap/js/bootstrap.m
 							defToneClose	= options.tones.all[defTonePos - 1];
 						}
 
-						console.log(defTone.name, defToneClose.name, defToneClose.name === tone.name);
 						if(defToneClose.name === tone.name) {
 							defTone	= defToneClose;
 						}
@@ -451,6 +458,16 @@ define(['jquery', 'api', 'game/options', 'socket.io', '/bootstrap/js/bootstrap.m
 						tone:	newTone || defTone,
 						freq:	newFreq || freq
 					}
+				},
+				getStepFactor:	function (percent) {
+					var	stepFactor;
+					L2P.steps.forEach(function (step) {
+						if(!stepFactor && percent >= step.percent) {
+							stepFactor	= step;
+						}
+					});
+
+					return stepFactor;
 				}
 			}
 		},
@@ -612,7 +629,51 @@ define(['jquery', 'api', 'game/options', 'socket.io', '/bootstrap/js/bootstrap.m
 			}
 
 			return socket;
-		}
+		},
+		steps: [
+			{
+				percent:	95,
+				factor:		1,
+				text:		'Perfect',
+				color:		'#090'
+			},
+			{
+				percent:	80,
+				factor:		0.95,
+				text:		'Good',
+				color:		'#0D0'
+			},
+			{
+				percent:	60,
+				factor:		0.9,
+				text:		'Fair',
+				color:		'#FF0'
+			},
+			{
+				percent:	45,
+				factor:		0.8,
+				text:		'Average',
+				color:		'#990'
+			},
+			{
+				percent:	30,
+				factor:		0.65,
+				text:		'Poor',
+				color:		'#F90'
+			},
+			{
+				percent:	10,
+				factor:		0.65,
+				text:		'Rubbish',
+				color:		'#C60'
+			},
+			{
+				percent:	0,
+				factor:		0.65,
+				text:		'Miserable',
+				color:		'#900'
+			}
+		]
 	};
 
 	return L2P;

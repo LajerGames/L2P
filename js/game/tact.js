@@ -4,6 +4,12 @@ define(['jquery', 'game/options', 'game/note'], function ($, options, Node) {
 		this.length		= this.type.length;
 		this.remaining	= this.length;
 		this.nodes		= [];
+		this.points		= 0;
+
+		this.noteLength		= 0;
+		this.notePercent	= 0;
+
+		this.stepFactor;
 	}
 	Tact.prototype.addNode = function(node) {
 		if(this.remaining >= node.length) {
@@ -51,7 +57,26 @@ define(['jquery', 'game/options', 'game/note'], function ($, options, Node) {
 				}
 			}
 		});
-	}
+	};
+	Tact.prototype.calculatePoints	= function (gameController, getStepFactor) {
+		var	tact		= this,
+			noteLength	= 0,
+			notePercent	= 0;
+
+		this.points		= 0;
+
+		this.nodes.forEach(function (note) {
+			if(!note.isRest) {
+				note.calculatePoints(gameController);
+
+				notePercent	+= note.stepPercent * note.length;
+				noteLength	+= note.length;
+				tact.points	+= note.points;
+			}
+		});
+
+		this.stepFactor	= getStepFactor(notePercent / noteLength);
+	};
 
 	return Tact;
 });

@@ -109,11 +109,11 @@ div#languages img {
 	height: 2vh;
 	padding-left: 0.6vw;
 	opacity:0.5;
-	filter:alpha(opacity=50);
+	-webkit-transform: translateZ(0);
+	-webkit-transition: 0.5s;
 }
 div#languages img:hover {
 	opacity:1;
-	filter:alpha(opacity=100);
 }
 
 body > div.countdown {
@@ -139,14 +139,22 @@ body > div.countdown > div.countdown-next {
 	font-size: 10vmin;
 }
 body > div.countdown > div.animateCountdown {
+	font-size: 75vmin;
 	-webkit-animation-name: countdown;
 	-webkit-animation-duration: 1s;
 	-webkit-animation-iteration-count: infinite;
 }
 @-webkit-keyframes countdown {
-	0% { font-size:75vmin; opacity: 1;}
-	95% { font-size:20vmin; opacity: 0.5;}
-	100% { font-size:75vmin; opacity: 1;}
+	0% { -webkit-transform: scale(1); opacity: 1;}
+	95% { -webkit-transform: scale(0.3); opacity: 0.5;}
+	100% { -webkit-transform: scale(1); opacity: 1;}
+}
+
+body > div.countdown > div.countdown-illustration {
+	margin-top: 14%;
+}
+body > div.countdown > div.countdown-illustration div#ViolinFingerBoard {
+	background-color: #FFF;
 }
 
 

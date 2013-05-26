@@ -37,7 +37,8 @@ class PageRenderer
 				<script data-main="'.HTTP_PROJECT_ROOT_JAVASCRIPT.'main" src="'.HTTP_PROJECT_ROOT_JAVASCRIPT.'require-jquery.js"></script>
 				<script>
 					var	L2P_global	= {
-						username:	"'.$_SESSION['UserObject']->username.'"
+						username:		"'.$_SESSION['UserObject']->username.'",
+						concert_pitch:	'.(empty($_SESSION['UserObject']->concert_pitch) ? 442 : $_SESSION['UserObject']->concert_pitch).'
 					};
 				</script>
 				<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -123,13 +124,14 @@ class PageRenderer
 		}
 	}
 
-	public function RenderDialogGame(Template $oTemplate, $strTitle, $strGameData, $strType)
+	public function RenderDialogGame(Template $oTemplate, $strTitle, $strGameData, $strType, $iOctave = null)
 	{
 		$arrDialog	= array(
 			'dialogType'	=> 'game',
 			'title'			=> $strTitle,
 			'data'			=> $strGameData,
-			'type'			=> $strType
+			'type'			=> $strType,
+			'octave'		=> $iOctave
 		);
 
 		if(IS_DIALOG)
@@ -139,7 +141,7 @@ class PageRenderer
 		else
 		{
 			return $oTemplate->RenderContent('
-				<div id="DialogContainer" data-dialog="game" data-game-title="{{title}}" data-game-data="{{data}}" data-game-type="{{type}}"></div>
+				<div id="DialogContainer" data-dialog="game" data-game-title="{{title}}" data-game-data="{{data}}" data-game-type="{{type}}" data-game-octave="{{octave}}"></div>
 			', $arrDialog);
 		}
 	}

@@ -52,7 +52,18 @@ $strBody	= '
 	</div>
 	<div id="SongContainer">
 		<input type="text" name="title" value="" placeholder="Title" data-value="Title" data-type="'.$strType.'" autocomplete="off" class="std" id="musicSearch">
-		'.$strAdditionalSearch.'
+		'.$strAdditionalSearch.'<br>
+		<div id="info">
+			<h4>'.$oLang->Get('browse_start_position').'</h4>
+			<div data-content="illustration"></div>
+			<ul class="unstyled">
+				<li data-content="title"></li>
+				<li data-content="author"></li>
+				<li data-content="year"></li>
+				<li data-content="difficulty"></li>
+			</ul>
+			<a href="#"><img src="/img/icons/statistics.svg" /> Statistics</a>
+		</div>
 		<div id="list">
 			'.$oBrowse->RenderMusic($strType).'
 		</div>

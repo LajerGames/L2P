@@ -80,7 +80,13 @@ define(['jquery', 'dsp', 'game/tones'], function ($, dsp, tones) {
 		hp.Q = 0.1;
 		success = function(stream) {
 			function tickDone(freq, note, diff) {
-				requestAnimationFrame(process);
+				requestAnimationFrame(function () {
+					requestAnimationFrame(function () {
+						requestAnimationFrame(function () {
+							requestAnimationFrame(process);
+						});
+					});
+				});
 				toneChange(freq, note, diff);
 			}
 

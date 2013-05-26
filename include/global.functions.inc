@@ -141,7 +141,8 @@ function GetMusic($oSql, $strType = 'song', $iLimit = 0, $strSearch = '')
 			games.id,
 			games.title,
 			games.permlink,
-			games.availability
+			games.availability,
+			games.octave
 		FROM
 			games
 		WHERE
@@ -488,7 +489,7 @@ function RenderGameDuration($fGameTime, $oLang)
     {
         $strMinutesPlural = $iGameTimeMinutes > 1 ? $oLang->Get('time_minutes') : $oLang->Get('time_minute');
 
-        $strGameTime .= $iGameTimeMinutes.' '.$strMinutesPlural;
+        $strGameTime .= $iGameTimeMinutes.' '.$strMinutesPlural.' ';
     }
 
     if($iRemainingSeconds > 0)

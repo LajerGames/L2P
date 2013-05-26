@@ -217,9 +217,21 @@ define(function () {
 
 		return this;
 	}
-	SVGElement.prototype.animateAbs	= function (x, y, duration) {
-		this.node.style.webkitTransition	= 'all '+duration+'s linear';
+	SVGElement.prototype.animateAbs	= function (x, y, duration, callback) {
+		var	that		= this,
+			secPrPx		= duration / x,
+			relativeX	= x - this.getPos().x,
+			relativeDuration	= secPrPx * relativeX;
+
+		this.node.style.webkitTransition	= 'all '+relativeDuration+'s linear';
 		this.node.style.webkitTransform		= 'translate3d('+x+'px,'+y+'px,0px)';
+
+		if(callback) {
+			$(this.node).on('webkitTransitionEnd', function (e) {
+				$(that.node).off('webkitTransitionEnd');
+				callback.call(this, e);
+			});
+		}
 
 		return this;
 	};
@@ -244,6 +256,14 @@ define(function () {
 	SVGElement.prototype.animateStopX	= function () {
 		this.node.style.webkitTransition	= 'all 0s linear';
 		this.node.style.webkitTransform		= 'translateX('+this.getPos().x+'px)';
+
+		return this;
+	};
+	SVGElement.prototype.animateStop	= function () {
+		var	pos	= this.getPos();
+
+		this.node.style.webkitTransition	= 'all 0s linear';
+		this.node.style.webkitTransform		= 'translate3d('+pos.x+'px,'+pos.y+'px,0px)';
 
 		return this;
 	};

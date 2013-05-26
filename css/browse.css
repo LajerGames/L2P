@@ -13,6 +13,26 @@ div#SongContainer select {
 	width: 30%;
 	margin: 0;
 }
+div#info {
+	width: 210px;
+	top: 12vh;
+	position: absolute;
+	left: 0;
+	padding: 0 15px;
+	color: #000;
+	display: none;
+}
+div#info div[data-content="illustration"] {
+	overflow: hidden;
+	height: 320px;
+}
+div#info #ViolinFingerBoard {
+	-webkit-transform: translateY(-20px);
+}
+div#list {
+	width: 720px;
+	margin-left: 240px;
+}
 div#list a {
 	display: block;
 	padding: 2px 0 2px 0;
@@ -27,6 +47,9 @@ div#PlaylistItems .removeFromPlaylist {
 	width: 1vw;
 	cursor: pointer;
 	padding: 3px 5px 3px 5px;
+}
+div#list .octave {
+	color: #BBB;
 }
 
 div#PlaylistContainer h2 {

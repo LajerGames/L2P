@@ -65,7 +65,7 @@ if(isset($_SESSION['UserObject']))
 		<div class="ContentBoxPoint">
 			<div class="ContentBoxHeadline">
 				<div>
-					<span data-standard-text="'.$oLang->Get('global_points').'"><span id="pointContainer"></span> '.$oLang->Get('global_points').'</span>
+					<span data-standard-text="'.$oLang->Get('global_points').'"><span id="pointContainer">0</span> '.$oLang->Get('global_points').'</span>
 				</div>
 			</div>
 			<div class="ContentBoxBody">
@@ -93,7 +93,7 @@ else
 		<div class="ContentBoxPoint">
 			<div class="ContentBoxHeadline">
 				<div>
-					<span data-standard-text="'.$oLang->Get('frontpage_point').'"><span id="pointContainer"></span> '.$oLang->Get('frontpage_point').'</span>
+					<span data-standard-text="'.$oLang->Get('global_points').'"><span id="pointContainer">0</span> '.$oLang->Get('global_points').'</span>
 				</div>
 			</div>
 			<div class="ContentBoxBody">
@@ -102,6 +102,7 @@ else
 		</div>
 	';
 }
+
 echo $oPageRenderer->Renderpage($oLang, '
 <div id="ActiveDialog"></div>
 <div id="frontpage_container" class="">

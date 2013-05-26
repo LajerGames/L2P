@@ -23,7 +23,6 @@ else
 // Create a instance of the new search class for the statistics
 $oStatisticsSearchObject = new AC_RenderStatisticsSearch();
 $oStatisticsSearchObject->iUserID = $oPathUser->iUserID > 0 ? $oPathUser->iUserID : $_SESSION['UserObject']->id;
-//$oStatisticsSearchObject->arrGameHistoryIDs = array(519);
 
 if(is_object($oStatisticsSearch))
 {

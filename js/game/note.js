@@ -80,7 +80,6 @@ define(function() {
 			});
 
 			this.points	= +((this.stepPercent * 100).toFixed(0) * this.stepFactor.factor * speedFactor * this.type.factor * 0.1).toFixed(0);
-			//console.log(this.stepPercent, this.stepFactor, this.ticks, this.ticks.length, this.points);
 			$(gameController).trigger('notePoints', [this]);
 		};
 		return Note;

@@ -33,6 +33,17 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		this.svgBackground	= svg.querySelector('#background');
 		this.SVGBackground	= new SVGElement(this.svgBackground);
 		this.svgNotes		= svg.querySelector('#notes');
+		this.svgNotes		= document.getElementById('svg_container_notes');
+		this.gameContainerDiv	= document.getElementById('game_container_div');
+		this.pointContainerDiv	= document.createElement('div');
+		this.pointContainerDiv.style.width				= '130px';
+		this.pointContainerDiv.style.height				= '40px';
+		this.pointContainerDiv.style.borderRadius		= '5px';
+		this.pointContainerDiv.style.position			= 'absolute';
+		this.pointContainerDiv.style.top				= '0';
+		this.pointContainerDiv.style.textAlign			= 'center';
+		this.pointContainerDiv.style.padding			= '15px 0';
+		this.pointContainerDiv.style.webkitTransform	= 'translate3d(145px, 150px, 0)';
 		this.SVGNotes		= new SVGElement(this.svgNotes);
 		this.svgStart		= svg.querySelector('#start');
 		this.SVGStart		= new SVGElement(this.svgStart);
@@ -40,9 +51,10 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		this.sound;
 		this.game;
 		this.lastPos		= 0;
-		this.playSound		= false;
+		this.playSound		= true;
 		this.useCountdown	= true;
 		this.currentNote;
+		this.currentTact;
 
 		$(fM.visibility).on('change', function (e, visibility) {
 			if(visibility.hidden) {
@@ -83,38 +95,20 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		this.startPos;
 		this.setFactor(1);
 	};
-	GameController.prototype.showPointBox	= function (note) {
-		var	g		= new SVGElement('g')
-						.animateAbs(145, 150, 1);
-		var	innerG	= new SVGElement('g')
-						.appendTo(g);
-
-		var	box		= new SVGElement('rect')
-						.setDimensions(130, 55)
-						.setFill(note.stepFactor.color)
-						.setBorderRadius(5)
-						.appendTo(innerG);
-
-		var	text	= new SVGElement('text')
-						.setPos(65, 20)
-						.setFontSize(16)
-						.setText(note.stepFactor.text)
-						.appendTo(innerG);
-		text.node.style.textAnchor	= 'middle';
-
-		var	point	= new SVGElement('text')
-						.setPos(65, 45)
-						.setDimensions()
-						.setText(note.points+' Points')
-						.appendTo(innerG);
-		point.node.style.textAnchor	= 'middle';
-
-		g.appendTo(this.svgStart);
+	GameController.prototype.showPointBox	= function (points, stepFactor) {
+		var	div						= this.pointContainerDiv.cloneNode();
+		div.innerHTML				= stepFactor.text+'<br>'+points+' Points';
+		div.style.backgroundColor	= stepFactor.color;
+		div.style.webkitTransition	= '1s';
 		setTimeout(function () {
-			innerG.animateAbs(0, -50, 1);
-			g.node.style.opacity	= 0;
-		},0);
+			div.style.webkitTransform	= 'translate3d(145px, 100px, 0)';
+			div.style.opacity			= '0';
+			setTimeout(function () {
+				div.remove();
+			}, 1000);
+		}, 0);
 
+		this.gameContainerDiv.appendChild(div);
 	};
 	GameController.prototype.setFactor	= function (factor) {
 		this.factor		= factor;
@@ -137,85 +131,37 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 
 		this.$this.trigger('gameLoadSpeedChange', this.game.speed);
 	};
-	GameController.prototype.setRandomGame	= function (speed, tacts, restTacts) {
-		var	that	= this;
-
-		require(['game/game', 'game/tact', 'game/note', 'game/options', 'game/tones'], function (Game, Tact, Node, options, tones) {
-			function tonesInMax(max) {
-				var	canAdd	= [];
-				if(max >= 1) {
-					canAdd.push(options.nodes.types.whole);
-				}
-				if(max >= 1/2) {
-					canAdd.push(options.nodes.types.half);
-				}
-				if(max >= 1/4) {
-					canAdd.push(options.nodes.types.quarter);
-					canAdd.push(options.nodes.types.quarter);
-					canAdd.push(options.nodes.types.quarter);
-				}
-				if(max >= 1/8) {
-					canAdd.push(options.nodes.types.eighth);
-					canAdd.push(options.nodes.types.eighth);
-				}
-				if(max >= 1/16) {
-					canAdd.push(options.nodes.types.sixteenth);
-				}
-
-				return canAdd;
-			}
-
-			var i,
-				tact,
-				node,
-				tone,
-				canAdd,
-				toneId,
-				nodeId,
-				game = new Game(speed);
-
-			for(i = 0; i < tacts; i += 1) {
-				tact	= new Tact(options.tacts.types.quarter);
-				max		= Math.round(Math.random() * 6);
-
-				while(tact.remaining > 0 && max > 0) {
-					canAdd	= tonesInMax(tact.remaining);
-
-					toneId  = Math.ceil(Math.random(0)*tones.length-1);
-					nodeId  = canAdd[Math.ceil(Math.random() * canAdd.length-1)];
-
-					tone	= tones[toneId];
-					node	= new Node(nodeId, tone);
-					tact.addNode(node);
-
-					max	-= 1;
-				}
-
-				game.addTact(tact);
-			}
-
-			that.setGame(game);
-		});
-	};
 	GameController.prototype.startGame	= function (nextSong) {
-		var	that	= this;
+		var	that		= this,
+			firstNote;
 
 		if(this.game) {
+			this.game.tacts.forEach(function (tact) {
+				if(firstNote) {
+					return;
+				}
+				tact.nodes.forEach(function (note) {
+					if(firstNote) {
+						return;
+					}
+					if(!note.isRest) {
+						firstNote	= note;
+					}
+				});
+			});
+
 			if(this.useCountdown) {
 				api.get.lang(function (data) {
-					L2P.countdown(3, data.game_start, that.game.title, function () {
-						that.game.start();
-						that.$this.trigger('gameStart');
+					api.get.illustrations(function (illustration) {
+						L2P.countdown(3, data.game_start, that.game.title, illustration.illustration, function () {
+							that.game.start();
+							that.$this.trigger('gameStart');
 
-						that.SVGNotes.node.style.webkitTransition	= '';
-						that.SVGNotes.node.style.webkitTransform	= '';
-						console.log(-that.game.getWidth(), that.game.getDuration());
-						that.SVGNotes.animateX(-that.game.getWidth(), that.game.getDuration(), that.gameDone.bind(that));
-
-						if(that.playSound) {
-							that.loop(true);
-						}
-					});
+							console.log(-that.game.getWidth(), that.game.getDuration());
+							that.SVGNotes.node.style.width	= that.game.getWidth()+'px';
+							that.SVGNotes.animateAbs(-that.game.getWidth(), -501, that.game.getDuration(), that.gameDone.bind(that));
+						});
+					}, firstNote.tone.octav, firstNote.tone.name);
 				}, ['game_start']);
 			} else {
 				that.game.start();
@@ -224,11 +170,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 				that.SVGNotes.node.style.webkitTransition	= '';
 				that.SVGNotes.node.style.webkitTransform	= '';
 				console.log(-that.game.getWidth(), that.game.getDuration());
-				that.SVGNotes.animateX(-that.game.getWidth(), that.game.getDuration(), that.gameDone.bind(that));
-
-				if(that.playSound) {
-					that.loop(true);
-				}
+				that.SVGNotes.animateAbs(-that.game.getWidth(), -501, that.game.getDuration(), that.gameDone.bind(that));
 			}
 		}
 	};
@@ -236,21 +178,26 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		if(this.game && this.game.running) {
 			this.game.stop();
 
-			this.SVGNotes.animateStopX();
+			this.SVGNotes.animateAbs(this.SVGNotes.node.getClientRects()[0].left, -501, 0);
 
 			this.$this.trigger('gameStop');
 			this.sound.clearSound();
 		}
 	};
-	GameController.prototype.drawSlur	= function (from, to) {;
+	GameController.prototype.drawSlur	= function (from, to) {
 		var	fromPos	= from.svgElement.getAbsolutePos(),
 			toPos	= to.svgElement.getAbsolutePos();
 
-		new SVGElement('path')
-			.setPath('M '+(fromPos.xc + options.noteSlurPos.x)+' '+(fromPos.yb + options.noteSlurPos.y)+' q '+((toPos.xc - fromPos.xc) / 2)+' '+options.noteSlurPos.z+' '+(toPos.xc - fromPos.xc)+' '+(toPos.yc - fromPos.yc))
-			.setStroke('#000', 2)
-			.setFill('none')
-			.appendTo(from.tact.svgElement.node);
+		var	slur	=
+			new SVGElement('path')
+				.setPath('M '+(fromPos.xc + options.noteSlurPos.x)+' '+(fromPos.yb + options.noteSlurPos.y)+' q '+((toPos.xc - fromPos.xc) / 2)+' '+options.noteSlurPos.z+' '+(toPos.xc - fromPos.xc)+' '+(toPos.yc - fromPos.yc))
+				.setStroke('#000', 2)
+				.setFill('none')
+				.appendTo(from.tact.svgElement.node);
+
+		if(from.svgElement.options.flip) {
+			slur.node.style.webkitTransform			= 'scaleY(-1)';
+		}
 	};
 	GameController.prototype.initView	= function () {
 		var	that		= this,
@@ -282,7 +229,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 			}
 		});
 
-		this.SVGNotes.animateX(0, 0);
+		this.SVGNotes.animateAbs(0, -501, 0);
 		this.SVGNotes.removeChildNodes();
 
 		if(this.game) {
@@ -350,8 +297,20 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 							flipNote(note);
 						}
 
-						if(connect) {
-
+						var	extraLine;
+						for(extraLine = -6; extraLine >= note.tone.pos; extraLine -= 2) {
+							var	y	= options.topPos + (extraLine / 2 + 5) * options.lineHeight;
+							new SVGElement('line')
+								.setLine(notePos - 5, y, notePos + 32, y)
+								.setStroke('#000')
+								.appendTo(tact.svgElement.node)
+						}
+						for(extraLine = 6; extraLine <= note.tone.pos; extraLine += 2) {
+							var	y	= options.topPos + (extraLine / 2 + 5) * options.lineHeight;
+							new SVGElement('line')
+								.setLine(notePos - 5, y, notePos + 32, y)
+								.setStroke('#000')
+								.appendTo(tact.svgElement.node)
 						}
 					}
 					if(note.isSlur) {
@@ -393,9 +352,6 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 									connections.forEach(function (note) {
 										var	realY	= note.svgElement.options.defY + 11 + (flip ? 147 : 0),
 											diffY	= y1 - realY;
-
-										if(!flip)
-											console.log(realY, diffY, connections);
 
 										if(flip && diffY < 0 && diffY < -moveY) {
 											moveY	= -diffY;
@@ -445,22 +401,6 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 			});
 		}
 	};
-	GameController.prototype.loop	= function (forceRun) {
-		if(this.game && this.game.running) {
-			var	newPos	= -this.SVGNotes.getPos().x;
-			if(newPos !== this.lastPos || forceRun === true) {
-				this.lastPos	= newPos;
-
-				this.game.runAtPos(newPos);
-
-				if(fM.requestAnimationFrame) {
-					window[fM.requestAnimationFrame](this.loop.bind(this));
-				}
-			} else {
-				this.stopGame();
-			}
-		}
-	};
 	GameController.prototype.playNote	= function (note) {
 		note.hasPlayed	= true;
 		if(note.type.isRest) {
@@ -474,12 +414,12 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 			this.game.setSpeed(speed);
 		}
 	};
-	GameController.prototype.importGame	= function (gameInfo, title) {
+	GameController.prototype.importGame	= function (gameInfo, title, octave) {
 		var	that	= this;
 
 		require(['game/game', 'game/tact', 'game/note', 'game/options'], function (Game, Tact, Node, options) {
 			if(!gameInfo.speed) {
-				that.importGameMin.call(that, gameInfo, title);
+				that.importGameMin.call(that, gameInfo, title, octave);
 				return;
 			}
 			var game        = new Game(gameInfo.speed);
@@ -525,12 +465,12 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 			that.setGame(game);
 		});
 	};
-	GameController.prototype.importGameMin	= function (gameInfo, title) {
+	GameController.prototype.importGameMin	= function (gameInfo, title, defaultOctave) {
 		var	that	= this;
 
 		require(['game/game', 'game/tact', 'game/note', 'game/options'], function (Game, Tact, Node, options) {
 			var game        = new Game(gameInfo[0]),
-				octave		= gameInfo[1][0];
+				octave		= defaultOctave || gameInfo[1][0];
 
 			game.title		= title;
 
@@ -679,8 +619,16 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		}
 		return 'rgb('+colorRed+', '+colorGreen+', '+colorBlue+')';
 	};
+	GameController.prototype.tactDone	= function () {
+		this.currentTact.calculatePoints(this, L2P.funcs.tones.getStepFactor);
+
+		this.point	+= this.currentTact.points;
+		this.pointCon.text(this.point);
+		this.showPointBox(this.currentTact.points, this.currentTact.stepFactor);
+	};
 	GameController.prototype.soundInput = function (freq, tone, diff) {
-		var	that	= this,
+		var	that			= this,
+			gameController	= this,
 			ratio;
 
 		if(this.game && this.game.running) {
@@ -698,19 +646,22 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 					if(noteLeftPos <= (options.markerPos + options.leftMargin + 10) && (noteLeftPos + note.type.length * that.defWidth) > (options.markerPos + options.leftMargin + 10)) {
 						if(that.currentNote === undefined) {
 							that.currentNote	= note;
+							that.currentTact	= tact;
+						}
+						if(!note.hasPlayed && gameController.playSound) {
+							that.playNote(note);
 						}
 						if(that.currentNote !== note) {
-							that.currentNote.calculatePoints(that);
-							that.point	+= that.currentNote.points;
-							that.pointCon.text(that.point);
-							that.showPointBox(that.currentNote);
+							if(that.currentTact !== note.tact) {
+								gameController.tactDone();
+							}
 							that.currentNote	= note;
+							that.currentTact	= tact;
 						}
 						var	closeTone	= L2P.funcs.tones.getCloseTone(freq, tone, note.tone);
-						freq	= closeTone.freq;
-						tone	= closeTone.tone;
+						freq		= closeTone.freq;
+						tone		= closeTone.tone;
 						toneDiff	= L2P.funcs.tones.freqDiffToTone(note.tone, freq, 0);
-						//console.log(freq, note.tone.hz);
 
 						if(that.compass) {
 							that.compass.setTone(note.tone);
@@ -756,6 +707,9 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 				that.setPointerPos(tone.pos);
 			} else {
 				var	pos	= options.tones.all.indexOf(tone);
+				if(pos === -1) {
+					return;
+				}
 				if(diff > 0) {
 					var	toneAbove	= options.tones.all[pos + 1],
 						toneDiffs	= Math.abs(toneAbove.hz - tone.hz);
@@ -823,11 +777,8 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		return JSON.stringify(data);
 	};
 	GameController.prototype.gameDone	= function () {
-		if(this.currentNote) {
-			this.currentNote.calculatePoints(this);
-			this.point	+= this.currentNote.points;
-			this.pointCon.text(this.point);
-			this.showPointBox(this.currentNote);
+		if(this.currentTact) {
+			this.tactDone();
 		}
 
 		this.stopGame();

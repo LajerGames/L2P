@@ -11,7 +11,7 @@ if(!isset($oUserSettingsForm))
 
 $strBody    = $oUserSettingsForm->RenderFields(false, null, null, true);
 
-$strDialog  = $oPageRenderer->RenderDialogAction($oTemplate, $oLang->Get('handle_user_headline'), $strBody, '#8D32B7', $oLang->Get('global_button_save'));
+$strDialog  = $oPageRenderer->RenderDialogAction($oTemplate, $oLang->Get('frontpage_user_settings'), $strBody, '#8D32B7', $oLang->Get('global_button_save'));
 
 if(IS_DIALOG)
 {

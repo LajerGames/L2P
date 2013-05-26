@@ -16,6 +16,7 @@ $this
 ->Set('delete', 'Slet')
 ->Set('new', 'Ny')
 ->Set('last', 'Sidste')
+->Set('octave', 'Oktav')
 
 # Validation Errors
 ->SetMenu('validation_')
@@ -90,6 +91,7 @@ $this
 ->Set('playlist_save', 'Gem playlist')
 ->Set('playlist_play', 'Spil playlist')
 ->Set('playlist_add', 'Tilføj til playlist')
+->Set('start_position', 'Start Position')
 
 # Create user
 ->SetMenu('create_user_')

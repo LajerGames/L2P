@@ -1,83 +1,57 @@
 define(function () {
-	var tones = [
-		{name:	'',		hz: 0,			pos: 1000,	octav:	0},
-		{name:	'C',	hz: 130.8,		pos: 13,	octav:	3},
-		{name:	'C#',	hz: 138.59,		pos: 13,	octav:	3},
-		{name:	'Db',	hz: 138.59,		pos: 12,	octav:	3},
-		{name:	'D',	hz: 146.8,		pos: 12,	octav:	3},
-		{name:	'D#',	hz: 155.56,		pos: 12,	octav:	3},
-		{name:	'Eb',	hz: 155.56, 	pos: 11,	octav:	3},
-		{name:	'E',	hz: 164.8, 		pos: 11,	octav:	3},
-		{name:  'E#',   hz: 174.6,      pos: 11,    octav:  3},
-		{name:	'F',	hz: 174.6,		pos: 10,	octav:	3},
-		{name:	'F#',	hz: 185,		pos: 10,	octav:	3},
-		{name:	'Gb',	hz: 185,		pos: 9,		octav:	3},
-		{name:	'G',	hz: 196,		pos: 9,		octav:	3},
-		{name:	'G#',	hz: 207.65,		pos: 9,		octav:	3},
-		{name:	'Ab',	hz: 207.65,		pos: 8,		octav:	3},
-		{name:	'A',	hz: 220,		pos: 8,		octav:	3},
-		{name:	'A#',	hz: 233.08,		pos: 8,		octav:	3},
-		{name:	'Bb',	hz: 233.08,		pos: 7,		octav:	3},
-		{name:	'B',	hz: 246.94,		pos: 7,		octav:	3},
-		{name:  'Cb',   hz: 246.94,     pos: 6,     octav:  4},
-		{name:	'C',	hz: 261.63,		pos: 6,		octav:	4},
-		{name:	'C#',	hz: 277.18,		pos: 6,		octav:	4},
-		{name:	'Db',	hz: 277.18,		pos: 5,		octav:	4},
-		{name:	'D',	hz: 293.66,		pos: 5,		octav:	4},
-		{name:	'D#',	hz: 311.13,		pos: 5,		octav:	4},
-		{name:	'Eb',	hz: 311.13,		pos: 4,		octav:	4},
-		{name:	'E',	hz: 329.63,		pos: 4,		octav:	4},
-		{name:  'E#',   hz: 349.23,     pos: 4,     octav:  4},
-		{name:	'F',	hz: 349.23,		pos: 3,		octav:	4},
-		{name:	'F#',	hz: 369.99,		pos: 3,		octav:	4},
-		{name:	'Gb',	hz: 369.99,		pos: 2,		octav:	4},
-		{name:	'G',	hz: 392,		pos: 2,		octav:	4},
-		{name:	'G#',	hz: 415.30,		pos: 2,		octav:	4},
-		{name:	'Ab',	hz: 415.30,		pos: 1,		octav:	4},
-		{name:	'A',	hz: 440,		pos: 1,		octav:	4},
-		{name:	'A#',	hz: 466.16,		pos: 1,		octav:	4},
-		{name:	'Bb',	hz: 466.16,		pos: 0,		octav:	4},
-		{name:	'B',	hz: 493.88,		pos: 0,		octav:	4},
-		{name:  'Cb',   hz: 493.88,     pos: -1,    octav:  5},
-		{name:	'C',	hz: 523.25,		pos: -1,	octav:	5},
-		{name:	'C#',	hz: 554.37,		pos: -1,	octav:	5},
-		{name:	'Db',	hz: 554.37,		pos: -2,	octav:	5},
-		{name:	'D',	hz: 587.33,		pos: -2,	octav:	5},
-		{name:	'D#',	hz: 622.25,		pos: -2,	octav:	5},
-		{name:	'Eb',	hz: 622.25,		pos: -3,	octav:	5},
-		{name:	'E',	hz: 659.26,		pos: -3,	octav:	5},
-		{name:  'E#',   hz: 698.46,     pos: -3,    octav:  5},
-		{name:	'F',	hz: 698.46,		pos: -4,	octav:	5},
-		{name:	'F#',	hz: 739.99,		pos: -4,	octav:	5},
-		{name:	'Gb',	hz: 739.99,		pos: -5,	octav:	5},
-		{name:	'G',	hz: 783.99,		pos: -5,	octav:	5},
-		{name:	'G#',	hz: 830.61,		pos: -5,	octav:	5},
-		{name:	'Ab',	hz: 830.61,		pos: -6,	octav:	5},
-		{name:	'A',	hz: 880,		pos: -6,	octav:	5},
-		{name:	'A#',	hz: 932.33,		pos: -6,	octav:	5},
-		{name:	'Bb',	hz: 932.33,		pos: -7,	octav:	5},
-		{name:	'B',	hz: 987.77,		pos: -7,	octav:	5},
-		{name:  'Cb',   hz: 987.77,     pos: -8,    octav:  6},
-		{name:	'C',	hz: 1046.50,	pos: -8,	octav:	6},
-		{name:	'C#',	hz: 1108.73,	pos: -8,	octav:	6},
-		{name:	'Db',	hz: 1108.73,	pos: -9,	octav:	6},
-		{name:	'D',	hz: 1174.66,	pos: -9,	octav:	6},
-		{name:	'D#',	hz: 1244.51,	pos: -9,	octav:	6},
-		{name:	'Eb',	hz: 1244.51,	pos: -10,	octav:	6},
-		{name:	'E',	hz: 1318.51,	pos: -10,	octav:	6},
-		{name:  'E#',   hz: 1396.91,    pos: -10,   octav:  6},
-		{name:	'F',	hz: 1396.91,	pos: -11,	octav:	6},
-		{name:	'F#',	hz: 1479.98,	pos: -11,	octav:	6},
-		{name:	'Gb',	hz: 1479.98,	pos: -12,	octav:	6},
-		{name:	'G',	hz: 1567.98,	pos: -12,	octav:	6},
-		{name:	'G#',	hz: 1661.22,	pos: -12,	octav:	6},
-		{name:	'Ab',	hz: 1661.22,	pos: -13,	octav:	6},
-		{name:	'A',	hz: 1760.00,	pos: -13,	octav:	6},
-		{name:	'A#',	hz: 1864.66,	pos: -13,	octav:	6},
-		{name:	'Bb',	hz: 1864.66,	pos: -14,	octav:	6},
-		{name:	'B',	hz: 1975.53,	pos: -14,	octav:	6},
-		{name:	'',		hz: 2000,		pos: -1000,	octav:	0}
-	];
+	var	toneNames	= [
+			[9, 'C', true, true],
+			[7, 'D', true, true],
+			[5, 'E', true, true],
+			[4, 'F', false, true],
+			[2, 'G', true, true],
+			[0, 'A', true, true],
+			[-2, 'B', true, false]
+		],
+		tones	= [
+			{name:	'',		hz: 0,			pos: 1000,	octav:	0}
+		];
+
+	var	freq	= L2P_global && L2P_global.concert_pitch || 442;
+	for(var octave = 0; octave <= 8; octave++) {
+		var relOctave	= octave - 4;
+
+		toneNames.forEach(function (toneInfo, toneNo) {
+			var	pos			= toneInfo[0]
+				name		= toneInfo[1],
+				useFlat		= toneInfo[2],
+				useSharp	= toneInfo[3],
+				n			= relOctave * 12 - pos,
+				toneFreq	= freq * Math.pow(2, n / 12);
+
+			if(useFlat) {
+				tones.push({
+					name:	name+'b',
+					hz:		freq * Math.pow(2, (n - 1) / 12),
+					pos:	-relOctave * 7 - toneNo + 6,
+					octav:	octave
+				});
+			}
+
+			tones.push({
+				name:	name,
+				hz:		freq * Math.pow(2, n / 12),
+				pos:	-relOctave * 7 - toneNo + 6,
+				octav:	octave
+			});
+
+			if(useSharp) {
+				tones.push({
+					name:	name+'#',
+					hz:		freq * Math.pow(2, (n + 1) / 12),
+					pos:	-relOctave * 7 - toneNo + 6,
+					octav:	octave
+				});
+			}
+		});
+	}
+
+	tones.push({name:	'',		hz: 8000,		pos: -1000,	octav:	0});
 
 	return tones;
 });

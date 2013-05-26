@@ -66,7 +66,7 @@ class Form
 
 		$oField	= new FormField(FormField::FieldType_Text);
 		$oField->strName			= $strName;
-		$oField->strValue			= $strValue;
+		$oField->mValue			    = $strValue;
 		$oField->strLabel			= $strLabel;
 		$oField->oValidation		= $oValidation;
 		$oField->strType			= $strType;
@@ -78,19 +78,32 @@ class Form
 		return $this;
 	}
 
-    public function Box($bIsRadio, $strName, $bIsChecked, $strLabel = '', $arrProperties = array())
+    public function SelectBox($strName, $arrOptions, $arrProperties = array())
+    {
+        $oField = new FormField(FieldType_Checkbox);
+        $oField->strName        = $strName;
+        $oField->mValue         = $arrOptions;
+        $oField->arrProperties  = $arrProperties;
+
+        $this->AddField($oField);
+
+        return $this;
+    }
+
+    public function Box($bIsRadio, $strName, $bIsChecked, $strLabel = '', $bLabelNextToBox = false, $arrProperties = array())
     {
         $strType = $bIsRadio ? FormField::FieldType_Radio : FormField::FieldType_Checkbox;
 
         $strName = empty($strName) ? 'unnamed' : $strName;
 
-        $oField     = new FormField($strType);
-        $oField->strName        = $strName;
-        $oField->strValue       = 1;
-        $oField->bIsChecked     = $bIsChecked;
-        $oField->strLabel       = $strLabel;
-        $oField->oValidation    = $oValidation;
-        $oField->arrProperties  = $arrProperties;
+        $oField = new FormField($strType);
+        $oField->strName            = $strName;
+        $oField->mValue             = 1;
+        $oField->bIsChecked         = $bIsChecked;
+        $oField->strLabel           = $strLabel;
+        $oField->bLabelNextToBox    = $bLabelNextToBox;
+        $oField->oValidation        = $oValidation;
+        $oField->arrProperties      = $arrProperties;
 
         $this->AddField($oField);
 
@@ -110,7 +123,7 @@ class Form
 	{
 		$oField	= new FormField(FormField::FieldType_Button);
 		$oField->strName		= $strName;
-		$oField->strValue		= $strValue;
+		$oField->mValue		    = $strValue;
 		$oField->bIsSubmit		= $bIsSubmit;
 		$oField->arrProperties	= $arrProperties;
 
@@ -241,9 +254,10 @@ class FormField
 
 	public	$strFieldType		= '',
 			$strName			= '',
-            $strValue           = '',
+            $mValue             = '',
 			$bIsChecked			= false,
-			$strLabel			= '',
+            $strLabel           = '',
+			$bLabelNextToBox	= false,
 			$strType			= '',
 			$strPattern			= '',
 			$oValidation		= null,
@@ -288,7 +302,7 @@ class FormField
                 $strHtml    .= $this->RenderCheckbox();
                 break;
             case FormField::FieldType_Radio :
-            
+
                 break;
 		}
 
@@ -305,7 +319,7 @@ class FormField
 	{
 		if(!($this->strFieldType === FormField::FieldType_Text && $this->strType === 'password'))
 		{
-			$this->strValue	= $strValue;
+			$this->mValue	= $strValue;
 		}
 
 		if(is_object($this->oValidation))
@@ -358,7 +372,7 @@ class FormField
 
 	public function ClearValue()
 	{
-		$this->strValue	= '';
+		$this->mValue	= '';
 
 		return $this;
 	}
@@ -399,7 +413,7 @@ class FormField
 
 		$strRtrn = '
 		<div class="inputContainer">
-			<input type="'.$this->strType.'" name="'.$this->strName.'" title="'.$this->oValidation->strError.'" value="'.$this->strValue.'" x-moz-errormessage="'.$this->oValidation->strError.'" placeholder="'.$strLabel.'" data-value="'.$strLabel.'" '.$strAddErrorMessage.' '.RenderProperties($arrProperties).' class="std" />
+			<input type="'.$this->strType.'" name="'.$this->strName.'" title="'.$this->oValidation->strError.'" value="'.$this->mValue.'" x-moz-errormessage="'.$this->oValidation->strError.'" placeholder="'.$strLabel.'" data-value="'.$strLabel.'" '.$strAddErrorMessage.' '.RenderProperties($arrProperties).' class="std" />
 			'.$strExtraNodes.'
 		</div>
 		';
@@ -411,15 +425,15 @@ class FormField
     {
         $strChecked = $this->bIsChecked ? 'checked="checked"' : '';
 
-        if(empty($this->strLabel))
+        if(empty($this->strLabel) || !$this->bLabelNextToBox)
         {
-            $strRtrn = '<input type="checkbox" value="'.$this->strValue.'" name="'.$this->strName.'" '.$strChecked.' />';
+            $strRtrn = '<input type="checkbox" value="'.$this->mValue.'" name="'.$this->strName.'" '.$strChecked.' />';
         }
         else
         {
             $strRtrn = '
             <label class="checkbox">
-              <input type="checkbox" value="'.$this->strValue.'" id="'.$this->strName.'" name="'.$this->strName.'" '.$strChecked.' /> '.$this->strLabel.'
+                <input type="checkbox" value="'.$this->mValue.'" id="'.$this->strName.'" name="'.$this->strName.'" '.$strChecked.' /> '.$this->strLabel.'
             </label>
             ';
         }
@@ -444,7 +458,7 @@ class FormField
 		$strType        		= $this->bIsSubmit ? 'submit' : 'button';
 		$arrProperties['class']	.= ' btn';
 		$arrProperties['class']	.= $this->bIsSubmit ? ' btn-primary' : '';
-		return '<button name="'.$this->strName.'" type="'.$strType.'" '.RenderProperties($arrProperties).'>'.$this->strValue.'</button>';
+		return '<button name="'.$this->strName.'" type="'.$strType.'" '.RenderProperties($arrProperties).'>'.$this->mValue.'</button>';
 	}
 
 	/**

@@ -31,15 +31,41 @@ class MySQLWrapper
 		return $this->FetchObject($this->Select($strQuery));
 	}
 
+	public function SelectSingleValue($strQuery)
+	{
+		$rResource	= $this->Select($strQuery);
+
+		if($rResource->num_rows === 0)
+		{
+			preg_match('/[ \t]AS[ \t]([a-zA-Z]+)/', $strQuery, $arrMatches);
+
+			$mValue	= $this->PrefixObject($arrMatches[1], '');
+		}
+		else
+		{
+			$oObject	= $this->FetchObject($rResource);
+			$arrSql		= (array)$oObject;
+			$mValue		= current($arrSql);
+		}
+
+		return $mValue;;
+	}
+
 	/**
 	* Fetches the next row as a PrefixedObject
 	*
 	* @param resource $rResource
 	* @param mixed $strClassName
 	*/
-	public function FetchObject($rResource)
+	public function FetchObject($rResource, $bPrefix = true)
 	{
-		return $this->PrefixObject($rResource->fetch_object());
+		$oObject	= $rResource->fetch_object();
+		if($bPrefix)
+		{
+			$oObject	= $this->PrefixObject($oObject);
+		}
+
+		return $oObject;
 	}
 
 	/**
@@ -127,6 +153,7 @@ class MySQLWrapper
 			WHERE
 				'.$strWhereClause.'
 		';
+
 		$this->oSql->query($strQuery);
 
 		// Save systemlog

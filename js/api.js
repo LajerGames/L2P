@@ -3,13 +3,7 @@ define(['jquery'], function ($) {
 
 	function _apiGetter( url, data ) {
 		function then( func ) {
-			$.ajax({
-				url:    systemFolder + '/api/get.' + url,
-				type:   'get',
-				cache:  false,
-				data:   data,
-				success:func
-			});
+			$.get(systemFolder + '/api/get.' + url, data, func);
 		}
 		return {
 			then:    then
@@ -40,6 +34,17 @@ define(['jquery'], function ($) {
 				}
 			});
 		},
+		game_info:	function ( callback, permlink, octave ) {
+			new	_apiGetter( 'game.info.php', {
+				permlink:	permlink,
+				octave:		octave
+			})
+			.then( function ( data ) {
+				if( callback ) {
+					callback( data );
+				}
+			});
+		},
 		lang:	function ( callback, keys ) {
 			new	_apiGetter( 'lang.php', {
 				keys:	keys
@@ -53,6 +58,17 @@ define(['jquery'], function ($) {
 		statistic_uuid:	function ( callback, search ) {
 			new _apiGetter( 'statistic.search.uuid.php', {
 				search:	search
+			})
+			.then( function ( data ) {
+				if( callback ) {
+					callback( data );
+				}
+			});
+		},
+		illustrations:	function ( callback, octave, tone_name ) {
+			new	_apiGetter( 'illustrations.php', {
+				octave:		octave,
+				note_name:	tone_name
 			})
 			.then( function ( data ) {
 				if( callback ) {

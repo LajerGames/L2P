@@ -1,7 +1,14 @@
 <?php
 require_once($_SERVER['DOCUMENT_ROOT'].'/include/config.php');
 
-$strPermlink	= substr(REQUEST_URI, 6, (strrpos(REQUEST_URI, '/', 6) !== false ? strrpos(REQUEST_URI, '/', 6) : 6) - 6);
+$arrURLInfo		= explode('/', REQUEST_URI);
+
+$strPermlink	= $arrURLInfo[2];
+$iOctave		= intval($arrURLInfo[3]);
+if($iOctave === 0)
+{
+	$iOctave	= null;
+}
 
 $oGame	= $oSql->Select('
 	SELECT
@@ -15,7 +22,7 @@ $oGame	= $oSql->Select('
 	 &&	games.permlink	= "'.$strPermlink.'"
 ')->fetch_object();
 
-$strDialog	= $oPageRenderer->RenderDialogGame($oTemplate, $oGame->title, json_decode($oGame->game), $oGame->type);
+$strDialog	= $oPageRenderer->RenderDialogGame($oTemplate, $oGame->title, json_decode($oGame->game), $oGame->type, $iOctave);
 
 if(IS_DIALOG)
 {

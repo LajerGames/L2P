@@ -24,10 +24,14 @@ define(['game/tones'], function (tones) {
 			all:	tones,
 			names:	{
 				0:	{},
+				1:	{},
+				2:	{},
 				3:	{},
 				4:	{},
 				5:	{},
-				6:	{}
+				6:	{},
+				7:	{},
+				8:	{}
 			},
 			hertz:	{},
 			pos:	{},
@@ -60,6 +64,12 @@ define(['game/tones'], function (tones) {
 					length:	6/4,
 					nodes:	6,
 					id:		4
+				},
+				twoForth:	{
+					name:	'twoForth',
+					length:	2/4,
+					nodes:	2,
+					id:		5
 				}
 			}
 		},
