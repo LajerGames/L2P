@@ -6,6 +6,10 @@ class MySQLWrapper
 	public function __construct(mysqli $oMysqli)
 	{
 		$this->oSql = $oMysqli;
+		if($this->oSql->connect_errno)
+		{
+			echo 'MySQLi connection error: '.$this->oSql->connect_error;
+		}
 	}
 
 	/**
