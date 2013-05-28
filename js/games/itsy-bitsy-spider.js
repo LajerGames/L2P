@@ -1,5 +1,5 @@
 require(['fragments/game', 'game/game', 'game/tact', 'game/note', 'game/options'], function (gameController, Game, Tact, Node, options) {
-    var game = new Game(80);
+    var game = new Game(100);
 
     function createNote(type, octave, nodeName, isRemoveKey, isSlur) {
         return new Node(options.nodes.types[type], options.tones.names[octave][nodeName], isRemoveKey, isSlur);
@@ -57,10 +57,10 @@ require(['fragments/game', 'game/game', 'game/tact', 'game/note', 'game/options'
     ]);
 
     applyTact([
-        createNote('quarter', 0, 'D'),
-        createNote('eighth', 0, 'C'),
-        createNote('quarter', 0, 'D'),
-        createNote('eighth', 0, 'E')
+        createNote('quarter', 0, 'F'),
+        createNote('eighth', 0, 'E'),
+        createNote('quarter', 0, 'F'),
+        createNote('eighth', 0, 'G')
     ]);
 
     applyTact([
