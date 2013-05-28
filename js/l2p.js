@@ -1,4 +1,4 @@
-define(['jquery', 'api', 'game/options', 'socket.io', '/bootstrap/js/bootstrap.min.js'], function ($, api, options, io) {
+define(['jquery', 'api', 'game/options', '/bootstrap/js/bootstrap.min.js'], function ($, api, options) {
 	function goBack(e, doGoBack) {
 		if(doGoBack !== false) {
 			window.history.back();
