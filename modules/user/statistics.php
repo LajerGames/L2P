@@ -34,6 +34,10 @@ if(is_object($oStatisticsSearch))
 	{
 		$oStatisticsSearchObject->arrGameIDs		= explode(',', $oStatisticsSearch->arrSearch['game_ids']);
 	}
+	if(intval($oStatisticsSearch->arrSearch['start_octave']) > 0)
+	{
+		$oStatisticsSearchObject->iStartOctave		= intval($oStatisticsSearch->arrSearch['start_octave']);
+	}
 }
 
 // Create new instance of the statistics class

@@ -41,8 +41,8 @@ define(['jquery', 'l2p', 'api', 'fM'], function ($, L2P, api, fM) {
 			return game.url;
 		}));
 	};
-	Playlist.prototype.addGame		= function (url, title, data, type) {
-		var	game	= {url: url, title: title, data: data, type: type	},
+	Playlist.prototype.addGame		= function (url, title) {
+		var	game	= {url: url, title: title},
 			i		= this.games.push(game);
 
 		this.save();

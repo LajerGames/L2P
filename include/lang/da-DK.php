@@ -92,6 +92,7 @@ $this
 ->Set('playlist_play', 'Spil playlist')
 ->Set('playlist_add', 'Tilføj til playlist')
 ->Set('start_position', 'Start Position')
+->Set('loops', 'Gentagelser')
 
 # Create user
 ->SetMenu('create_user_')

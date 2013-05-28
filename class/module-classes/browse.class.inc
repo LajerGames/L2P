@@ -30,7 +30,7 @@ class browse
 				$strMusic	.= $oTemplate->RenderContent('
 					<div class="clear--left"></div>
 					{{availability}}
-					<a href="/game/{{permlink}}/{{octave}}" data-dialog="game" title="{{info}}"  class="OpenGame">
+					<a href="/game/{{permlink}}/{{octave}}" data-dialog="game" title="{{info}}"  class="OpenGame" data-title="{{title}}">
 						<span class="octave">('.$oLang->Get('global_octave').' {{octave}})</span> {{title}}
 					</a>
 				', $oMusicOctave);

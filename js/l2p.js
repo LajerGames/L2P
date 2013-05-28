@@ -21,7 +21,6 @@ define(['jquery', 'api', 'game/options', '/bootstrap/js/bootstrap.min.js'], func
 		this.kill		= kill;
 
 		this.loader.call(this);
-		this.reload();
 	}
 	Render.prototype.reload	= function () {
 		this.render.call(this);
@@ -524,13 +523,20 @@ define(['jquery', 'api', 'game/options', '/bootstrap/js/bootstrap.min.js'], func
 		render:	{
 			playlist:	function (playlist, $container) {
 				return new Render($container, function () {
-					var	that	= this;
+					var	that	= this,
+						lang	= {};
 					this.$container
 						.html([
-							'<table>',
-								'<tbody>',
-								'</tbody>',
-							'</table>'
+							'<div>',
+								'<table>',
+									'<tbody>',
+									'</tbody>',
+								'</table>',
+							'</div>',
+							'<form class="form-inline" name="play_options">',
+								'<label></label>',
+								'<select name="loops"></select>',
+							'</div>'
 						].join(''))
 
 					this.$tbody	= $container.find('tbody');
@@ -541,32 +547,59 @@ define(['jquery', 'api', 'game/options', '/bootstrap/js/bootstrap.min.js'], func
 						playlist.removeGame(game);
 					});
 
-					this.reloadProxy	= $.proxy(this.reload, this);
+					var	$loops	= this.$container.find('[name="loops"]');
+					for(var loop_no = 1; loop_no <= 10; loop_no += 1) {
+						$('<option></option>')
+							.attr('value', loop_no)
+							.text(loop_no)
+							.appendTo($loops);
+					}
+
+					api.get.lang(function (lang) {
+						that.lang			= lang;
+
+						that.$container
+							.find('form[name="play_options"] label').text(lang.browse_loops);
+
+						that.render.call(that);
+					}, ['global_delete', 'browse_loops']);
+
+					that.reloadProxy	= $.proxy(that.reload, that);
 
 					playlist.$this.on('update', this.reloadProxy);
 				}, function () {
 					var	that	= this;
 					this.$tbody.empty();
 
-					api.get.lang(function (lang) {
-						playlist.games.forEach(function (game) {
-							$([
-								'<tr>',
-									'<td><a data-dialog="game"></a></td>',
-									'<td><img src="/img/icons/trash.svg" class="removeFromPlaylist" /></td>',
-								'</tr>',
-							].join(''))
-							.data('game', game)
-							.appendTo(that.$tbody)
-							.find('a[data-dialog="game"]')
-								.attr('href', game.url)
+					playlist.games.forEach(function (game) {
+						var	urlInfo	= game.url.split('/'),
+							octave	= urlInfo[3] || 0;
+						$([
+							'<tr>',
+								'<td>',
+									'<a data-dialog="game">',
+										'<span class="octave"></span>',
+										'<span class="title"></span>',
+									'</a>',
+								'</td>',
+								'<td><img src="/img/icons/trash.svg" class="removeFromPlaylist" /></td>',
+							'</tr>',
+						].join(''))
+						.data('game', game)
+						.appendTo(that.$tbody)
+						.find('a[data-dialog="game"]')
+							.attr('href', game.url)
+							.find('span.octave')
+								.text(octave === 0 ? '' : '(Octave '+octave+') ')
+								.end()
+							.find('span.title')
 								.text(game.title)
 								.end()
-							.find('img.removeFromPlaylist')
-								.attr('title', lang.global_delete)
-								.end();
-						});
-					}, ['global_delete']);
+							.end()
+						.find('img.removeFromPlaylist')
+							.attr('title', that.lang.global_delete)
+							.end();
+					});
 				}, function () {
 					playlist.$this.off('update', this.reloadProxy);
 				});
@@ -578,14 +611,13 @@ define(['jquery', 'api', 'game/options', '/bootstrap/js/bootstrap.min.js'], func
 				var	that		= this,
 					$this		= that.nodeName === 'IMG' ? $(this).next() : $(this),
 					urlRaw		= $this.attr('href'),
-					url			= urlRaw+(urlRaw.indexOf('?') === -1 ? (urlRaw.substr(urlRaw.length - 1, 1) === '/' ? '' : '/') : '');
+					url			= urlRaw+(urlRaw.indexOf('?') === -1 ? (urlRaw.substr(urlRaw.length - 1, 1) === '/' ? '' : '/') : ''),
+					title		= $this.attr('data-title');
 
 				require(['fM'], function (fM) {
 					if(that && that.nodeName === 'IMG') {
-						getAjax('/dialog'+url, function (data) {
-							L2P.get.playlist(null, function () {
-								playlist.addGame(url, data.title, data.data, data.type);
-							});
+						L2P.get.playlist(null, function () {
+							playlist.addGame(url, title);
 						});
 					} else {
 						fM.link.navigate(url, 'Play.now', {

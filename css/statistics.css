@@ -25,17 +25,20 @@ table.BottomTableView tr td:nth-child(3), table.BottomTableView tr td:nth-child(
 table.BottomTableView td {
     color: #000;
 }
+table.BottomTableView .octave {
+	color: #BBB;
+}
 table.summery {
    width: 100%;
 }
 table.Summery tr th {
-    padding-top: 4vh;   
+    padding-top: 4vh;
 }
 table.Summery tr th:not(:nth-child(1)) {
-    width: 150px; 
+    width: 150px;
 }
 table.Summery tr td:not(:nth-child(1)) {
-    text-align: right;   
+    text-align: right;
 }
 table.Summery td, table.summery th {
    color: #000;

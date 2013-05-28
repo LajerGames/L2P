@@ -41,14 +41,26 @@ elseif($strType == 'scales')
 	echo "YAY";
 }
 
+$strLoops	= '';
+for($iLoopNo = 1; $iLoopNo <= 10; $iLoopNo++)
+{
+	$strLoops	.= '<option value="'.$iLoopNo.'">'.$iLoopNo.'</option>';
+}
+
 // Create a new instance of the browse class
 $oBrowse = new browse($oSql);
 
 $strBody	= '
 <div id="Browse">
 	<div id="PlaylistContainer">
-		<h2>Playlist <img src="/img/icons/new.svg" class="newPlaylist" title="'.$oLang->Get('global_new').'" /><img src="/img/icons/play.svg" class="playPlaylist" title="'.$oLang->Get('global_play').'" /></h2>
-		<div id="PlaylistItems"></div>
+		<h2>Playlist <img src="/img/icons/new.svg" class="listPlaylist" title="'.$oLang->Get('global_new').'" /><img src="/img/icons/play.svg" class="playPlaylist" title="'.$oLang->Get('global_play').'" /></h2>
+		<div id="PlaylistInfoContainer">
+			<div id="PlaylistInfoContainerInner">
+				<div id="PlaylistList">&nbsp;</div>
+				<div id="PlaylistItems"></div>
+				<div class="clear"></div>
+			</div>
+		</div>
 	</div>
 	<div id="SongContainer">
 		<input type="text" name="title" value="" placeholder="Title" data-value="Title" data-type="'.$strType.'" autocomplete="off" class="std" id="musicSearch">
@@ -58,11 +70,12 @@ $strBody	= '
 			<div data-content="illustration"></div>
 			<ul class="unstyled">
 				<li data-content="title"></li>
+				<li data-content="octave"></li>
 				<li data-content="author"></li>
 				<li data-content="year"></li>
 				<li data-content="difficulty"></li>
 			</ul>
-			<a href="#"><img src="/img/icons/statistics.svg" /> Statistics</a>
+			<a href="#" data-content="statistics" data-dialog="info"><img src="/img/icons/statistics.svg" /> Statistics</a>
 		</div>
 		<div id="list">
 			'.$oBrowse->RenderMusic($strType).'

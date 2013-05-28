@@ -167,6 +167,19 @@ class MySQLWrapper
 	}
 
 	/**
+	* Set the rows as updated
+	*
+	* @param string $strTable
+	* @param string $mWhereClause
+	*/
+	public function Touch($strTable, $mWhereClause)
+	{
+		$this->Update($strTable, array(), $mWhereClause);
+
+		return;
+	}
+
+	/**
 	* Flags one or more records as deleted
 	*
 	* @param string $strTable

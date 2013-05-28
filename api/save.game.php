@@ -41,6 +41,9 @@ $iStartTime     = $arrGame[4][0]; // In ms
 $iGameTime      = $arrGame[4][1]; // In ms
 $fGameDuration  = $arrGame[4][2]; // Decimal seconds
 
+// Start Octave
+$iStartOctave	= $arrGame[6];
+
 $strStartDate   = date('Y-m-d H:i:s', ($iStartTime / 1000));
 
 // When did the game end
@@ -196,6 +199,7 @@ $arrSavegame = array(
     'game_start'            => $strStartDate,
     'game_finished'         => $strEndDateTime,
     'game_duration'         => $fGameDuration,
+    'game_start_octave'		=> $iStartOctave,
     'json_gamestring'       => $strJsonGameString,
     'json_statisticsstring' => $strGameStatistics,
     'json_tactstats'        => $strTactStatistics

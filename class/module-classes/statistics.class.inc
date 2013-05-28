@@ -66,6 +66,14 @@ class statistics
             ';
         }
 
+        # Start Octave
+        if($oCustomSearch->iStartOctave > 0)
+        {
+            $strConditions .= '
+             && users_games_history.game_start_octave	= '.$oCustomSearch->iStartOctave.'
+            ';
+        }
+
         // The entire gamestring is pretty damn huge, only fetch it if it's neccesary
         $strSelect = $bReturnEntireGamestring ? 'users_games_history.json_gamestring            AS strEntireGame' : '';
 
@@ -78,6 +86,7 @@ class statistics
                 users_games_history.game_start              AS tGameStart,
                 users_games_history.game_finished           AS tGameFinished,
                 users_games_history.game_duration           AS fGameDuration,
+                users_games_history.game_start_octave       AS iGameStartOctave,
                 '.$strSelect.'
                 users_games_history.json_statisticsstring   AS strGameStatistics,
                 users_games_history.json_tactstats          AS strTactStatistics
@@ -108,6 +117,7 @@ class statistics
             $oGameData->strEntireGame       = $oGameObject->strEntireGame;
             $oGameData->strGameStatistics   = $oGameObject->strGameStatistics;
             $oGameData->strTactStatistics   = $oGameObject->strTactStatistics;
+            $oGameData->iGameStartOctave	= $oGameObject->iGameStartOctave;
 
             $arrGameData[] = $oGameData;
         }
@@ -291,7 +301,7 @@ class statistics
             $arrDailyPoints[$strDate]['playtime']   += $oGameData->fGameDuration;
         }
 
-        return $arrDailyPoints;   
+        return $arrDailyPoints;
     }
 
     private function SortArray (&$arrFavourites, $strKey)
@@ -358,7 +368,8 @@ class statistics
 
             // Update the information about this song
             $arrFavouriteSongs[$oGameData->iGameID]['played']++;
-            $arrFavouriteSongs[$oGameData->iGameID]['avg_points'] += $oGameData->iPoints;
+            $arrFavouriteSongs[$oGameData->iGameID]['avg_points']	+= $oGameData->iPoints;
+            $arrFavouriteSongs[$oGameData->iGameID]['start_octave']	= $oGameData->iGameStartOctave;
         }
 
         // Now loop through the song array in order to calculate the avrage points obtained on this song
@@ -474,7 +485,7 @@ class statistics
             $strFavouriteSongs .= '
                 <tr data-gameid="'.$iGameID.'">
                     <td>'.$iLoopID.'</td>
-                    <td>'.$arrGameInfo['name'].'</td>
+                    <td><span class="octave">(Octave '.$arrGameInfo['start_octave'].')</span> '.$arrGameInfo['name'].'</td>
                     <td>'.$arrGameInfo['played'].' '.$strPlayed.'</td>
                     <td>'.round($arrGameInfo['avg_points']).' '.$strPoints.'</td>
                 </tr>
@@ -498,8 +509,8 @@ class statistics
 
         return '
             <div id="BottomList">
-                <a href="">'.$this->oLang->Get('statistics_view_all').'</a>
-                <h3>'.$this->oLang->Get('statistics_favourites').' (Top 10)</h3>
+                <!--<a href="">'.$this->oLang->Get('statistics_view_all').'</a>-->
+                <h3>'.$this->oLang->Get('statistics_favourites').'</h3>
             </div>
             '.$strFavouriteSongs.'
         ';
@@ -541,7 +552,7 @@ class statistics
 
         return '
             <div id="BottomList">
-                <a href="">'.$this->oLang->Get('statistics_view_all').'</a>
+                <!--<a href="">'.$this->oLang->Get('statistics_view_all').'</a>-->
                 <h3>'.$this->oLang->Get('statistics_plays').'</h3>
             </div>
             '.$strTopPlayedRows.'
@@ -628,7 +639,7 @@ class statistics
     {
         //echo $strGameStatistics;
 
-        return;   
+        return;
     }
 
     /**
@@ -780,6 +791,7 @@ class statistics
                 <form class="hidden" name="search">
                     <input type="hidden" name="game_history_ids" value="'.implode(',', $this->oSearch->arrGameHistoryIDs).'" />
                     <input type="hidden" name="game_ids" value="'.implode(',', $this->oSearch->arrGameIDs).'" />
+                    <input type="hidden" name="start_octave" value="'.$this->oSearch->iStartOctave.'" />
                 </form>
                 <div class="hidden" data-statistic="'.htmlentities(json_encode(array($arrLeftChart, $arrRightChart))).'"></div>
                 <div class="statistic-graph"></div>
@@ -797,6 +809,7 @@ class AC_RenderStatisticsSearch
     public $iUserID;
     public $arrGameIDs;
     public $arrGameHistoryIDs;
+    public $iStartOctave;
 }
 class AC_GameData
 {
@@ -809,4 +822,5 @@ class AC_GameData
     public $strEntireGame;
     public $strGameStatistics;
     public $strTactStatistics;
+    public $iGameStartOctave;
 }

@@ -65,8 +65,8 @@ switch($_REQUEST['mode']) // Yep it makes sence to use request here!
         #Hack 1
         $oUserSettingsForm = new Form('settings');
         $oUserSettingsForm->TextField('concert_pitch', $_SESSION['UserObject']->concert_pitch, $oLang->Get('user_settings_concert_pitch'), new FormFieldValidation(true, PATTERN_INT, $oLang->Get('user_settings_validation_concert_pitch'), false), null, false, array('maxlength' => 3));
-        $oUserSettingsForm->Box(false, 'color_nodes', $_SESSION['UserObject']->colored_notes, $oLang->Get('user_settings_color_notes'));   
- 
+        $oUserSettingsForm->Box(false, 'color_nodes', $_SESSION['UserObject']->colored_notes, $oLang->Get('user_settings_color_notes'));
+
         include(SERVER_PROJECT_ROOT_MODULES.'user/action/settings.php');
 		break;
 	case 'language' :

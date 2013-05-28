@@ -16,10 +16,14 @@ $oGameData	= $oGame->getGameData();
 
 header("Content-Type: application/json; charset=utf-8");
 echo json_encode(array(
-	'title'			=> $oGame->strGameTitle,
-	'author'		=> $oAuthor->strAuthorName,
-	'year'			=> $oGame->iGameReleased,
-	'difficulty'	=> '',
-	'illustration'	=> $oGameData->getIllustration($iOctave)
+	'title'				=> $oGame->strGameTitle,
+	'author'			=> $oAuthor->strAuthorName,
+	'year'				=> $oGame->iGameReleased,
+	'difficulty'		=> '',
+	'illustration'		=> $oGameData->getIllustration($iOctave),
+	'statistics_uuid'	=> GenerateStatisticSearchUUID($oSql, array(
+		'game_ids'		=> $oGame->iGameID,
+		'start_octave'	=> is_null($iOctave) ? 0 : $iOctave
+	))
 ));
 ?>

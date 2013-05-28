@@ -414,65 +414,15 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 			this.game.setSpeed(speed);
 		}
 	};
-	GameController.prototype.importGame	= function (gameInfo, title, octave) {
-		var	that	= this;
-
-		require(['game/game', 'game/tact', 'game/note', 'game/options'], function (Game, Tact, Node, options) {
-			if(!gameInfo.speed) {
-				that.importGameMin.call(that, gameInfo, title, octave);
-				return;
-			}
-			var game        = new Game(gameInfo.speed);
-			game.title		= title;
-
-			if(gameInfo.sharps) {
-				gameInfo.sharps.forEach(function (toneName) {
-					game.setSharp(toneName);
-				});
-			}
-			if(gameInfo.flats) {
-				gameInfo.flats.forEach(function (toneName) {
-					game.setFlat(toneName);
-				});
-			}
-
-			function createNote(type, octave, nodeName, isRemoveKey, isSlur) {
-				return new Node(options.nodes.types[type], options.tones.names[octave][nodeName], isRemoveKey ? true : false, isSlur ? true : false);
-			}
-			function createRest(type) {
-				return new Node(options.nodes.types.rest[type], options.tones.rest);
-			}
-			function applyTact(type, nodes) {
-				var tact    = new Tact(options.tacts.types[type]);
-
-				nodes.forEach(function (nodeInfo) {
-					if(nodeInfo.type.substr(0, 4) === 'rest') {
-						tact.addNode(createRest(nodeInfo.type.substr(4).toLowerCase()));
-					} else {
-						tact.addNode(createNote(nodeInfo.type, nodeInfo.toneOctave, nodeInfo.toneType, nodeInfo.isRemoveKey, nodeInfo.isSlur));
-					}
-				});
-
-				game.addTact(tact);
-
-				return;
-			}
-
-			gameInfo.tacts.forEach(function (tact) {
-				applyTact(tact.name, tact.nodes);
-			});
-
-			that.setGame(game);
-		});
-	};
-	GameController.prototype.importGameMin	= function (gameInfo, title, defaultOctave) {
+	GameController.prototype.importGame	= function (gameInfo, title, defaultOctave) {
 		var	that	= this;
 
 		require(['game/game', 'game/tact', 'game/note', 'game/options'], function (Game, Tact, Node, options) {
 			var game        = new Game(gameInfo[0]),
 				octave		= defaultOctave || gameInfo[1][0];
 
-			game.title		= title;
+			game.title			= title;
+			game.startOctave	= octave;
 
 			if(gameInfo[3]) {
 				gameInfo[3].forEach(function (toneName) {
@@ -524,45 +474,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 			that.setGame(game);
 		});
 	};
-	GameController.prototype.exportGame	= function (dontMinify) {
-		if(!dontMinify) {
-			return this.exportGameMin();
-		}
-		var ex = {
-			speed:  this.game.speed,
-			tacts:  [],
-			sharps:	[],
-			flats:	[]
-		};
-
-		for(var toneName in this.game.sharps) {
-			ex.sharps.push(toneName);
-		}
-		for(var toneName in this.game.flats) {
-			ex.flats.push(toneName);
-		}
-
-		this.game.tacts.forEach(function (tact) {
-			var exTact = {
-				name:   tact.type.name,
-				nodes:  []
-			};
-			tact.nodes.forEach(function (node) {
-				var exNode  = {
-					type:       	node.type.name,
-					toneType:   	node.tone.name,
-					toneOctave: 	node.tone.octav,
-					isRemoveKey:	node.isRemoveKey,
-					isSlur:			node.isSlur
-				};
-				exTact.nodes.push(exNode);
-			});
-			ex.tacts.push(exTact);
-		});
-
-		return ex;
-	};
-	GameController.prototype.exportGameMin	= function () {
+	GameController.prototype.exportGame	= function () {
 		var ex = [
 			this.game.speed,
 			[],
@@ -734,16 +646,17 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 	};
 	GameController.prototype.generateGameData	= function () {
 		var	data	= [
-			1,					// 0	_v
-			this.game.speed,	// 1	speed
-			[],					// 2	tacts
-			this.point,			// 3	points
-			[					// 4	time
+			1.1,					// 0	_v
+			this.game.speed,		// 1	speed
+			[],						// 2	tacts
+			this.point,				// 3	points
+			[						// 4	time
 				this.game.startTime,						// 0	start
 				this.game.stopTime -this.game.startTime,	// 1	stop
 				this.game.getDuration()						// 2	game duration
 			],
-			this.permlink		// 5	permlink
+			this.permlink,			// 5	permlink
+			this.game.startOctave	// 6	startOctave
 		];
 
 		this.game.tacts.forEach(function (tact) {

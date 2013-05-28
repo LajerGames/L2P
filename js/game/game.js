@@ -1,6 +1,7 @@
 define(['game/options', 'fM'], function (options, fM) {
 	var	Game	= function (speed) {
 		this.defaultSpeed	= speed;
+		this.startOctave	= 4;
 		this.factor		= 1;
 		this.defWidth	= 750 * this.factor;
 		this.startPos	= options.leftMargin + this.defWidth;

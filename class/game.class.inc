@@ -183,7 +183,7 @@ class Game
 			return;
 		}
 
-		$this->bHasData;
+		$this->bHasData	= true;
 
 		$oData	= $this->oSql->SelectSingleObject('
 			SELECT
@@ -194,7 +194,7 @@ class Game
 				games_info.released		AS iGameReleased
 			FROM
 				games
-			RIGHT JOIN
+			LEFT JOIN
 				games_info ON
 					games_info.deleted	= 0
 				 &&	games_info.game_id	= games.id

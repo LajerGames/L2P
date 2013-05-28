@@ -1,6 +1,6 @@
 <?php
 require_once($_SERVER['DOCUMENT_ROOT'].'/include/config.php');
-header("Content-Type: application/json; charset=utf-8");
+header("Content-Type: text/html; charset=utf-8");
 
 // Require the browse class
 require_once(SERVER_PROJECT_ROOT_CLASS_MODULE.'browse.class.inc');
