@@ -12,6 +12,8 @@ if(!isset($oCreateUserForm))
     $oCreateUserForm->TextField('password_repeat', '', $oLang->Get('create_user_repeat_password'), new FormFieldValidation(true, PATTERN_PASSWORD, $oLang->Get('validation_password')), 'password', false, array('autocomplete' => 'off'));
 }
 
+$strBody    = $oCreateUserForm->RenderFields(false);
+
 $strDialog	= $oPageRenderer->RenderDialogAction($oTemplate, $oLang->Get('create_user_headline'), $strBody, '#8D32B7', $oLang->Get('create_user_submit'));
 
 if(IS_DIALOG)

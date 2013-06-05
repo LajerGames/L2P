@@ -644,6 +644,9 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 			}
 		}
 	};
+	GameController.prototype.expectedTone	= function () {
+		return this.currentNote && this.currentNote.tone;
+	};
 	GameController.prototype.generateGameData	= function () {
 		var	data	= [
 			1.1,					// 0	_v
@@ -711,7 +714,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 			});
 		});
 		//console.log(this.status, this.plus, this.minus);
-	}
+	};
 
 	return GameController;
 });

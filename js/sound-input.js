@@ -27,7 +27,7 @@ define(['jquery', 'dsp', 'game/tones'], function ($, dsp, tones) {
 		frequencies[tone.name+tone.octav]	= tone;
 	});
 
-	Tuner = function (err, toneChange) {
+	Tuner = function (err, toneChange, expectedTone) {
 		var	requestAnimationFrame	= requestAnimationFrame || webkitRequestAnimationFrame || msRequestAnimationFrame || mozRequestAnimationFrame || oRequestAnimationFrame || function () {};
 
 		var audioContext, buffer, bufferFillSize, bufferFiller, error, fft, fftSize, gauss, hp, i, lp, sampleRate, success;
@@ -192,6 +192,24 @@ define(['jquery', 'dsp', 'game/tones'], function ($, dsp, tones) {
 								peak = peaks[2];
 							}
 						}
+						peak	= (function (expectedTone, peaks) {
+							var	diff,
+								closestPeak	= null;
+							if(peaks.length === 0 || expectedTone === undefined) {
+								return null;
+							}
+
+							peaks.forEach(function (peak) {
+								peak.hz	= peak.x * (sampleRate / fftSize);
+								if(Math.abs(expectedTone.hz - peak.hz) < diff || diff === undefined) {
+									diff		= Math.abs(expectedTone.hz - peak.hz);
+									closestPeak	= peak;
+								}
+							});
+
+							return closestPeak;
+						}(expectedTone(), peaks));
+
 						if (peaks.length > 1 || maxPeaks === 1 || maxPeaks === 2 || maxPeaks === 3) {
 							if (!(peak != null)) {
 								peak = peaks[0];

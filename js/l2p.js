@@ -234,7 +234,7 @@ define(['jquery', 'api', 'game/options', '/bootstrap/js/bootstrap.min.js'], func
 					if(generate) {
 						SoundInput(function (e) {
 							console.log(e);
-						}, $.proxy(L2P.gameController.soundInput, L2P.gameController));
+						}, $.proxy(L2P.gameController.soundInput, L2P.gameController), $.proxy(L2P.gameController.expectedTone, L2P.gameController));
 					}
 
 					state.is_game	= true;
@@ -471,7 +471,34 @@ define(['jquery', 'api', 'game/options', '/bootstrap/js/bootstrap.min.js'], func
 			}
 		},
 		storage: (function () {
-			var	containers	= {};
+			var	containers	= {},
+				lastPing	= 0;
+
+			function ping() {
+				var	namespaces	= [],
+					namespace;
+				for(namespace in containers) {
+					if(containers.hasOwnProperty(namespace)) {
+						namespaces.push(namespace);
+					}
+				}
+
+				if(namespaces.length > 0) {
+					$.get('/api/get.storage.php', {
+						namespaces:	namespaces
+					}, function (data) {
+						var	name;
+						for(namespace in data) {
+							if(data.hasOwnProperty(namespace)) {
+								for(name in data[namespace]) {
+									containers[namespace][0][0].set(name, data[namespace][name], true);
+								}
+							}
+						}
+					});
+				}
+			}
+			setInterval(ping, 2000);
 
 			function Storage(namespace) {
 				this.namespace	= namespace;
@@ -481,16 +508,28 @@ define(['jquery', 'api', 'game/options', '/bootstrap/js/bootstrap.min.js'], func
 			Storage.prototype.reload	= function () {
 				this._storage	= JSON.parse(localStorage.getItem(this.namespace) || '{}');
 			};
-			Storage.prototype.set		= function (name, value) {
+			Storage.prototype.set		= function (name, value, fromPing) {
 				var	that				= this;
+
 				this._storage[name]		= value;
+
+				if(fromPing && localStorage.getItem(this.namespace) === JSON.stringify(this._storage)) {
+					return;
+				}
 				localStorage.setItem(this.namespace, JSON.stringify(this._storage));
 
 				containers[this.namespace].forEach(function ($storage, i) {
-					if($storage !== that.$this) {
+					if($storage !== that.$this || fromPing) {
 						$storage.trigger('update', [name]);
 					}
 				});
+
+				if(!fromPing) {
+					$.post('/api/save.storage.php', {
+						namespace:	this.namespace,
+						data:		this._storage
+					});
+				}
 
 				return this;
 			};
@@ -570,7 +609,7 @@ define(['jquery', 'api', 'game/options', '/bootstrap/js/bootstrap.min.js'], func
 				}, function () {
 					var	that	= this;
 					this.$tbody.empty();
-
+					console.log(playlist);
 					playlist.games.forEach(function (game) {
 						var	urlInfo	= game.url.split('/'),
 							octave	= urlInfo[3] || 0;
@@ -631,7 +670,7 @@ define(['jquery', 'api', 'game/options', '/bootstrap/js/bootstrap.min.js'], func
 			}
 		},
 		get:	{
-			playlist:	function (id, callback) {
+			playlist:	function (id, callback, name) {
 				require(['playlist'], function (Playlist) {
 					if(!playlist || id) {
 						if(id === 'new') {
@@ -643,7 +682,7 @@ define(['jquery', 'api', 'game/options', '/bootstrap/js/bootstrap.min.js'], func
 							}
 						}
 						//console.log(id);
-						playlist	= new Playlist({}, id);
+						playlist	= new Playlist({}, id, name);
 					}
 
 					callback(playlist);

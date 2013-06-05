@@ -717,6 +717,7 @@ class statistics
             // Get Gamedata
             $arrGameData = $this->GetGameData();
 
+            // READ ME :
             /**
             * Read this carefully if you wish to understand what's going on here!
             * We have 3 optional screens to show.

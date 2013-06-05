@@ -25,6 +25,7 @@ class Template
 	*/
 	public function RenderContent($strContent, $mItem, $bShowAddToPlaylist = true)
 	{
+        //printr($mItem);
 		global $oLang;
 		foreach($mItem as $strName => $strValue)
 		{

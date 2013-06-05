@@ -7,6 +7,7 @@ if(!isset($oUserSettingsForm))
     $oUserSettingsForm = new Form('settings');
     $oUserSettingsForm->TextField('concert_pitch', $_SESSION['UserObject']->concert_pitch, $oLang->Get('user_settings_concert_pitch'), new FormFieldValidation(true, PATTERN_INT, $oLang->Get('user_settings_validation_concert_pitch'), false), null, false, array('maxlength' => 3));
     $oUserSettingsForm->Box(false, 'color_nodes', $_SESSION['UserObject']->colored_notes, $oLang->Get('user_settings_color_notes'));
+    $oUserSettingsForm->SelectBox('language', $_COOKIE['country_code'], array('da-DK' => 'Dansk', 'en-US' => 'English'), $oLang->Get('create_user_language'));
 }
 
 $strBody    = $oUserSettingsForm->RenderFields(false, null, null, true);

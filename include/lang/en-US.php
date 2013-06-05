@@ -90,9 +90,10 @@ $this
 ->Set('search_title', 'Title')
 ->Set('playlist_save', 'Save playlist')
 ->Set('playlist_play', 'Play playlist')
-->Set('playlist_add', 'Tilføj til playlist')
+->Set('playlist_add', 'New playlist')
 ->Set('start_position', 'Start Position')
 ->Set('loops', 'Loops')
+->Set('my_playlist', 'My playlist')
 
 # Create user
 ->SetMenu('create_user_')
@@ -100,6 +101,7 @@ $this
 ->Set('submit', 'Create')
 ->Set('username', 'Username')
 ->Set('email', 'E-mail')
+->Set('language', 'Vælg sprog')
 ->Set('repeat_email', 'Repeat e-mail')
 ->Set('password', 'Password')
 ->Set('repeat_password', 'Repeat password')

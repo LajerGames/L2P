@@ -1,6 +1,7 @@
 <?php
 // Initialize userinputs
 $strUsername        = $_POST['username'];
+$strLanguage        = $_POST['language'];
 $strEmail           = $_POST['email'];
 $strEmailRepeat     = $_POST['email_repeat'];
 $strPassword        = $_POST['password'];

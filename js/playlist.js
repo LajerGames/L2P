@@ -1,9 +1,10 @@
 define(['jquery', 'l2p', 'api', 'fM'], function ($, L2P, api, fM) {
-	function Playlist(options, id) {
+	function Playlist(options, id, name) {
 		var	that		= this;
 		this.$this		= $(this);
 		this.id			= id || Date.now();
-		this.name		= '';
+		this.name		= name;
+		this.games		= [];
 		this.options	= $.extend({
 			mode:	'countdown',
 			loop:	0
@@ -22,13 +23,29 @@ define(['jquery', 'l2p', 'api', 'fM'], function ($, L2P, api, fM) {
 				that.load(true);
 			}
 		});
-		this.load();
+		this.load(false, name);
 	}
-	Playlist.prototype.load			= function (doReload) {
-		var	info	= this.storage.get(this.id, doReload) || {name:	'', games:	[]};
-		this.name	= info.name;
-		this.games	= info.games;
-		this.$this.trigger('update', []);
+	Playlist.prototype.load			= function (doReload, name) {
+		var	that	= this,
+			info	= this.storage.get(this.id, doReload);
+
+		if(!info && !name) {
+			api.get.lang(function (lang) {
+				that.name	= lang.browse_my_playlist;
+				that.games	= [];
+
+				that.$this.trigger('update', []);
+			}, ['browse_my_playlist']);
+		} else {
+			if(info) {
+				this.name	= info.name;
+				this.games	= info.games;
+			} else {
+				this.name	= name || '';
+				this.games	= [];
+			}
+			this.$this.trigger('update', []);
+		}
 	};
 	Playlist.prototype.save			= function () {
 		this.storage.set(this.id, {
@@ -42,6 +59,7 @@ define(['jquery', 'l2p', 'api', 'fM'], function ($, L2P, api, fM) {
 		}));
 	};
 	Playlist.prototype.addGame		= function (url, title) {
+		console.log(this);
 		var	game	= {url: url, title: title},
 			i		= this.games.push(game);
 

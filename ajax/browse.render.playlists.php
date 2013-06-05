@@ -2,7 +2,9 @@
 require_once($_SERVER['DOCUMENT_ROOT'].'/include/config.php');
 header("Content-Type: text/html; charset=utf-8");
 
-$strPlaylists	= '';
+$strPlaylists	= '
+	<div data-playlist_id="new"><input type="text" placeholder="'.$oLang->Get('browse_playlist_add').'" /> <img src="/img/icons/save.svg" data-action="save" /></div>
+';
 $rPlaylists		= $oSql->Select('
 	SELECT
 		users_playlists.id			AS iPlaylistID,
@@ -17,7 +19,8 @@ $rPlaylists		= $oSql->Select('
 while($oPlaylist = $oSql->FetchObject($rPlaylists))
 {
 	$strPlaylists	.= '
-		<div data-playlist_id="'.$oPlaylist->iPlaylistID.'">'.(empty($oPlaylist->strPlaylistName) ? $oPlaylist->iPlaylistTimestamp : $oPlaylist->strPlaylistName).'</div>';
+		<div data-playlist_id="'.$oPlaylist->iPlaylistTimestamp.'">'.(empty($oPlaylist->strPlaylistName) ? $oPlaylist->iPlaylistTimestamp : $oPlaylist->strPlaylistName).' <img src="/img/icons/pen.svg" data-action="edit" /></div>
+	';
 }
 
 echo $strPlaylists;

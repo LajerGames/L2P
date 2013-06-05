@@ -32,7 +32,13 @@ class MySQLWrapper
 	*/
 	public function SelectSingleObject($strQuery)
 	{
-		return $this->FetchObject($this->Select($strQuery));
+		$rResource	= $this->Select($strQuery);
+		if($rResource->num_rows === 0)
+		{
+			return null;
+		}
+
+		return $this->FetchObject($rResource);
 	}
 
 	public function SelectSingleValue($strQuery)
@@ -43,7 +49,7 @@ class MySQLWrapper
 		{
 			preg_match('/[ \t]AS[ \t]([a-zA-Z]+)/', $strQuery, $arrMatches);
 
-			$mValue	= $this->PrefixObject($arrMatches[1], '');
+			$mValue	= $this->PrefixKeyValue($arrMatches[1], '');
 		}
 		else
 		{
@@ -52,7 +58,7 @@ class MySQLWrapper
 			$mValue		= current($arrSql);
 		}
 
-		return $mValue;;
+		return $mValue;
 	}
 
 	/**
@@ -145,7 +151,7 @@ class MySQLWrapper
 		foreach($arrData as $strCell => $mValue)
 		{
 			$strData .= '
-			'.$strCell.' = "'.$mValue.'",';
+			'.$this->oSql->real_escape_string($strCell).' = "'.$this->oSql->real_escape_string($mValue).'",';
 		}
 		$strData = rtrim($strData, ',');
 
@@ -336,50 +342,57 @@ class MySQLWrapper
         {
 		    foreach($oObject as $strName => $strValue)
 		    {
-			    if(substr($strName, 0, 1) === 'i')
-			    {
-				    $oObject->$strName	= intval($strValue);
-			    }
-			    elseif(substr($strName, 0, 1) === 'f')
-			    {
-				    $oObject->$strName	= floatval($strValue);
-			    }
-			    elseif(substr($strName, 0, 1) === 'b')
-			    {
-				    $oObject->$strName	= $strValue == 1;
-			    }
-                elseif(substr($strName, 0, 1) === 't')
-                {
-                    $oObject->$strName    = date('Y-m-d H:i:s', strtotime($strValue));
-                    if($oObject->$strName === '1970-01-01 00:00:00')
-                    {
-                       $oObject->$strName = null;
-                    }
-                }
-                elseif(substr($strName, 0, 1) === 'd')
-                {
-                    $oObject->$strName    = date('Y-m-d', strtotime($strValue));
-                    if($oObject->$strName === '1970-01-01' || $oObject->$strName === '-0001-11-30')
-                    {
-                        $oObject->$strName = null;
-                    }
-                }
-                elseif(substr($strName, 0, 3) === 'arr')
-                {
-					if(substr($strName, -8) === 'FromJSON')
-					{
-						$strName	= substr($strName, 0, -8);
-						$oObject->$strName	= json_decode($strValue, true);
-					}
-					else
-					{
-						$oObject->$strName	= empty($strValue) ? array () : explode(',', $strValue);
-					}
-                }
+		    	$oObject->$strName	= $this->PrefixKeyValue($strName, $strValue);
 		    }
         }
 
 		return $oObject;
+	}
+
+	private function PrefixKeyValue($strKey, $mValue)
+	{
+		if(substr($strName, 0, 1) === 'i')
+		{
+			$mValue	= intval($strValue);
+		}
+		elseif(substr($strName, 0, 1) === 'f')
+		{
+			$mValue	= floatval($strValue);
+		}
+		elseif(substr($strName, 0, 1) === 'b')
+		{
+			$mValue	= $strValue == 1;
+		}
+        elseif(substr($strName, 0, 1) === 't')
+        {
+            $mValue    = date('Y-m-d H:i:s', strtotime($strValue));
+            if($mValue === '1970-01-01 00:00:00')
+            {
+               $mValue = null;
+            }
+        }
+        elseif(substr($strName, 0, 1) === 'd')
+        {
+            $mValue    = date('Y-m-d', strtotime($strValue));
+            if($mValue === '1970-01-01' || $mValue === '-0001-11-30')
+            {
+                $mValue = null;
+            }
+        }
+        elseif(substr($strName, 0, 3) === 'arr')
+        {
+			if(substr($strName, -8) === 'FromJSON')
+			{
+				$strName	= substr($strName, 0, -8);
+				$mValue	= json_decode($strValue, true);
+			}
+			else
+			{
+				$mValue	= empty($strValue) ? array () : explode(',', $strValue);
+			}
+        }
+
+        return $mValue;
 	}
 
 	/**

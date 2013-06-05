@@ -1,7 +1,10 @@
 <?php
 // Always have access to config file
 require_once($_SERVER['DOCUMENT_ROOT'].'/include/config.php');
-//printr($_POST);exit;
+
+
+// So, how 'bout we chat the browser version huh?
+
 
 // READ ABOUT "HACK 1" - I APOLOGIZE FOR THIS!
 /**

@@ -92,13 +92,15 @@ $this
 ->Set('playlist_play', 'Spil playlist')
 ->Set('playlist_add', 'Tilføj til playlist')
 ->Set('start_position', 'Start Position')
-->Set('loops', 'Gentagelser')
+->Set('loops', 'Gentag')
+->Set('my_playlist', 'Min playlist')
 
 # Create user
 ->SetMenu('create_user_')
 ->Set('headline', 'Opret bruger')
 ->Set('submit', 'Opret')
 ->Set('username', 'Brugernavn')
+->Set('language', 'Vælg sprog')
 ->Set('email', 'E-mail')
 ->Set('repeat_email', 'Gentag e-mail')
 ->Set('password', 'Kodeord')

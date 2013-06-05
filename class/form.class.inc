@@ -78,11 +78,13 @@ class Form
 		return $this;
 	}
 
-    public function SelectBox($strName, $arrOptions, $arrProperties = array())
+    public function SelectBox($strName, $strValue, $arrOptions, $strLabel = '', $arrProperties = array())
     {
-        $oField = new FormField(FieldType_Checkbox);
+        $oField = new FormField(FormField::FieldType_Selectbox);
         $oField->strName        = $strName;
-        $oField->mValue         = $arrOptions;
+        $oField->mValue         = $strValue;
+        $oField->arrOptions     = $arrOptions;
+        $oField->strLabel       = $strLabel;
         $oField->arrProperties  = $arrProperties;
 
         $this->AddField($oField);
@@ -249,12 +251,14 @@ class FormField
 			FieldType_Password	= 'password',
             FieldType_Button    = 'button',
             FieldType_Radio     = 'radio',
-			FieldType_Checkbox	= 'checkbox',
+            FieldType_Checkbox  = 'checkbox',
+			FieldType_Selectbox	= 'selectbox',
 			FieldType_Date		= 'date';
 
 	public	$strFieldType		= '',
 			$strName			= '',
             $mValue             = '',
+            $arrOptions         = array(),
 			$bIsChecked			= false,
             $strLabel           = '',
 			$bLabelNextToBox	= false,
@@ -303,6 +307,9 @@ class FormField
                 break;
             case FormField::FieldType_Radio :
 
+                break;
+            case FormField::FieldType_Selectbox :
+                $strHtml    .= $this->RenderSelectbox();
                 break;
 		}
 
@@ -439,6 +446,21 @@ class FormField
         }
 
         return $strRtrn;
+    }
+
+    private function RenderSelectbox()
+    {
+        $strOptions = '';
+        foreach($this->arrOptions as $strValue => $strKey)
+        {
+            $strSelected = $strValue == $this->mValue ? 'selected="selected"' : '';
+            $strOptions .= '<option value="'.$strValue.'" '.$strSelected.'>'.$strKey.'</option>';
+        }
+        return '
+        <select name="'.$this->strName.'">
+            '.$strOptions.'
+        </select>
+        ';   
     }
 
 	/**

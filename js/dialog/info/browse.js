@@ -8,7 +8,7 @@ define(['jquery', 'l2p', 'playlist', 'api', 'fM'], function ($, L2P, Playlist, a
 			$playlistList	= $playlistInner.find('#PlaylistList');
 
 		L2P.get.playlist(null, function (playlist) {
-			render	= L2P.render.playlist(playlist, $dialog.find('#PlaylistItems'));;
+			render	= L2P.render.playlist(playlist, $dialog.find('#PlaylistItems'));
 		});
 		L2P.click.set($dialog);
 
@@ -66,11 +66,36 @@ define(['jquery', 'l2p', 'playlist', 'api', 'fM'], function ($, L2P, Playlist, a
 			});
 
 		$playlistList
-			.on('click', 'div[data-playlist_id]', function () {
+			.on('click', 'div[data-playlist_id]', function (e) {
 				var	$this	= $(this),
 					data	= $this.data();
 
-				$playlistInner.css('webkit-transform', 'translate3d(-50%, 0, 0)');
+				switch(e.target.nodeName) {
+					case 'INPUT':
+						break;
+					case 'IMG':
+						if(data.playlist_id === 'new') {
+							L2P.get.playlist('new', function (playlist) {
+								render && render.kill();
+								render			= L2P.render.playlist(playlist, $dialog.find('#PlaylistItems'));
+							}, $this.find('input').val());
+
+							$playlistInner.css('webkit-transform', 'translate3d(-50%, 0, 0)');
+						}
+						break;
+					case 'DIV':
+					default:
+						if(data.playlist_id === 'new') {
+							return;
+						}
+						L2P.get.playlist(data.playlist_id, function (playlist) {
+							render && render.kill();
+							render	= L2P.render.playlist(playlist, $dialog.find('#PlaylistItems'));
+						});
+
+						$playlistInner.css('webkit-transform', 'translate3d(-50%, 0, 0)');
+						break;
+				}
 			});
 	});
 })
