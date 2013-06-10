@@ -33,7 +33,7 @@ class MySQLWrapper
 	public function SelectSingleObject($strQuery)
 	{
 		$rResource	= $this->Select($strQuery);
-		if($rResource->num_rows === 0)
+		if($rResource->num_rows === 0 || !$rResource)
 		{
 			return null;
 		}
@@ -351,44 +351,44 @@ class MySQLWrapper
 
 	private function PrefixKeyValue($strKey, $mValue)
 	{
-		if(substr($strName, 0, 1) === 'i')
+		if(substr($strKey, 0, 1) === 'i')
 		{
-			$mValue	= intval($strValue);
+			$mValue	= intval($mValue);
 		}
-		elseif(substr($strName, 0, 1) === 'f')
+		elseif(substr($strKey, 0, 1) === 'f')
 		{
-			$mValue	= floatval($strValue);
+			$mValue	= floatval($mValue);
 		}
-		elseif(substr($strName, 0, 1) === 'b')
+		elseif(substr($strKey, 0, 1) === 'b')
 		{
-			$mValue	= $strValue == 1;
+			$mValue	= $mValue == 1;
 		}
-        elseif(substr($strName, 0, 1) === 't')
+        elseif(substr($strKey, 0, 1) === 't')
         {
-            $mValue    = date('Y-m-d H:i:s', strtotime($strValue));
+            $mValue    = date('Y-m-d H:i:s', strtotime($mValue));
             if($mValue === '1970-01-01 00:00:00')
             {
                $mValue = null;
             }
         }
-        elseif(substr($strName, 0, 1) === 'd')
+        elseif(substr($strKey, 0, 1) === 'd')
         {
-            $mValue    = date('Y-m-d', strtotime($strValue));
+            $mValue    = date('Y-m-d', strtotime($mValue));
             if($mValue === '1970-01-01' || $mValue === '-0001-11-30')
             {
                 $mValue = null;
             }
         }
-        elseif(substr($strName, 0, 3) === 'arr')
+        elseif(substr($strKey, 0, 3) === 'arr')
         {
-			if(substr($strName, -8) === 'FromJSON')
+			if(substr($strKey, -8) === 'FromJSON')
 			{
-				$strName	= substr($strName, 0, -8);
-				$mValue	= json_decode($strValue, true);
+				$strKey	= substr($strKey, 0, -8);
+				$mValue	= json_decode($mValue, true);
 			}
 			else
 			{
-				$mValue	= empty($strValue) ? array () : explode(',', $strValue);
+				$mValue	= empty($mValue) ? array () : explode(',', $mValue);
 			}
         }
 

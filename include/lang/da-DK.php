@@ -136,6 +136,7 @@ $this
 ->SetMenu('user_settings_')
 ->Set('concert_pitch', 'Kammertone')
 ->Set('color_notes', 'Farvede noder')
+->Set('kiddie_mode', 'Begynder mode')
 ->Set('validation_concert_pitch', 'Kammertonen skal være numerisk')
 
 # Activate user

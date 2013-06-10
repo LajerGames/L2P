@@ -192,7 +192,7 @@ define(['jquery', 'dsp', 'game/tones'], function ($, dsp, tones) {
 								peak = peaks[2];
 							}
 						}
-						peak	= (function (expectedTone, peaks) {
+						/*peak	= (function (expectedTone, peaks) {
 							var	diff,
 								closestPeak	= null;
 							if(peaks.length === 0 || expectedTone === undefined) {
@@ -208,7 +208,10 @@ define(['jquery', 'dsp', 'game/tones'], function ($, dsp, tones) {
 							});
 
 							return closestPeak;
-						}(expectedTone(), peaks));
+						}(expectedTone(), peaks));*/
+						peaks.sort(function (a, b) {
+							return a.y < b.y;
+						});
 
 						if (peaks.length > 1 || maxPeaks === 1 || maxPeaks === 2 || maxPeaks === 3) {
 							if (!(peak != null)) {

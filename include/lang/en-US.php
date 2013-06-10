@@ -136,6 +136,7 @@ $this
 ->SetMenu('user_settings_')
 ->Set('concert_pitch', 'Concert pitch')
 ->Set('color_notes', 'Colored notes')
+->Set('kiddie_mode', 'Kiddie mode')
 ->Set('validation_concert_pitch', 'Concert pitch must be numeric')
 
 # Activate user

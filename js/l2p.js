@@ -19,14 +19,22 @@ define(['jquery', 'api', 'game/options', '/bootstrap/js/bootstrap.min.js'], func
 		this.loader		= loader;
 		this.render		= render;
 		this.kill		= kill;
+		this.updates	= [];
 
 		this.loader.call(this);
 	}
 	Render.prototype.reload	= function () {
+		var	render	= this;
 		this.render.call(this);
+		this.updates.forEach(function (update) {
+			update.call(render);
+		});
 	};
 	Render.prototype.kill	= function () {
 		this.kill.call(this);
+	};
+	Render.prototype.onUpdate	= function (func) {
+		this.updates.push(func);
 	};
 
 	var	L2P	= {
@@ -511,15 +519,21 @@ define(['jquery', 'api', 'game/options', '/bootstrap/js/bootstrap.min.js'], func
 			Storage.prototype.set		= function (name, value, fromPing) {
 				var	that				= this;
 
-				this._storage[name]		= value;
+				if(value === null) {
+					delete this._storage[name];
+				} else {
+					this._storage[name]		= value;
+				}
 
 				if(fromPing && localStorage.getItem(this.namespace) === JSON.stringify(this._storage)) {
 					return;
 				}
+				console.log('save', fromPing, this._storage);
 				localStorage.setItem(this.namespace, JSON.stringify(this._storage));
 
 				containers[this.namespace].forEach(function ($storage, i) {
 					if($storage !== that.$this || fromPing) {
+						$storage[0].reload();
 						$storage.trigger('update', [name]);
 					}
 				});
@@ -567,6 +581,7 @@ define(['jquery', 'api', 'game/options', '/bootstrap/js/bootstrap.min.js'], func
 					this.$container
 						.html([
 							'<div>',
+								'<div></div>',
 								'<table>',
 									'<tbody>',
 									'</tbody>',
@@ -576,7 +591,7 @@ define(['jquery', 'api', 'game/options', '/bootstrap/js/bootstrap.min.js'], func
 								'<label></label>',
 								'<select name="loops"></select>',
 							'</div>'
-						].join(''))
+						].join(''));
 
 					this.$tbody	= $container.find('tbody');
 					this.$tbody.on('click', '.removeFromPlaylist', function () {
@@ -609,7 +624,11 @@ define(['jquery', 'api', 'game/options', '/bootstrap/js/bootstrap.min.js'], func
 				}, function () {
 					var	that	= this;
 					this.$tbody.empty();
-					console.log(playlist);
+
+					this.$container
+						.find('div > div')
+						.text(playlist.name);
+
 					playlist.games.forEach(function (game) {
 						var	urlInfo	= game.url.split('/'),
 							octave	= urlInfo[3] || 0;

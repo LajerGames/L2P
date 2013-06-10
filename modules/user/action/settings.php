@@ -6,12 +6,14 @@ if($oUserSettingsForm->Validate($_POST))
     $iConcertPitch  = intval($_POST['concert_pitch']);
     $iColoredNoted  = intval($_POST['color_nodes']);
     $strLanguage    = $_POST['language'] == 'da-DK' ? 'da-DK' : 'en-US';
+    $iKiddieMode    = intval($_POST['kiddie_mode']);
     $iUserID        = intval($_SESSION['UserObject']->id);
 
     // Create update array
     $arrSettings = array(
         'concert_pitch' => $iConcertPitch,
-        'colored_notes' => $iColoredNoted
+        'colored_notes' => $iColoredNoted,
+        'kiddie_mode'   => $iKiddieMode
     );
 
     $oSql->Update('users_settings', $arrSettings, 'user_id = '.$iUserID, 'Bruger ('.$iUserID.') opdaterede sine settings');

@@ -48,6 +48,7 @@ if(isset($_SESSION['UserObject']))
 {
 	// Create headline
 	$strHeadline = str_replace('#username#', $_SESSION['UserObject']->username, $oLang->Get('userarea_headline'));
+	$strPointBoxText	= $_SESSION['UserObject']->kiddie_mode ? '<span data-standard-text="'.$oLang->Get('user_settings_kiddie_mode').'">'.$oLang->Get('user_settings_kiddie_mode').' :)</span>' : '<span data-standard-text="'.$oLang->Get('global_points').'"><span id="pointContainer">0</span> '.$oLang->Get('global_points').'</span>';
 	$strUserarea = '
 		<div class="ContentBoxBlue">
 			<div class="ContentBoxHeadline">
@@ -65,7 +66,7 @@ if(isset($_SESSION['UserObject']))
 		<div class="ContentBoxPoint">
 			<div class="ContentBoxHeadline">
 				<div>
-					<span data-standard-text="'.$oLang->Get('global_points').'"><span id="pointContainer">0</span> '.$oLang->Get('global_points').'</span>
+					'.$strPointBoxText.'
 				</div>
 			</div>
 			<div class="ContentBoxBody">

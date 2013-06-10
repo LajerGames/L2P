@@ -55,6 +55,9 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		this.useCountdown	= true;
 		this.currentNote;
 		this.currentTact;
+		this.kiddieMode		= L2P_global.kiddie_mode;
+		this.paused			= false;
+		this.lastLeft		= -1;
 
 		$(fM.visibility).on('change', function (e, visibility) {
 			if(visibility.hidden) {
@@ -157,9 +160,10 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 							that.game.start();
 							that.$this.trigger('gameStart');
 
-							console.log(-that.game.getWidth(), that.game.getDuration());
-							that.SVGNotes.node.style.width	= that.game.getWidth()+'px';
-							that.SVGNotes.animateAbs(-that.game.getWidth(), -501, that.game.getDuration(), that.gameDone.bind(that));
+							that.runGame();
+							//console.log(-that.game.getWidth(), that.game.getDuration());
+							//that.SVGNotes.node.style.width	= that.game.getWidth()+'px';
+							//that.SVGNotes.animateAbs(-that.game.getWidth(), -501, that.game.getDuration(), that.gameDone.bind(that));
 						});
 					}, firstNote.tone.octav, firstNote.tone.name);
 				}, ['game_start']);
@@ -169,16 +173,40 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 
 				that.SVGNotes.node.style.webkitTransition	= '';
 				that.SVGNotes.node.style.webkitTransform	= '';
-				console.log(-that.game.getWidth(), that.game.getDuration());
-				that.SVGNotes.animateAbs(-that.game.getWidth(), -501, that.game.getDuration(), that.gameDone.bind(that));
+
+				that.runGame();
+				//console.log(-that.game.getWidth(), that.game.getDuration());
+				//that.SVGNotes.animateAbs(-that.game.getWidth(), -501, that.game.getDuration(), that.gameDone.bind(that));
 			}
 		}
+	};
+	GameController.prototype.runGame	= function () {
+		var	gameController		= this,
+			totalWidth			= this.game.getWidth(),
+			totalDuration		= this.game.getDuration(),
+			currentLeft			= -this.svgNotes.getClientRects()[0].left,
+			relativeWidth		= totalWidth + currentLeft,
+			relativeDuration	= totalDuration * (totalWidth - currentLeft) / totalWidth;
+
+		// console.log('total ', totalWidth, totalDuration);
+		// console.log('left', currentLeft);
+		// console.log('relative', relativeWidth, relativeDuration);
+
+		this.paused	= false;
+
+		this.SVGNotes.node.style.width				= totalWidth+'px';
+
+		this.SVGNotes.animateAbs(-totalWidth, -501, relativeDuration, this.gameDone.bind(this));
+	};
+	GameController.prototype.pauseGame	= function () {
+		this.SVGNotes.animateAbs(-this.currentLeft() + 30, -501, 0);
+		this.paused	= true;
 	};
 	GameController.prototype.stopGame	= function () {
 		if(this.game && this.game.running) {
 			this.game.stop();
 
-			this.SVGNotes.animateAbs(this.SVGNotes.node.getClientRects()[0].left, -501, 0);
+			this.pauseGame();
 
 			this.$this.trigger('gameStop');
 			this.sound.clearSound();
@@ -252,7 +280,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 
 				tact.nodes.forEach(function (note) {
 					var noteWidth	= note.type.length * that.defWidth,
-						notePos		= tactPos + that.defWidth / 16 + noteLeftPos,
+						notePos		= tactPos + that.defWidth / 16 + noteLeftPos - 20,
 						tonePos 	= (note.tone.pos + 11) * options.lineHeight / 2 + 4,
 						connect		= false;
 
@@ -532,11 +560,29 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		return 'rgb('+colorRed+', '+colorGreen+', '+colorBlue+')';
 	};
 	GameController.prototype.tactDone	= function () {
-		this.currentTact.calculatePoints(this, L2P.funcs.tones.getStepFactor);
+		if(this.currentTact) {
+			this.currentTact.calculatePoints(this, L2P.funcs.tones.getStepFactor);
 
-		this.point	+= this.currentTact.points;
-		this.pointCon.text(this.point);
-		this.showPointBox(this.currentTact.points, this.currentTact.stepFactor);
+			this.point	+= this.currentTact.points;
+			this.pointCon.text(this.point);
+			this.showPointBox(this.currentTact.points, this.currentTact.stepFactor);
+		}
+	};
+	GameController.prototype.currentLeft	= function () {
+		var	gameController	= this,
+			left			= -gameController.svgNotes.getBoundingClientRect().left + 45,
+			useLeft			= left,
+			timeRunning,
+			factor;
+
+		if(left === gameController.lastLeft && !gameController.paused) {
+			timeRunning	= Date.now() - gameController.game.startTime;
+			factor		= timeRunning / (gameController.game.getDuration() * 1000);
+			//useLeft		= gameController.game.getWidth() * factor + 2;
+		}
+		gameController.lastLeft	= left;
+
+		return useLeft;
 	};
 	GameController.prototype.soundInput = function (freq, tone, diff) {
 		var	that			= this,
@@ -544,27 +590,28 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 			ratio;
 
 		if(this.game && this.game.running) {
-			var	timeRunning	= Date.now() - that.game.startTime,
-				factor		= timeRunning / (that.game.getDuration() * 1000),
-				newPos		= that.game.getWidth() * factor + 2;
+			var	newPos	= gameController.currentLeft();
 
 			this.game.tacts.forEach(function (tact) {
 				if(tact.hasPlayed) {
 					return;
 				}
 				tact.nodes.forEach(function (note) {
-					var	noteLeftPos	= note.svgElement.getX() - newPos;
+					var	noteLeftPos		= note.svgElement.getX() - newPos + 20,
+						noteLeftPosRel	= noteLeftPos + ((750 / 4) * (gameController.game.speed / 60) * (100 / 1000));
 
 					if(noteLeftPos <= (options.markerPos + options.leftMargin + 10) && (noteLeftPos + note.type.length * that.defWidth) > (options.markerPos + options.leftMargin + 10)) {
-						if(that.currentNote === undefined) {
-							that.currentNote	= note;
-							that.currentTact	= tact;
+						if(!note.hasPlayed && gameController.playSound) {
+							that.playNote(note);
 						}
+					}
+
+					if(noteLeftPosRel <= (options.markerPos + options.leftMargin + 10) && (noteLeftPosRel + note.type.length * that.defWidth) > (options.markerPos + options.leftMargin + 10)) {
 						if(!note.hasPlayed && gameController.playSound) {
 							that.playNote(note);
 						}
 						if(that.currentNote !== note) {
-							if(that.currentTact !== note.tact) {
+							if(!gameController.kiddieMode && that.currentTact !== note.tact) {
 								gameController.tactDone();
 							}
 							that.currentNote	= note;
@@ -578,6 +625,18 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 						if(that.compass) {
 							that.compass.setTone(note.tone);
 							that.compass.setFreq(freq);
+						}
+
+						if(gameController.kiddieMode) {
+							if(!note.isRest && (toneDiff.ratioRel > 0.15 || freq === -1) && !note.kiddieModeAccepted) {
+								if(!gameController.paused) {
+									gameController.pauseGame();
+								}
+								return;
+							} else if(gameController.paused) {
+								gameController.runGame();
+							}
+							note.kiddieModeAccepted	= true;
 						}
 
 						note.ticks.push(new Tick(freq, toneDiff));
@@ -693,12 +752,15 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		return JSON.stringify(data);
 	};
 	GameController.prototype.gameDone	= function () {
-		if(this.currentTact) {
+		if(!this.kiddieMode && this.currentTact) {
 			this.tactDone();
 		}
 
 		this.stopGame();
 
+		if(this.kiddieMode) {
+			return;
+		}
 		var	data	= this.generateGameData(),
 			that	= this;
 		$.post('/api/save.game.php', {

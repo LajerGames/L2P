@@ -34,10 +34,12 @@ class PageRenderer
 				<link rel="stylesheet" href="'.HTTP_PROJECT_ROOT_CSS.'default.css">
 				'.$strCSSFiles.'
 
-				<script data-main="'.HTTP_PROJECT_ROOT_JAVASCRIPT.'main" src="'.HTTP_PROJECT_ROOT_JAVASCRIPT.'require-jquery.js"></script>
+                <script data-main="'.HTTP_PROJECT_ROOT_JAVASCRIPT.'main" src="'.HTTP_PROJECT_ROOT_JAVASCRIPT.'require-jquery.js"></script>
 				<script>
 					var	L2P_global	= {
-						username:		"'.$_SESSION['UserObject']->username.'",
+                        username:       "'.$_SESSION['UserObject']->username.'",
+						kiddie_mode:	'.intval($_SESSION['UserObject']->kiddie_mode).',
+                        colored_notes:  '.intval($_SESSION['UserObject']->colored_notes).',
 						concert_pitch:	'.(empty($_SESSION['UserObject']->concert_pitch) ? 442 : $_SESSION['UserObject']->concert_pitch).'
 					};
 				</script>

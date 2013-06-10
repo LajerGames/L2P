@@ -60,6 +60,9 @@ $oSql = new MySQLWrapper($oMysqli);
 # Global functions
 require_once(SERVER_PROJECT_ROOT.'/include/global.functions.inc');
 
+set_error_handler('handlePHPError');
+register_shutdown_function('handleShutdown');
+
 # User class
 require_once(SERVER_PROJECT_ROOT_CLASS.'/user.class.inc');
 $oUserHandler = new UserHandler($oSql);

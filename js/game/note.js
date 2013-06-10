@@ -62,11 +62,14 @@ define(function() {
 			this.stepPercent	= 0;
 			this.stepFactor;
 			this.points			= 0;
+			this.kiddieModeAccepted	= false;
 		}
 		Note.prototype.calculatePoints	= function (gameController) {
 			var	that			= this,
 				totalPercent	= 0,
-				speedFactor		= 1 + (gameController.game.speed - gameController.game.defaultSpeed) / 200
+				speedFactor		= 1 + (gameController.game.speed - gameController.game.defaultSpeed) / 200,
+				factor;
+
 			this.ticks.forEach(function (tick) {
 				totalPercent	+= Math.max(tick.percent, 0);
 			});
@@ -79,7 +82,9 @@ define(function() {
 				}
 			});
 
-			this.points	= +((this.stepPercent * 100).toFixed(0) * this.stepFactor.factor * speedFactor * this.type.factor * 0.1).toFixed(0);
+			factor	= this.stepFactor && this.stepFactor.factor || 0;
+
+			this.points	= +((this.stepPercent * 100).toFixed(0) * factor * speedFactor * this.type.factor * 0.1).toFixed(0);
 			$(gameController).trigger('notePoints', [this]);
 		};
 		return Note;

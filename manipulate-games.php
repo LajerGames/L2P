@@ -1,6 +1,64 @@
 <?php
 // Always have access to config file
 require_once($_SERVER['DOCUMENT_ROOT'].'/include/config.php');
+exit;
+// Fetch all scales
+$rScales = $oSql->Select('
+    SELECT
+        *
+    FROM
+        games
+    WHERE
+        deleted = 0
+     && type = "scale"
+');
+
+while($oScales = mysqli_fetch_object($rScales))
+{
+    $arrGame = json_decode($oScales->game);
+    $arrNewGame = array(80, $arrGame[1]);
+
+    $bGive = true;
+    $arrContainer = array();
+    $arrTactsCont = array();
+    $iLoopNo = 0;
+    foreach($arrGame[2] as $arrTacts)
+    {
+        foreach($arrTacts[1] as $arrNote)
+        {
+            $arrNote[0] = 2;
+            if(count($arrContainer) == 0)
+            {
+                $arrContainer[] = $arrNote;
+            }
+            else
+            {
+                $arrContainer[] = $arrNote;
+                $arrTactsCont[] = array(
+                    1,
+                    $arrContainer
+                );
+                $arrContainer = array();
+            }
+        }
+    }
+    if(count($arrContainer) > 0)
+    {
+        $arrContainer[] = array(4, null, null,0,0);
+        $arrContainer[] = array(4, null, null,0,0);
+        $arrTactsCont[] = array(
+            1,
+            $arrContainer
+        );
+    }
+    $arrNewGame[] = $arrTactsCont;
+    $arrNewGame[] = $arrGame[3];
+    $arrNewGame[] = $arrGame[4];
+
+    $strGame = json_encode($arrNewGame);
+
+    $oSql->Update('games', array('game' => $strGame), $oScales->id);
+}
 
 exit;
 $rNumbers = $oSql->Select('

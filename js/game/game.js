@@ -54,6 +54,7 @@ define(['game/options', 'fM'], function (options, fM) {
 				note.hasPlayed  = false;
 				note.img        = note.type.img;
 				note.ticks		= [];
+				note.kiddieModeAccepted	= false;
 			});
 		});
 	};

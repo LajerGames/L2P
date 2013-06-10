@@ -9,6 +9,9 @@ define(['jquery', 'l2p', 'playlist', 'api', 'fM'], function ($, L2P, Playlist, a
 
 		L2P.get.playlist(null, function (playlist) {
 			render	= L2P.render.playlist(playlist, $dialog.find('#PlaylistItems'));
+			render.onUpdate(function () {
+				$playlistInner.css('webkit-transform', 'translate3d(-50%, 0, 0)');
+			});
 		});
 		L2P.click.set($dialog);
 
@@ -67,8 +70,10 @@ define(['jquery', 'l2p', 'playlist', 'api', 'fM'], function ($, L2P, Playlist, a
 
 		$playlistList
 			.on('click', 'div[data-playlist_id]', function (e) {
-				var	$this	= $(this),
-					data	= $this.data();
+				var	$this		= $(this),
+					data		= $this.data(),
+					$target		= $(e.target),
+					targetData	= $target.data();
 
 				switch(e.target.nodeName) {
 					case 'INPUT':
@@ -77,20 +82,48 @@ define(['jquery', 'l2p', 'playlist', 'api', 'fM'], function ($, L2P, Playlist, a
 						if(data.playlist_id === 'new') {
 							L2P.get.playlist('new', function (playlist) {
 								render && render.kill();
-								render			= L2P.render.playlist(playlist, $dialog.find('#PlaylistItems'));
+								render	= L2P.render.playlist(playlist, $dialog.find('#PlaylistItems'));
+								render.onUpdate(function () {
+									$playlistInner.css('webkit-transform', 'translate3d(-50%, 0, 0)');
+								});
 							}, $this.find('input').val());
+
+							$playlistInner.css('webkit-transform', 'translate3d(-50%, 0, 0)');
+						} else if(targetData.action === 'edit') {
+							var	name	= $this.text().trim();
+
+							$this
+								.html([
+									'<input type="text" />',
+									'<img src="/img/icons/save.svg" data-action="save" />'
+								].join(''))
+								.find('input')
+									.val(name);
+						} else if(targetData.action === 'save') {
+							var	name	= $this.find('input').val();
+
+							L2P.get.playlist(data.playlist_id, function (playlist) {
+								render && render.kill();
+								render	= L2P.render.playlist(playlist, $dialog.find('#PlaylistItems'));
+								render.onUpdate(function () {
+									$playlistInner.css('webkit-transform', 'translate3d(-50%, 0, 0)');
+								});
+							}, name);
 
 							$playlistInner.css('webkit-transform', 'translate3d(-50%, 0, 0)');
 						}
 						break;
 					case 'DIV':
 					default:
-						if(data.playlist_id === 'new') {
+						if($this.find('input').length > 0) {
 							return;
 						}
 						L2P.get.playlist(data.playlist_id, function (playlist) {
 							render && render.kill();
 							render	= L2P.render.playlist(playlist, $dialog.find('#PlaylistItems'));
+							render.onUpdate(function () {
+								$playlistInner.css('webkit-transform', 'translate3d(-50%, 0, 0)');
+							});
 						});
 
 						$playlistInner.css('webkit-transform', 'translate3d(-50%, 0, 0)');

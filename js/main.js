@@ -24,6 +24,7 @@ require(['jquery', 'fM', 'l2p'], function ($, fM, L2P) {
 	}
 
 	$(document).ready(function () {
+
 		var	$CenteringContainer	= $('#CenteringContainer');
 		L2P.click.set($CenteringContainer);
 

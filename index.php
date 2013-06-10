@@ -2,10 +2,6 @@
 // Always have access to config file
 require_once($_SERVER['DOCUMENT_ROOT'].'/include/config.php');
 
-
-// So, how 'bout we chat the browser version huh?
-
-
 // READ ABOUT "HACK 1" - I APOLOGIZE FOR THIS!
 /**
 * Refrence: Hack #1
@@ -64,13 +60,13 @@ switch($_REQUEST['mode']) // Yep it makes sence to use request here!
 		$oHandleUserForm->TextField('last_name', $_SESSION['UserObject']->last_name, $oLang->Get('handle_user_last_name'), new FormFieldValidation(false, PATTERN_LAST_NAME, $oLang->Get('handle_user_validation_last_name'), false), null, false, array('autocomplete' => 'off', 'maxlength' => 30));
 
 		include(SERVER_PROJECT_ROOT_MODULES.'user/action/handle.php');
-    case 'settings' :
-        #Hack 1
-        $oUserSettingsForm = new Form('settings');
-        $oUserSettingsForm->TextField('concert_pitch', $_SESSION['UserObject']->concert_pitch, $oLang->Get('user_settings_concert_pitch'), new FormFieldValidation(true, PATTERN_INT, $oLang->Get('user_settings_validation_concert_pitch'), false), null, false, array('maxlength' => 3));
-        $oUserSettingsForm->Box(false, 'color_nodes', $_SESSION['UserObject']->colored_notes, $oLang->Get('user_settings_color_notes'));
+	case 'settings' :
+		#Hack 1
+		$oUserSettingsForm = new Form('settings');
+		$oUserSettingsForm->TextField('concert_pitch', $_SESSION['UserObject']->concert_pitch, $oLang->Get('user_settings_concert_pitch'), new FormFieldValidation(true, PATTERN_INT, $oLang->Get('user_settings_validation_concert_pitch'), false), null, false, array('maxlength' => 3));
+		$oUserSettingsForm->Box(false, 'color_nodes', $_SESSION['UserObject']->colored_notes, $oLang->Get('user_settings_color_notes'));
 
-        include(SERVER_PROJECT_ROOT_MODULES.'user/action/settings.php');
+		include(SERVER_PROJECT_ROOT_MODULES.'user/action/settings.php');
 		break;
 	case 'language' :
 		$strLanguage = $_GET['lang'] == 'da-DK' ? 'da-DK' : 'en-US';
@@ -83,48 +79,48 @@ switch($_REQUEST['mode']) // Yep it makes sence to use request here!
 if(!IS_DIALOG)
 {
 	// We cannot have everything point to frontpage, Google surely hate that
-    // Find path to load
-    $oLoadInfo = FindLoadFile($oSql);
+	// Find path to load
+	$oLoadInfo = FindLoadFile($oSql);
 
-    // Set oPathUser if needed
-    if(is_object($oLoadInfo->oPathUser))
-    {
-        // Hack #2
-        $oPathUser = $oLoadInfo->oPathUser;
-    }
+	// Set oPathUser if needed
+	if(is_object($oLoadInfo->oPathUser))
+	{
+		// Hack #2
+		$oPathUser = $oLoadInfo->oPathUser;
+	}
 
-    // Set oStatisticsSearch if needed
-    if(is_object($oLoadInfo->oStatisticsSearch))
-    {
-        // Hack #2
-        $oStatisticsSearch = $oLoadInfo->oStatisticsSearch;
-    }
+	// Set oStatisticsSearch if needed
+	if(is_object($oLoadInfo->oStatisticsSearch))
+	{
+		// Hack #2
+		$oStatisticsSearch = $oLoadInfo->oStatisticsSearch;
+	}
 
-    if(REQUEST_URI == '/' || !empty($oLoadInfo->strLoadfile))
-    {
-        include(SERVER_PROJECT_ROOT_MODULES.'frontpage/frontpage.php');
-    }
+	if(REQUEST_URI == '/' || !empty($oLoadInfo->strLoadfile))
+	{
+		include(SERVER_PROJECT_ROOT_MODULES.'frontpage/frontpage.php');
+	}
 }
 else
 {
-    // Find path to load
-    $oLoadInfo = FindLoadFile($oSql, true);
+	// Find path to load
+	$oLoadInfo = FindLoadFile($oSql, true);
 
-    // Set oPathUser if needed
-    if(is_object($oLoadInfo->oPathUser))
-    {
-        // Hack #2
-        $oPathUser = $oLoadInfo->oPathUser;
-    }
+	// Set oPathUser if needed
+	if(is_object($oLoadInfo->oPathUser))
+	{
+		// Hack #2
+		$oPathUser = $oLoadInfo->oPathUser;
+	}
 
-    // Set oStatisticsSearch if needed
-    if(is_object($oLoadInfo->oStatisticsSearch))
-    {
-        // Hack #2
-        $oStatisticsSearch = $oLoadInfo->oStatisticsSearch;
-    }
+	// Set oStatisticsSearch if needed
+	if(is_object($oLoadInfo->oStatisticsSearch))
+	{
+		// Hack #2
+		$oStatisticsSearch = $oLoadInfo->oStatisticsSearch;
+	}
 
-    // Include
+	// Include
 	include($oLoadInfo->strLoadfile);
 }
 ?>

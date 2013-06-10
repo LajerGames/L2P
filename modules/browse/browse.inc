@@ -51,21 +51,9 @@ for($iLoopNo = 1; $iLoopNo <= 10; $iLoopNo++)
 $oBrowse = new browse($oSql);
 
 $strBody	= '
-<div id="Browse">
-	<div id="PlaylistContainer">
-		<h2>Playlist <img src="/img/icons/new.svg" class="listPlaylist" title="'.$oLang->Get('global_new').'" /><img src="/img/icons/play.svg" class="playPlaylist" title="'.$oLang->Get('global_play').'" /></h2>
-		<div id="PlaylistInfoContainer">
-			<div id="PlaylistInfoContainerInner">
-				<div id="PlaylistList">&nbsp;</div>
-				<div id="PlaylistItems"></div>
-				<div class="clear"></div>
-			</div>
-		</div>
-	</div>
-	<div id="SongContainer">
-		<input type="text" name="title" value="" placeholder="Title" data-value="Title" data-type="'.$strType.'" autocomplete="off" class="std" id="musicSearch">
-		'.$strAdditionalSearch.'<br>
-		<div id="info">
+<table id="Browse">
+	<tr>
+		<td id="info">
 			<h4>'.$oLang->Get('browse_start_position').'</h4>
 			<div data-content="illustration"></div>
 			<ul class="unstyled">
@@ -76,12 +64,26 @@ $strBody	= '
 				<li data-content="difficulty"></li>
 			</ul>
 			<a href="#" data-content="statistics" data-dialog="info"><img src="/img/icons/statistics.svg" /> Statistics</a>
-		</div>
-		<div id="list">
-			'.$oBrowse->RenderMusic($strType).'
-		</div>
-	</div>
-</div>
+		</td>
+		<td id="SongContainer">
+			<input type="text" name="title" value="" placeholder="Title" data-value="Title" data-type="'.$strType.'" autocomplete="off" class="std" id="musicSearch">
+			'.$strAdditionalSearch.'<br>
+			<div id="list">
+				'.$oBrowse->RenderMusic($strType).'
+			</div>
+		</td>
+		<td id="PlaylistContainer">
+			<h2>Playlist <img src="/img/icons/new.svg" class="listPlaylist" title="'.$oLang->Get('global_new').'" /><img src="/img/icons/play.svg" class="playPlaylist" title="'.$oLang->Get('global_play').'" /></h2>
+			<div id="PlaylistInfoContainer">
+				<div id="PlaylistInfoContainerInner">
+					<div id="PlaylistList">&nbsp;</div>
+					<div id="PlaylistItems"></div>
+					<div class="clear"></div>
+				</div>
+			</div>
+		</td>
+	</tr>
+</table>
 ';
 
 $strDialog	= $oPageRenderer->RenderDialogInfo($oTemplate, $strHeadline, $strBody, $strTitleBarColor, null, 'browse');

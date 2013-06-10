@@ -550,6 +550,170 @@ function LangNumberFormat($fValue, $iDecimals)
 
     return number_format($fValue, $iDecimals, $strDecimalSeperator, $strThousindSeperator);
 }
+function reportError($strErrorDescription, $strUniqueErrorID = "", $strFilename = null, $iLineNum = null)
+{
+	$iBacktraceLvl = 1;
+
+	$arrBacktrace 	= debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+
+	if (!isset ($strFilename) || !isset ($iLineNum))
+	{
+		foreach ($arrBacktrace as $trace)
+		{
+			if ($trace['file'] !== __FILE__ && $trace['file'] !== $_SERVER['DOCUMENT_ROOT'].'/class/class.mysql.inc.php')
+			{
+				$strFilename = $trace['file'];
+				$iLineNum = $trace['line'];
+				break;
+			}
+		}
+	}
+	// Send postback
+	$strPostback = '
+	<table border="1" cellspacing="0" cellpadding="5">
+	';
+	$iPostAmt = 0;
+	foreach($_POST as $strName => $strValue)
+	{
+		if(is_array($strValue))
+		{
+			$strValue = '
+			<pre>
+			'.print_r($strValue, true).'
+			</pre>
+			';
+		}
+		$strPostback .= '
+		<tr>
+			<td>'.$strName.'</td>
+			<td>'.$strValue.'</td>
+		</tr>
+		';
+		$iPostAmt++;
+	}
+
+	if($iPostAmt == 0)
+	{
+		$strPostback .= '
+		<tr>
+			<td>Postback was empty!</td>
+		</tr>
+		';
+	}
+	$strPostback .= '</table>';
+
+
+	// Send debug_backtrace
+	$strBacktrace = '
+	<table border="1" cellspacing="0" cellpadding="5">
+	';
+	$arrBacktrace = debug_backtrace (DEBUG_BACKTRACE_IGNORE_ARGS);
+	foreach($arrBacktrace as $strName => $strValue)
+	{
+		$strBacktrace .= '
+		<tr>
+			<td>'.$strName.'</td>
+			<td><pre>'.print_r($strValue, true).'</pre></td>
+		</tr>
+		';
+	}
+	$strBacktrace .= '</table>';
+
+
+	// Send _SERVER
+	$strServer = '
+	<table border="1" cellspacing="0" cellpadding="5">
+	';
+	foreach($_SERVER as $strName => $strValue)
+	{
+		$strServer .= '
+		<tr>
+			<td>'.$strName.'</td>
+			<td>'.$strValue.'</td>
+		</tr>
+		';
+	}
+	$strServer .= '</table>';
+
+	// Send SESSION
+	$strLongSession = '
+	<table border="1" cellspacing="0" cellpadding="5">
+	';
+	$i = 0;
+	foreach($_SESSION as $strName => $strValue)
+	{
+		if(is_array($strValue))
+		{
+			$strValue = '
+			<pre>
+			'.print_r($strValue, true).'
+			</pre>
+			';
+		}
+		$strLongSession .= '
+		<tr>
+			<td>'.$strName.'</td>
+			<td>'.$strValue.'</td>
+		</tr>
+		';
+
+	}
+	$strLongSession .= '</table>';
+
+	$message	= "
+	<div style='border:#000 1px solid;padding:10px;'>{$strErrorDescription}</div><br><br>
+	Postback:<br>
+	".$strPostback."<br><br>
+	Debug Backtrace:<br>
+	".$strBacktrace."<br><br>
+	Server:<br>
+	".$strServer."<br><br>
+	Session:<br>
+	".$strLongSession."<br><br><br>
+	- HAVE FUN!!!
+	";
+
+	echo $message;
+
+	return;
+}
+
+function handlePHPError($errno, $errstr, $errfile, $errline)
+{
+	switch ($errno)
+	{
+		case E_USER_ERROR:
+		case E_COMPILE_ERROR:
+		case E_ERROR:
+			reportError($errstr, 'Uncaught PHP Error', $errfile, $errline);
+			//exit;
+			break;
+
+		case E_USER_WARNING:
+		case E_COMPILE_WARNING:
+		case E_WARNING:
+			//reportError($errstr, 'Uncaught PHP warning', $errfile, $errline);
+			break;
+
+		case E_USER_NOTICE:
+		//case E_COMPILE_NOTICE: REMOVED DUE TO NOTICE
+		case E_NOTICE:
+			//portError($errstr, 'Uncaught PHP notice', $errfile, $errline);
+			break;
+
+		default:
+			//reportError($errstr, 'Uncaught unknown PHP error', $errfile, $errline);
+			break;
+	}
+
+	return true;
+}
+
+function handleShutdown ()
+{
+	$arrLastError = error_get_last();
+	handlePHPError($arrLastError['type'], $arrLastError['message'], $arrLastError['file'], $arrLastError['line']);
+}
 class AC_LoadFileInfo
 {
     public $strLoadfile;

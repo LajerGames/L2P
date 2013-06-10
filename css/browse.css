@@ -1,108 +1,105 @@
-div#PlaylistContainer {
-	float: right;
-	width: 25%;
+#Browse {
+    width: 100%;
 }
-div#SongContainer {
-	width: 74%;
+#PlaylistContainer {
+	width: 310px;
 }
-div#SongContainer input {
+#SongContainer {
+	vertical-align: top;
+}
+#SongContainer input {
 	width: 60%;
 	margin: 0;
 }
-div#SongContainer select {
+#SongContainer select {
 	width: 30%;
 	margin: 0;
 }
-div#info {
+#info {
 	width: 210px;
-	top: 12vh;
-	position: absolute;
-	left: 0;
-	padding: 0 15px;
 	color: #000;
-	display: none;
+	vertical-align: top;
 }
-div#info div[data-content="illustration"] {
+#info div[data-content="illustration"] {
 	overflow: hidden;
 	height: 320px;
 }
-div#info #ViolinFingerBoard {
+#info #ViolinFingerBoard {
 	-webkit-transform: translateY(-20px);
 }
-div#list {
-	width: 720px;
-	margin-left: 240px;
+#list {
 	overflow-y: auto;
 	height: 46vh;
 }
-div#list a {
+#list a {
 	display: block;
 	padding: 2px 0 2px 0;
 	margin: 2px 0 2px 0;
 }
-div#list a:hover {
+#list a:hover {
 	background-color: #D0D0D0;
 }
-div#list .addToPlaylist,
-div#PlaylistItems .removeFromPlaylist {
+#list .addToPlaylist,
+#PlaylistItems .removeFromPlaylist {
 	float: right;
 	width: 1vw;
 	cursor: pointer;
 	padding: 3px 5px 3px 5px;
 }
-div#list .octave {
+#list .octave {
 	color: #BBB;
 }
 
-div#PlaylistContainer {
+#PlaylistContainer {
 	overflow: hidden;
+	vertical-align: top;
 }
-div#PlaylistContainer h2 {
+#PlaylistContainer h2 {
 	position: relative;
 }
-div#PlaylistContainer img.listPlaylist,
-div#PlaylistContainer img.playPlaylist {
+#PlaylistContainer img.listPlaylist,
+#PlaylistContainer img.playPlaylist {
 	height: 4vh;
 	position: absolute;
 	right: 4vh;
 	cursor: pointer;
 }
-div#PlaylistContainer img.playPlaylist {
+#PlaylistContainer img.playPlaylist {
 	right: 0;
 }
-div#PlaylistInfoContainerInner {
+#PlaylistInfoContainerInner {
 	color: #000;
 	width: 200%;
 	-webkit-transform: translate3d(-50%, 0, 0);
 	-webkit-transition-duration: 0.75s;
 }
-div#PlaylistList,
-div#PlaylistItems {
+#PlaylistList,
+#PlaylistItems {
 	width: 50%;
 	height: 46vh;
 	overflow-y: auto;
-	float: left;
 	position: relative;
+	float: left;
 }
-div#PlaylistList div,
-div#PlaylistItems div {
+#PlaylistList div,
+#PlaylistItems div {
 	color: #000;
 }
-div#PlaylistList > div {
+#PlaylistList > div {
 	height: 3vh;
 	cursor: pointer;
 }
-div#PlaylistList > div:hover {
+#PlaylistList > div:hover {
 	background-color: #D0D0D0;
 }
-div#PlaylistList input {
+#PlaylistList input {
 	height: 2vh;
 	font-size: 1.5vh;
 	line-height: 1.5vh;
 	margin: 0;
 	width: 80%;
 }
-div#PlaylistList img {
+#PlaylistList img {
 	position: absolute;
 	right: 0;
 	height: 2vh;
@@ -110,42 +107,46 @@ div#PlaylistList img {
 }
 
 
-div#PlaylistItems div:first-child {
+#PlaylistItems > div:first-child {
 	height: 42vh;
 	overflow-y: auto;
 }
-div#PlaylistItems table {
+#PlaylistItems > div > div {
+	height: 3vmin;
+	font-weight: bold;
+}
+#PlaylistItems table {
 	width: 100%;
 }
-div#PlaylistItems table tr:hover {
+#PlaylistItems table tr:hover {
 	background-color: #D0D0D0;
 }
-div#PlaylistItems span.title {
+#PlaylistItems span.title {
 	color: #000;
 }
-div#PlaylistItems span.octave {
+#PlaylistItems span.octave {
 	color: #BBB;
 }
-div#PlaylistItems form {
+#PlaylistItems form {
 	margin: 0;
 	height: 4vh;
 }
-div#PlaylistItems form label {
+#PlaylistItems form label {
 	font-size: 3vh;
 	color: #000;
 	line-height: 3vh;
 }
-div#PlaylistItems form select {
+#PlaylistItems form select {
 	width: 5vw;
 	margin-top: 0;
 	font-size: 2vh;
 	height: 3vh;
 }
-div#PlaylistPlay label {
+#PlaylistPlay label {
 	color: #000;
 	font-size: 2vmin;
 }
-div#PlaylistPlay select {
+#PlaylistPlay select {
 	width: 5vw;
 	margin-top: 0;
 }

@@ -25,12 +25,15 @@ class MainClass
 		{
 			$mData	= $this->oSql->SelectSingleObject($mData);
 		}
-		foreach($mData as $strName => $mValue)
+		if(!is_null($mData))
 		{
-			$this->$strName	= $mValue;
-		}
+			foreach($mData as $strName => $mValue)
+			{
+				$this->$strName	= $mValue;
+			}
 
-		$this->bHasData	= true;
+			$this->bHasData	= true;
+		}
 
 		return;
 	}
@@ -202,6 +205,7 @@ class Game
 				games.deleted			= 0
 			 &&	games.id				= '.$this->iGameID.'
 		');
+
 		foreach($oData as $strName => $mValue)
 		{
 			$this->$strName	= $mValue;

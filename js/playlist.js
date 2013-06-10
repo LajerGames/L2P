@@ -38,8 +38,11 @@ define(['jquery', 'l2p', 'api', 'fM'], function ($, L2P, api, fM) {
 			}, ['browse_my_playlist']);
 		} else {
 			if(info) {
-				this.name	= info.name;
+				this.name	= name || info.name;
 				this.games	= info.games;
+				if(name) {
+					this.save();
+				}
 			} else {
 				this.name	= name || '';
 				this.games	= [];
@@ -48,18 +51,17 @@ define(['jquery', 'l2p', 'api', 'fM'], function ($, L2P, api, fM) {
 		}
 	};
 	Playlist.prototype.save			= function () {
-		this.storage.set(this.id, {
-			name:	this.name,
-			games:	this.games
-		});
+		if(this.games.length === 0) {
+			this.storage.set(this.id, null);
+		} else {
+			this.storage.set(this.id, {
+				name:	this.name,
+				games:	this.games
+			});
+		}
 		this.$this.trigger('update', []);
-
-		api.save.playlist(this.id, this.name, this.games.map(function (game) {
-			return game.url;
-		}));
 	};
 	Playlist.prototype.addGame		= function (url, title) {
-		console.log(this);
 		var	game	= {url: url, title: title},
 			i		= this.games.push(game);
 
