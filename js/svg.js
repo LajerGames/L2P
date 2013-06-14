@@ -219,7 +219,7 @@ define(function () {
 	}
 	SVGElement.prototype.animateAbs	= function (x, y, duration, callback) {
 		var	that		= this,
-			secPrPx		= duration / x,
+			secPrPx		= duration / x || 0,
 			relativeX	= x - this.getPos().x,
 			relativeDuration	= secPrPx * relativeX;
 
@@ -227,7 +227,7 @@ define(function () {
 		this.node.style.webkitTransform		= 'translate3d('+x+'px,'+y+'px,0px)';
 
 		if(callback) {
-			$(this.node).on('webkitTransitionEnd', function (e) {
+			$(this.node).off('webkitTransitionEnd').on('webkitTransitionEnd', function (e) {
 				$(that.node).off('webkitTransitionEnd');
 				callback.call(this, e);
 			});

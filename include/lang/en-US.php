@@ -13,6 +13,8 @@ $this
 ->Set('points', 'Points')
 ->Set('save', 'Save')
 ->Set('play', 'Play')
+->Set('play_again', 'Play again')
+->Set('pause', 'Pause')
 ->Set('delete', 'Delete')
 ->Set('new', 'New')
 ->Set('last', 'Last')

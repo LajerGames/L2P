@@ -12,7 +12,9 @@ define(['jquery', 'api', 'game/options', '/bootstrap/js/bootstrap.min.js'], func
 		svgContainer,
 		sound,
 		playlist,
-		socket;
+		socket,
+		$controller,
+		$toggleGame;
 
 	function Render($container, loader, render, kill) {
 		this.$container	= $container;
@@ -36,6 +38,28 @@ define(['jquery', 'api', 'game/options', '/bootstrap/js/bootstrap.min.js'], func
 	Render.prototype.onUpdate	= function (func) {
 		this.updates.push(func);
 	};
+
+	function ControllerSet(type) {
+		if($toggleGame === undefined) {
+			if($controller === undefined) {
+				$controller	= $('.ContentBoxGameControl');
+			}
+			$toggleGame	= $controller.find('td[data-action="toggle-game"]');
+		}
+		if(type === 'play') {
+			//$toggleGame.find('.ContentBoxGameControl-playpause').text(L2P_global.lang.global_play);
+			//$toggleGame.find('img').attr('src', '/img/icons/play-white.svg');
+			$toggleGame.removeClass('can_pause');
+		} else if(type === 'restart') {
+			//$toggleGame.find('.ContentBoxGameControl-playpause').text(L2P_global.lang.global_play_again);
+			//$toggleGame.find('img').attr('src', '/img/icons/play-white.svg');
+			$toggleGame.removeClass('can_pause');
+		} else if(type === 'pause') {
+			//$toggleGame.find('.ContentBoxGameControl-playpause').text(L2P_global.lang.global_pause);
+			//$toggleGame.find('img').attr('src', '/img/icons/pause-white.svg');
+			$toggleGame.addClass('can_pause');
+		}
+	}
 
 	var	L2P	= {
 		$modal:	undefined,
@@ -164,9 +188,12 @@ define(['jquery', 'api', 'game/options', '/bootstrap/js/bootstrap.min.js'], func
 
 				require(['fM', 'text!/templates/game.html', 'game/game-controller', 'game/sound', 'sound-input', 'compass', '/bootstrap/js/bootstrap.min.js', 'underscore-min'], function (fM, gameText, GameController, Sound, SoundInput, Compass) {
 					var	generate	= !L2P.gameController,
-						compassBox	= $('div.ContentBoxOrange div.CompassOuter'),
-						compass		= new Compass(compassBox),
+						$compassBox	= $('div.ContentBoxGameCompass'),
+						compass		= new Compass($compassBox),
 						state		= fM.link.getCurrentNavigate() || {};
+
+					L2P.resetBoxText($('#song_title'));
+					L2P.resetBoxText($('#scale_title'));
 
 					state.is_game	= true;
 
@@ -178,13 +205,19 @@ define(['jquery', 'api', 'game/options', '/bootstrap/js/bootstrap.min.js'], func
 					$body_container.removeClass(type === 'song' ? 'scale' : 'song');
 
 					svgContainer	= $game_container.find('#svg_container')[0];
-					var	$speed		= $game_container.find('#speed'),
+					if($controller === undefined) {
+						$controller	= $('.ContentBoxGameControl');
+					}
+					if($toggleGame === undefined) {
+						$toggleGame	= $controller.find('td[data-action="toggle-game"]');
+					}
+					var	$speed		= $controller.find('input[name="bpm"]'),
 						$speedShow	= $game_container.find('#speedShow'),
 						$startGame	= $game_container.find('#startGame'),
 						$stopGame	= $game_container.find('#stopGame'),
-						$song_title	= $('#song_title');
+						$game_title	= type === 'song' ? $('#song_title') : $('#scale_title');
 
-					$song_title.html(title);
+					$game_title.html(title);
 
 					if(generate) {
 						if(!sound) {
@@ -201,18 +234,14 @@ define(['jquery', 'api', 'game/options', '/bootstrap/js/bootstrap.min.js'], func
 
 					$speed.on('change', function () {
 						L2P.gameController.setGameSpeed(+this.value);
-						$speedShow.html(this.value);
 					});
 					if(generate) {
 						$(L2P.gameController).on({
 							gameLoadSpeedChange:	function (e, speed) {
 								$speed.val(speed).trigger('change');
 							},
-							gameStart:	function () {
-								compass.show();
-							},
+							gameStart:	function () {},
 							gameEnd:	function (e, gameInfo) {
-								compass.hide();
 								var	currentState	= fM.link.getCurrent() || {};
 
 								if(!currentState || !currentState.from_playlist) {
@@ -222,6 +251,7 @@ define(['jquery', 'api', 'game/options', '/bootstrap/js/bootstrap.min.js'], func
 										game_history_ids:	gameInfo.game_history_id
 									});
 								}
+								ControllerSet('restart');
 							},
 							notePoints:	function (note) {
 								//console.log(note);
@@ -230,7 +260,20 @@ define(['jquery', 'api', 'game/options', '/bootstrap/js/bootstrap.min.js'], func
 
 						$startGame.on('click', $.proxy(L2P.gameController.startGame, L2P.gameController));
 						$stopGame.on('click', $.proxy(L2P.gameController.stopGame, L2P.gameController));
+						$toggleGame.on('click', function () {
+							if(L2P.gameController.game && !L2P.gameController.game.running) {
+								L2P.gameController.startGame();
+
+								ControllerSet('pause');
+							} else {
+								L2P.gameController.stopGame();
+
+								ControllerSet('play');
+							}
+						});
 					}
+
+					ControllerSet('play');
 
 					L2P.gameController.importGame(data, title, octave);
 					if(url) {
@@ -300,6 +343,7 @@ define(['jquery', 'api', 'game/options', '/bootstrap/js/bootstrap.min.js'], func
 
 				require(['fM'], function (fM) {
 					L2P.resetBoxText($('#song_title'));
+					L2P.resetBoxText($('#scale_title'));
 					$body_container.removeClass('ShowGame');
 					$body_container.removeClass('song');
 					$body_container.removeClass('scale');

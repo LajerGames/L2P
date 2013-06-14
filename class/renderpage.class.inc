@@ -4,6 +4,18 @@ class PageRenderer
 	const	DialogType_Action	= 'action',
 			DialogType_Info		= 'info';
 
+	private function getLang(Language $oLang, $arrKeys)
+	{
+		$arrPreloadLang	= array();
+
+		foreach($arrKeys as $strLangKey)
+		{
+			$arrPreloadLang[$strLangKey]	= $oLang->Get($strLangKey);
+		}
+
+		return $arrPreloadLang;
+	}
+
 	/**
 	* Renders the page with proper top and bottom
 	*
@@ -23,6 +35,11 @@ class PageRenderer
 				';
 			}
 		}
+		$arrPreloadLang	= $this->getLang($oLang, array(
+			'global_play',
+			'global_play_again',
+			'global_pause'
+		));
 
 		return '
 		<!DOCTYPE html>
@@ -40,7 +57,8 @@ class PageRenderer
                         username:       "'.$_SESSION['UserObject']->username.'",
 						kiddie_mode:	'.intval($_SESSION['UserObject']->kiddie_mode).',
                         colored_notes:  '.intval($_SESSION['UserObject']->colored_notes).',
-						concert_pitch:	'.(empty($_SESSION['UserObject']->concert_pitch) ? 442 : $_SESSION['UserObject']->concert_pitch).'
+						concert_pitch:	'.(empty($_SESSION['UserObject']->concert_pitch) ? 442 : $_SESSION['UserObject']->concert_pitch).',
+						lang:			'.json_encode($arrPreloadLang, JSON_FORCE_OBJECT).'
 					};
 				</script>
 				<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -48,9 +66,9 @@ class PageRenderer
 			<body>
 				<div id="CenteringContainer" data-default-title="'.$oLang->Get('system_title_welcome').'">
 					<a href="'.HTTP_PROJECT_ROOT.'" id="logo" data-internal-navigation="home" data-title="'.$oLang->Get('system_title_welcome').'"><svg version="1.1" id="Lag_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 width="123.5px" height="63px" viewBox="0 0 123.5 63" enable-background="new 0 0 123.5 63" xml:space="preserve">
-<text transform="matrix(1 0 0 1 63.5 43)"><tspan x="0" y="0" fill="#588A9D" font-family="\'ArialMT\'" font-size="13">learn</tspan><tspan x="0" y="15.6" fill="#588A9D" font-family="\'ArialMT\'" font-size="13">compete</tspan></text>
-<text transform="matrix(1 0 0 1 0 24.5)" class="logo-text" font-family="\'ArialMT\'" font-size="31">play.now</text>
+	 width="163.5px" height="63px" viewBox="0 0 143.5 63" enable-background="new 0 0 123.5 63" xml:space="preserve">
+<text transform="matrix(1 0 0 1 103.5 43)"><tspan x="0" y="0" fill="#588A9D" font-family="\'ArialMT\'" font-size="13">learn</tspan><tspan x="0" y="15.6" fill="#588A9D" font-family="\'ArialMT\'" font-size="13">compete</tspan></text>
+<text transform="matrix(1 0 0 1 0 24.5)" class="logo-text" font-family="\'ArialMT\'" font-size="31">Magic Tune</text>
 </svg></a>
 					'.$strHtmlContent.'
 				</div>

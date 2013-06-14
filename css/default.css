@@ -199,11 +199,30 @@ body > div.countdown > div.countdown-illustration div#ViolinFingerBoard {
 /**
 * Illustrations class
 */
-div#ViolinFingerBoard {
-    width: 140px;
-    height: 350px;
-    background-image: url(/img/game/start-position/fingerboard.png);
+table#ViolinFingerBoard {
+    width: 200px;
+    margin-top: 30px;
     position: relative;
+}
+table#ViolinFingerBoard td {
+    padding-left: 3px;
+    vertical-align: top;
+    text-align: center;
+    position: relative;
+}
+table#ViolinFingerBoard span.TopNote {
+    background-color: #95A5A6;
+    width: 44px;
+    color: #000;
+    line-height: 44px;
+    -webkit-border-radius: 22px;
+    display: block; 
+}
+table#ViolinFingerBoard td div {
+    height: 250px;
+    width: 2px;
+    background-color: #000;
+    display: inline-block;
 }
 
 
@@ -214,4 +233,15 @@ div#ViolinFingerBoard {
 	width: 50%;
 	height: 30vmin;
 	float: left;
+}
+
+#system_requirements {
+	z-index: 1050;
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	width: 500px;
+	margin-left: -250px;
+	height: 200px;
+	margin-top: -100px;
 }

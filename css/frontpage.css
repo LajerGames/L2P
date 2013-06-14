@@ -39,6 +39,7 @@ div.ContentBoxHeadline {
 div.ContentBoxHeadline img {
 	height: 3vh;
 	margin-right: 5px;
+	margin-top: -1vmin;
 }
 
 div.ContentBoxHeadline img#EditUser {
@@ -69,12 +70,25 @@ div.ContentBoxBody img, div.ContentBoxBody span {
 	width: 3vmin;
 	float: right;
 }
-body.ShowGame div.ContentBoxBody {
-	height: 0;
+body.ShowGame div:not(.ContentBoxBlue) div.ContentBoxBody {
+	-webkit-transform: translate3d(0, -100%, 0);
 	position: absolute;
 }
+body .ContentBoxBodyContainer {
+    position: absolute;
+    width: 100%;
+    overflow: hidden;
+    -webkit-transition: 1s;
+    height: 30vh;
+}
+body.ShowGame .ContentBox .ContentBoxBodyContainer {
+    height: 0;
+}
+body.ShowGame .ContentBox:hover div:not(.ContentBoxBlue) .ContentBoxBodyContainer {
+    height: 30vh;
+}
 body.ShowGame div.ContentBox:hover div:not(.ContentBoxBlue) div.ContentBoxBody {
-	height: 30vh;
+	-webkit-transform: translate3d(0, 0, 0);
 }
 div.ContentBoxBody.upper {
 	margin-top: 2px;
@@ -133,21 +147,63 @@ div.ContentBox > div > div.ContentBoxHeadline {
 	-moz-transition-duration: 1s;
 	-webkit-transition-duration: 1s;
 }
-div.ContentBoxGreen div {
+div.ContentBoxGreen div:not(.ContentBoxBodyContainer) {
 	background-color: #71C211;
 }
-div.ContentBoxOrange > div {
+div.ContentBoxOrange div:not(.ContentBoxBodyContainer) {
 	background-color: #E2A30C;
 }
-div.ContentBoxBlue > div {
+div.ContentBoxBlue div:not(.ContentBoxBodyContainer) {
 	background-color: #1DBAE7;
 }
-body.scale div.ContentBoxPoint > div {
-	background-color: #E2A30C;
+body.scale div.ContentBoxPoint > div:not(.ContentBoxBodyContainer) {
+	background-color: #1DBAE7;
 }
-body.song div.ContentBoxPoint > div {
-	background-color: #71C211;
+body.song div.ContentBoxPoint > div:not(.ContentBoxBodyContainer) {
+	background-color: #1DBAE7;
 }
+body.ShowGame div.ContentBoxGameCompass {
+	position: relative;
+}
+body.ShowGame div.ContentBoxGameCompass img {
+	width: 50%;
+	position: absolute;
+	top: 3vh;
+	left: 0;
+}
+body.ShowGame div.ContentBoxGameCompass img:nth-child(2) {
+	right: 0;
+	left: inherit;
+}
+div.ContentBoxGameCompass div.ContentBoxGameCompass-tone-before {
+    position: absolute;
+    top: 1vh;
+    color: #000;
+}
+div.ContentBoxGameCompass div.ContentBoxGameCompass-tone-current {
+    position: absolute;
+    top: 1vh;
+    color: #000;
+    width: 100%;
+    text-align: center;
+}
+div.ContentBoxGameCompass div.ContentBoxGameCompass-tone-after {
+    position: absolute;
+    top: 1vh;
+    color: #000;
+    right: 0;
+}
+div.ContentBoxGameCompass div.ContentBoxGameCompass-line {
+	position: absolute;
+	left: -1px;
+	margin-left: 50%;
+	height: 6vh;
+	top: 1vh;
+	background: #000;
+	width: 2px;
+	-webkit-transition: 0.2s;
+}
+
 div.ContentBoxBlue input {
 	color: #000;
 	border-radius: 0;
@@ -166,16 +222,92 @@ body.ShowGame div.ContentBoxBlue {
 	height: 0;
 }
 
-div.ContentBoxPoint {
-	height: 0;
-	overflow: hidden;
+div.ContentBoxGameControl div {
+    margin-top: 1vh;
+}
+
+body div.ContentBoxGameControl div table td:nth-child(odd) {
+    padding: 2px;
 	transition-duration: 1s;
 	-o-transition-duration: 1s;
 	-ms-transition-duration: 1s;
 	-moz-transition-duration: 1s;
 	-webkit-transition-duration: 1s;
 }
-body.ShowGame div.ContentBoxPoint {
+body.song div.ContentBoxGameControl div table td:nth-child(odd) {
+    background-color: #71C211;
+}
+body.scale div.ContentBoxGameControl div table td:nth-child(odd) {
+    background-color: #E2A30C;
+}
+
+body.ShowGame div.ContentBoxGameControl table {
+    width: 100%;
+    font-size: 2.5vh;
+	line-height: 2.5vh;
+}
+
+body.ShowGame div.ContentBoxGameControl table tr input {
+    width: 100%;
+    height: 6vh;
+    margin: 0;
+    box-sizing: border-box;
+    font-size: 2.5vh;
+	line-height: 2.5vh;
+    padding: 2vh;
+    font-weight: bold;
+    font-style: italic;
+}
+body.ShowGame div.ContentBoxGameControl table tr td {
+	position: relative;
+}
+body.ShowGame div.ContentBoxGameControl table tr td:nth-child(2) {
+    width: 5%;
+    height: 4.5vh;
+}
+body.ShowGame div.ContentBoxGameControl table tr td:nth-child(3) {
+    width: 55%;
+    height: 4.5vh;
+    cursor: pointer;
+}
+body.ShowGame div.ContentBoxGameControl .ContentBoxGameControl-playpause {
+    font-size: 2.5vh;
+    line-height: 2.5vh;
+    padding: 1.9vh;
+}
+body.ShowGame div.ContentBoxGameControl .ContentBoxGameControl-icon {
+    position: absolute;
+    right: 2vh;
+    height: 3vh;
+}
+body.ShowGame div.ContentBoxGameControl .ContentBoxGameControl-bpm {
+    position: absolute;
+    top: 2vh;
+    right: 2vh;
+    width: 6vh;
+    color: #555555;
+    margin: 0;
+    font-weight: bold;
+    font-style: italic;
+    font-size: 2.5vh;
+	line-height: 2.5vh;
+    height: 2.5vh;
+}
+
+div.ContentBoxGameCompass,
+div.ContentBoxPoint,
+div.ContentBoxGameControl {
+    height: 0;
+    overflow: hidden;
+    transition-duration: 1s;
+    -o-transition-duration: 1s;
+    -ms-transition-duration: 1s;
+    -moz-transition-duration: 1s;
+    -webkit-transition-duration: 1s;
+}
+body.ShowGame div.ContentBoxGameCompass,
+body.ShowGame div.ContentBoxPoint,
+body.ShowGame div.ContentBoxGameControl {
 	height: 7.5vh;
 }
 
@@ -214,4 +346,21 @@ a.edit {
 	div.ContentBox:hover div.ContentBoxBody {
 		height: 30vh;
 	}
+}
+
+td[data-action="toggle-game"] > div {
+    position: absolute;
+    top: 1vh;
+    width: 100%;
+    -webkit-transition: 1s;
+}
+.ContentBoxGameControl-playpause-pause {
+    -webkit-transform: rotateX(-90deg) translate3d(0, -28px, 0);
+}
+
+td[data-action="toggle-game"].can_pause .ContentBoxGameControl-playpause-play {
+    -webkit-transform: rotateX(90deg) translate3d(0, 28px, 0);
+}
+td[data-action="toggle-game"].can_pause .ContentBoxGameControl-playpause-pause {
+    -webkit-transform: initial;
 }

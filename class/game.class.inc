@@ -5,13 +5,15 @@ class MainClass
 			* @var MySQLWrapper
 			*/
 			$oSql,
-			$bHasData	= false,
-			$iID		= 0;
+			$bHasData	    = false,
+			$iID		    = 0,
+            $strGameType    = '';
 
-	public function __construct(MySQLWrapper $oSql, $iID = 0)
+	public function __construct(MySQLWrapper $oSql, $iID = 0, $strGameType = '')
 	{
-		$this->oSql	= $oSql;
-		$this->iID	= $iID;
+		$this->oSql	        = $oSql;
+        $this->iID          = $iID;
+		$this->strGameType	= $strGameType;
 
 		if($this->iID !== 0)
 		{
@@ -107,6 +109,7 @@ class GameData extends MainClass
 	{
 		$arrFirstNote	= null;
 		$arrTacts		= $this->arrGameDataData[2];
+
 		foreach($arrTacts as $iTactNo => $arrTactInfo)
 		{
 			if($arrFirstNote)
@@ -133,7 +136,7 @@ class GameData extends MainClass
 
 		$oIllustrations	= new Illustrations($this->oSql);
 
-		return $oIllustrations->RenderStartPosition(Illustrations::Instrument_Violin, $iOctave, $strNoteName);
+		return $oIllustrations->RenderStartPosition(Illustrations::Instrument_Violin, $iOctave, $strNoteName, false, $this->strGameType);
 	}
 }
 
@@ -144,6 +147,7 @@ class Game
 			$bHasData			= false;
 
 	public	$iGameID			= 0,
+            $strGameType        = '',
 			$strGameTitle		= '',
 			$strGamePermlink	= '',
 			$iAuthorID			= 0,
@@ -171,6 +175,16 @@ class Game
 					 &&	games.permlink	= "'.$this->oSql->RealEscape($mID).'"
 				');
 			}
+
+            $this->strGameType = $this->oSql->SelectSingleValue('
+                SELECT
+                    games.type        AS strGameType
+                FROM
+                    games
+                WHERE
+                    games.deleted    = 0
+                 &&    games.permlink    = "'.$this->oSql->RealEscape($mID).'"
+            ');
 		}
 
 		if($this->iGameID !== 0)
@@ -221,7 +235,7 @@ class Game
 
 	public function getGameData()
 	{
-		return new GameData($this->oSql, $this->iGameID);
+		return new GameData($this->oSql, $this->iGameID, $this->strGameType);
 	}
 }
 class Illustrations
@@ -229,7 +243,9 @@ class Illustrations
     private $oSql;
 
     const   Instrument_Violin   = 'violin',
-            Instrument_Guitar   = 'guitar';
+            Instrument_Guitar   = 'guitar',
+            GameType_Song       = 'song',
+            GameType_Scale      = 'scale';
 
     public function __construct($oSql)
     {
@@ -242,171 +258,166 @@ class Illustrations
     * @param int $iOctave
     * @param string $strNoteName
     */
-    private function ViolinFirstPosIllustration($iOctave, $strNoteName, $bPreferFourthPos)
+    private function ViolinFirstPosIllustration($iOctave, $strNoteName, $bPreferFourthPos, $cGameType = Illustrations::GameType_Scale)
     {
-        $iTopPosition   = 25;
-        $iLeftPosition  = 7; // Default position starts here - we will add to it, as we find the true position of the marker
+        $iTopPosition   = 0;
+        $strString      = '';
 
         if($iOctave === 3)
         {
+            $strString = 'G';
             // In octave 3 we're absolutely certain that we're in the left column
             switch($strNoteName)
             {
                 case 'G#' :
                 case 'Ab' :
-                    $iTopPosition += 40;
+                    $iTopPosition += 46;
                     break;
                 case 'A' :
-                    $iTopPosition += 79;
+                    $iTopPosition += 92;
                     break;
                 case 'A#' :
                 case 'Bb' :
-                    $iTopPosition += 119;
+                    $iTopPosition += 138;
                     break;
                 case 'B' :
-                    $iTopPosition += 158;
+                    $iTopPosition += 184;
                     break;
             }
         }
 
         if($iOctave === 4)
         {
+            $strString = 'D';
             switch($strNoteName)
             {
                 case 'C' :
-                    $iTopPosition += 198;
+                    $strString = 'G';
+                    $iTopPosition += 230;
                     break;
                 case 'C#' :
                 case 'Db' :
-                    $iTopPosition += 237;
-                    break;
-                case 'D' :
-                    if($bPreferFourthPos)
-                    {
-                        $iTopPosition += 277;
-                    }
-                    else
-                    {
-                        $iLeftPosition += 33;
-                    }
+                    $strString = 'G';
+                    $iTopPosition += 276;
                     break;
                 case 'D#' :
                 case 'Eb' :
-                    $iLeftPosition += 33;
-                    $iTopPosition += 40;
+                    $iTopPosition += 46;
                     break;
                 case 'E' :
-                    $iLeftPosition += 33;
-                    $iTopPosition += 79;
+                    $iTopPosition += 92;
                     break;
                 case 'F' :
-                    $iLeftPosition += 33;
-                    $iTopPosition += 119;
+                    $iTopPosition += 138;
                     break;
                 case 'F#' :
                 case 'Gb' :
-                    $iLeftPosition += 33;
-                    $iTopPosition += 158;
+                    $iTopPosition += 184;
                     break;
                 case 'G' :
-                    $iLeftPosition += 33;
-                    $iTopPosition += 198;
+                    $iTopPosition += 230;
                     break;
                 case 'G#' :
                 case 'Ab' :
-                    $iLeftPosition += 33;
-                    $iTopPosition += 237;
+                    $iTopPosition += 276;
                     break;
                 case 'A' :
-                    if($bPreferFourthPos)
-                    {
-                        $iLeftPosition += 33;
-                        $iTopPosition += 277;
-                    }
-                    else
-                    {
-                         $iLeftPosition += 66;
-                    }
+                    $strString = 'A';
                     break;
                 case 'A#' :
                 case 'Bb' :
-                    $iLeftPosition += 66;
-                    $iTopPosition += 40;
+                    $strString = 'A';
+                    $iTopPosition += 46;
                     break;
                 case 'B' :
-                    $iLeftPosition += 66;
-                    $iTopPosition += 79;
+                    $strString = 'A';
+                    $iTopPosition += 92;
                     break;
             }
         }
 
         if($iOctave === 5)
         {
-            $iLeftPosition += 66;
+            $strString = 'E';
             switch($strNoteName)
             {
                 case 'C' :
-                    $iTopPosition += 119;
+                    $strString = 'A';
+                    $iTopPosition += 138;
                     break;
                 case 'C#' :
                 case 'Db' :
-                    $iTopPosition += 158;
+                    $strString = 'A';
+                    $iTopPosition += 184;
                     break;
                 case 'D' :
-                    $iTopPosition += 198;
+                    $strString = 'A';
+                    $iTopPosition += 230;
                     break;
                 case 'D#' :
                 case 'Eb' :
-                    $iTopPosition += 237;
-                    break;
-                case 'E' :
-                    if($bPreferFourthPos)
-                    {
-                        $iTopPosition += 277;
-                    }
-                    else
-                    {
-                         $iLeftPosition += 33;
-                    }
+                    $strString = 'A';
+                    $iTopPosition += 276;
                     break;
                 case 'F' :
-                    $iLeftPosition += 33;
-                    $iTopPosition += 40;
+                    $iTopPosition += 46;
                     break;
                 case 'F#' :
                 case 'Gb' :
-                    $iLeftPosition += 33;
-                    $iTopPosition += 79;
+                    $iTopPosition += 92;
                     break;
                 case 'G' :
-                    $iLeftPosition += 33;
-                    $iTopPosition += 119;
+                    $iTopPosition += 138;
                     break;
                 case 'G#' :
                 case 'Ab' :
-                    $iLeftPosition += 33;
-                    $iTopPosition += 158;
+                    $iTopPosition += 184;
                     break;
                 case 'A' :
-                    $iLeftPosition += 33;
-                    $iTopPosition += 198;
+                    $iTopPosition += 230;
                     break;
                 case 'A#' :
                 case 'Bb' :
-                    $iLeftPosition += 33;
-                    $iTopPosition += 237;
+                    $iTopPosition += 276;
                     break;
                 case 'B' :
-                    $iLeftPosition += 33;
-                    $iTopPosition += 277;
+                    $iTopPosition += 322;
                     break;
             }
         }
 
+        $strColor = $cGameType === Illustrations::GameType_Scale ? '#E2A30C' : '#71C211';
+
+        $strGString = $strString == 'G' ? '<span class="TopNote" style="position:absolute;top:'.$iTopPosition.'px;background-color:'.$strColor.';">'.$strNoteName.'</span>' : '';
+        $strDString = $strString == 'D' ? '<span class="TopNote" style="position:absolute;top:'.$iTopPosition.'px;background-color:'.$strColor.';">'.$strNoteName.'</span>' : '';
+        $strAString = $strString == 'A' ? '<span class="TopNote" style="position:absolute;top:'.$iTopPosition.'px;background-color:'.$strColor.';">'.$strNoteName.'</span>' : '';
+        $strEString = $strString == 'E' ? '<span class="TopNote" style="position:absolute;top:'.$iTopPosition.'px;background-color:'.$strColor.';">'.$strNoteName.'</span>' : '';
+
         return '
-        <div id="ViolinFingerBoard">
-            <img src="/img/game/start-position/position-marker.png" style="position: absolute;top:'.$iTopPosition.'px;left:'.$iLeftPosition.'px;" alt="Finger start position" />
-        </div>
+        <table border="0" cellspacing="0" cellpadding="0" id="ViolinFingerBoard">
+            <tr>
+                <td align="center">
+                    <span class="TopNote">G</span>
+                    <div></div>
+                    '.$strGString.'
+                </td>
+                <td align="center">
+                    <span class="TopNote">D</span>
+                    <div></div>
+                    '.$strDString.'
+                </td>
+                <td align="center">
+                    <span class="TopNote">A</span>
+                    <div></div>
+                    '.$strAString.'
+                </td>
+                <td align="center">
+                    <span class="TopNote">E</span>
+                    <div></div>
+                    '.$strEString.'
+                </td>
+            </tr>
+        </table>
         ';
     }
 
@@ -418,14 +429,14 @@ class Illustrations
     * @param string $strNoteName
     * @param bool $bPreferFourthPos
     */
-    public function RenderStartPosition($cInstrument, $iOctave, $strNoteName, $bPreferFourthPos = false)
+    public function RenderStartPosition($cInstrument, $iOctave, $strNoteName, $bPreferFourthPos = false, $cGameType = Illustrations::GameType_Scale)
     {
 
         $strPositionIllustration = '';
         switch($cInstrument)
         {
             case Illustrations::Instrument_Violin :
-                $strPositionIllustration =  $this->ViolinFirstPosIllustration($iOctave, $strNoteName, $bPreferFourthPos);
+                $strPositionIllustration =  $this->ViolinFirstPosIllustration($iOctave, $strNoteName, $bPreferFourthPos, $cGameType);
                 break;
         }
 

@@ -100,7 +100,7 @@ require(['fragments/game', 'game/game', 'game/tact', 'game/note', 'game/options'
 
 	applyTact([
 		createNote('quarterPeriod', 1, 'C'),
-		createNote('quarter', 1, 'C'),
+		createNote('quarter', 1, 'C', false, true),
 		createNote('eighth', 0, 'B')
 	]);
 
@@ -192,12 +192,6 @@ require(['fragments/game', 'game/game', 'game/tact', 'game/note', 'game/options'
 	]);
 
 	applyTact([
-		createNote('quarterPeriod', 1, 'C'),
-		createNote('quarter', 1, 'C', false, true),
-		createNote('eighth', 1, 'C')
-	]);
-
-	applyTact([
 		createNote('eighth', 1, 'C'),
 		createNote('eighth', 0, 'B', true),
 		createNote('eighth', 1, 'C'),
@@ -223,11 +217,11 @@ require(['fragments/game', 'game/game', 'game/tact', 'game/note', 'game/options'
 	]);
 
 	applyTact([
-		createNote('quarter', 1, 'C'),
+		createNote('quarter', 1, 'D'),
+		createNote('eighth', 1, 'D'),
+		createNote('eighth', 1, 'D'),
 		createNote('eighth', 1, 'C'),
-		createNote('eighth', 1, 'C'),
-		createNote('eighth', 0, 'B'),
-		createNote('eighth', 1, 'C')
+		createNote('eighth', 1, 'D')
 	]);
 
 	applyTact([
@@ -252,7 +246,7 @@ require(['fragments/game', 'game/game', 'game/tact', 'game/note', 'game/options'
 		createNote('eighth', 0, 'B'),
 		createNote('eighth', 0, 'A'),
 		createNote('eighth', 0, 'B'),
-		createNote('eighth', 1, 'D'),
+		createNote('eighth', 1, 'Db'),
 		createNote('eighth', 1, 'C'),
 		createNote('eighth', 0, 'B')
 	]);

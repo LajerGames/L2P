@@ -342,7 +342,12 @@ class MySQLWrapper
         {
 		    foreach($oObject as $strName => $strValue)
 		    {
-		    	$oObject->$strName	= $this->PrefixKeyValue($strName, $strValue);
+		    	$strKey	= $strName;
+				if(substr($strName, -8) === 'FromJSON')
+				{
+					$strKey	= substr($strName, 0, -8);
+				}
+		    	$oObject->$strKey	= $this->PrefixKeyValue($strName, $strValue);
 		    }
         }
 
@@ -383,7 +388,6 @@ class MySQLWrapper
         {
 			if(substr($strKey, -8) === 'FromJSON')
 			{
-				$strKey	= substr($strKey, 0, -8);
 				$mValue	= json_decode($mValue, true);
 			}
 			else

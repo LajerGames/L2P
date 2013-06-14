@@ -130,6 +130,10 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 
 		console.log(this.game);
 		this.game.reset();
+
+		this.SVGNotes.animateAbs(0, -501, 0);
+
+		console.log('reset-pos', this.SVGNotes.node.style.webkitTransition, this.SVGNotes.node.style.webkitTransform);
 		this.initView();
 
 		this.$this.trigger('gameLoadSpeedChange', this.game.speed);
@@ -161,9 +165,6 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 							that.$this.trigger('gameStart');
 
 							that.runGame();
-							//console.log(-that.game.getWidth(), that.game.getDuration());
-							//that.SVGNotes.node.style.width	= that.game.getWidth()+'px';
-							//that.SVGNotes.animateAbs(-that.game.getWidth(), -501, that.game.getDuration(), that.gameDone.bind(that));
 						});
 					}, firstNote.tone.octav, firstNote.tone.name);
 				}, ['game_start']);
@@ -175,8 +176,6 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 				that.SVGNotes.node.style.webkitTransform	= '';
 
 				that.runGame();
-				//console.log(-that.game.getWidth(), that.game.getDuration());
-				//that.SVGNotes.animateAbs(-that.game.getWidth(), -501, that.game.getDuration(), that.gameDone.bind(that));
 			}
 		}
 	};
@@ -187,10 +186,6 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 			currentLeft			= -this.svgNotes.getClientRects()[0].left,
 			relativeWidth		= totalWidth + currentLeft,
 			relativeDuration	= totalDuration * (totalWidth - currentLeft) / totalWidth;
-
-		// console.log('total ', totalWidth, totalDuration);
-		// console.log('left', currentLeft);
-		// console.log('relative', relativeWidth, relativeDuration);
 
 		this.paused	= false;
 
@@ -215,6 +210,10 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 	GameController.prototype.drawSlur	= function (from, to) {
 		var	fromPos	= from.svgElement.getAbsolutePos(),
 			toPos	= to.svgElement.getAbsolutePos();
+
+		if(from.svgElement.options.flip && !to.svgElement.options.flip) {
+			fromPos.yc	= -fromPos.yc - 45;
+		}
 
 		var	slur	=
 			new SVGElement('path')
@@ -318,7 +317,16 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 								.setInnerText(text, 36, 'bold')
 								.setPos(notePos - 25, tonePos + y)
 								.appendTo(tact.svgElement.node);
-
+						}
+						if(note.isPeriod) {
+							new	SVGElement('circle')
+								.setCircle(notePos + 25 + 10, tonePos + 90 - 8, 3)
+								.appendTo(tact.svgElement.node);
+								/*
+							new SVGElement('text')
+								.setInnerText('◘', 36, 'bold')
+								.setPos(notePos + 25, tonePos + 90)
+								.appendTo(tact.svgElement.node);*/
 						}
 
 						if(note.tone.pos <= 0) {
@@ -775,7 +783,6 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 				game_history_id:	gameInfo.game_history_id
 			});
 		});
-		//console.log(this.status, this.plus, this.minus);
 	};
 
 	return GameController;

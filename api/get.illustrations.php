@@ -4,10 +4,11 @@ header("Content-Type: application/json; charset=utf-8");
 
 $iOctave		= intval($_GET['octave']);
 $strNoteName	= $_GET['note_name'];
+$cGameType      = $_GET['game_type'];
 
 
 echo json_encode(array(
-	'illustration'	=> $oIllustrations->RenderStartPosition(Illustrations::Instrument_Violin, $iOctave, $strNoteName)
+	'illustration'	=> $oIllustrations->RenderStartPosition(Illustrations::Instrument_Violin, $iOctave, $strNoteName, false, $cGameType)
 ));
 
 ?>

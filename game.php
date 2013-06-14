@@ -14,7 +14,7 @@ $rCheckGametype = $oSql->Select('
 ');*/
 
 echo $oPageRenderer->Renderpage($oLang, '
-<script src="'.HTTP_PROJECT_ROOT_JAVASCRIPT.'games/tunetester.js"></script>
+<script src="'.HTTP_PROJECT_ROOT_JAVASCRIPT.'games/itsy-bitsy-spider.js"></script>
 <div>
 	<b>Games</b><br>
 	<div id="gamesBox"></div>

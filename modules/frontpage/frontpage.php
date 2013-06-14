@@ -57,15 +57,18 @@ if(isset($_SESSION['UserObject']))
 					<a href="/user/handle/" title="'.$oLang->Get('frontpage_edit').'" data-internal-navigation><img id="EditUser" src="'.HTTP_PROJECT_ROOT_IMG.'icons/pen.svg" alt="" /></a>
 				</div>
 			</div>
-			<div class="ContentBoxBody">
-                <a href="/?mode=logout">'.$oLang->Get('frontpage_user_logout').'</a>
-				'.$oPageRenderer->RenderDialogLink('/user/'.$_SESSION['UserObject']->username.'/statistics/', PageRenderer::DialogType_Info, $oLang->Get('frontpage_user_statistics')).'
-                <a href="/user/settings/" title="'.$oLang->Get('frontpage_user_settings').'" data-internal-navigation>'.$oLang->Get('frontpage_user_settings').'</a>
+			<div class="ContentBoxBodyContainer">
+				<div class="ContentBoxBody">
+	                <a href="/?mode=logout">'.$oLang->Get('frontpage_user_logout').'</a>
+					'.$oPageRenderer->RenderDialogLink('/user/'.$_SESSION['UserObject']->username.'/statistics/', PageRenderer::DialogType_Info, $oLang->Get('frontpage_user_statistics')).'
+	                <a href="/user/settings/" title="'.$oLang->Get('frontpage_user_settings').'" data-internal-navigation>'.$oLang->Get('frontpage_user_settings').'</a>
+				</div>
 			</div>
 		</div>
 		<div class="ContentBoxPoint">
 			<div class="ContentBoxHeadline">
 				<div>
+                    <img src="'.HTTP_PROJECT_ROOT_IMG.'icons/user.svg" alt="" />
 					'.$strPointBoxText.'
 				</div>
 			</div>
@@ -73,6 +76,24 @@ if(isset($_SESSION['UserObject']))
 				Pointdims
 			</div>
 		</div>
+        <div class="ContentBoxGameControl">
+            <div>
+                <table border="0" cellspacing="100" cellpadding="0">
+                    <tr>
+                        <td><input type="text" name="bpm" value="80" /><div class="ContentBoxGameControl-bpm">bpm</div></td>
+                        <td>&nbsp;</td>
+                        <td data-action="toggle-game">
+                        	<div class="ContentBoxGameControl-playpause-play">
+                        		<span class="ContentBoxGameControl-playpause">'.$oLang->Get('global_play').'</span><img src="/img/icons/play-white.svg" class="ContentBoxGameControl-icon" />
+                        	</div>
+                        	<div class="ContentBoxGameControl-playpause-pause">
+                        		<span class="ContentBoxGameControl-playpause">'.$oLang->Get('global_pause').'</span><img src="/img/icons/pause-white.svg" class="ContentBoxGameControl-icon" />
+                        	</div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
 	';
 }
 else
@@ -84,12 +105,14 @@ else
 					<img src="'.HTTP_PROJECT_ROOT_IMG.'icons/user.svg" alt="" /><span data-standard-text="'.$oLang->Get('frontpage_login').'">'.$oLang->Get('frontpage_login').'</span>
 				</div>
 			</div>
-			<div class="ContentBoxBody upper">
-				'.$oLoginForm->RenderFields(false).'
+			<div class="ContentBoxBodyContainer">
+				<div class="ContentBoxBody upper">
+					'.$oLoginForm->RenderFields(false).'
+				</div>
+				'.$oPageRenderer->RenderDialogLink('/user/create/', PageRenderer::DialogType_Action, '
+					<span>'.$oLang->Get('frontpage_create_user').'</span>
+				', array('class' => 'ContentBoxBody lower')).'
 			</div>
-			'.$oPageRenderer->RenderDialogLink('/user/create/', PageRenderer::DialogType_Action, '
-				<span>'.$oLang->Get('frontpage_create_user').'</span>
-			', array('class' => 'ContentBoxBody lower')).'
 		</div>
 		<div class="ContentBoxPoint">
 			<div class="ContentBoxHeadline">
@@ -115,48 +138,61 @@ echo $oPageRenderer->Renderpage($oLang, '
 					<img src="'.HTTP_PROJECT_ROOT_IMG.'icons/sixteenthnote.svg" alt="" /><span id="song_title" data-default-text="'.$oLang->Get('frontpage_choose_song').'">'.$oLang->Get('frontpage_choose_song').'</span>
 				</div>
 			</div>
-			<div class="ContentBoxBody">
-				'.$oTemplate->RenderContentResource('
-				<div>
-					{{availability}}
-					<a href="/game/{{permlink}}" data-dialog="game" title="{{info}}"  class="OpenGame">
-						{{title}}
-					</a>
-					<div class="clear"></div>
-				</div>
-				', $rMusic, 7, false).'
-				<div>
-					<a href="/browse/songs/" data-dialog="info" title="'.$oLang->Get('frontpage_view_all_songs_title').'" class="ViewAllGames">
-						-- '.$oLang->Get('frontpage_view_all').' --
-					</a>
-					<div class="clear"></div>
+			<div class="ContentBoxBodyContainer">
+				<div class="ContentBoxBody">
+					'.$oTemplate->RenderContentResource('
+					<div>
+						{{availability}}
+						<a href="/game/{{permlink}}" data-dialog="game" title="{{info}}"  class="OpenGame">
+							{{title}}
+						</a>
+						<div class="clear"></div>
+					</div>
+					', $rMusic, 7, false).'
+					<div>
+						<a href="/browse/songs/" data-dialog="info" title="'.$oLang->Get('frontpage_view_all_songs_title').'" class="ViewAllGames">
+							-- '.$oLang->Get('frontpage_view_all').' --
+						</a>
+						<div class="clear"></div>
+					</div>
 				</div>
 			</div>
 		</div>
+        <div class="ContentBoxGameCompass">
+            <div>
+				<img src="/img/game/compas-left.svg" />
+				<img src="/img/game/compas-left.svg" style="-webkit-transform: scaleX(-1);" />
+				<div class="ContentBoxGameCompass-tone-before">&nbsp;</div>
+				<div class="ContentBoxGameCompass-tone-current">&nbsp;</div>
+				<div class="ContentBoxGameCompass-tone-after">&nbsp;</div>
+				<div class="ContentBoxGameCompass-line">&nbsp;</div>
+            </div>
+        </div>
 	</div>
 	<div  class="ContentBox">
 		<div class="ContentBoxOrange">
-			<div class="CompassOuter"></div>
 			<div class="ContentBoxHeadline">
 				<div>
 					<img src="'.HTTP_PROJECT_ROOT_IMG.'icons/eighthnote.svg" alt="" /><span id="scale_title" data-default-text="'.$oLang->Get('frontpage_choose_scale').'">'.$oLang->Get('frontpage_choose_scale').'</span>
 				</div>
 			</div>
-			<div class="ContentBoxBody">
-				'.$oTemplate->RenderContentResource('
-				<div>
-					{{availability}}
-					<a href="/game/{{permlink}}" data-dialog="game" title="{{info}}" class="OpenGame">
-						{{title}}
-					</a>
-					<div class="clear"></div>
-				</div>
-				', $rScale, 7, false).'
-				<div>
-					<a href="/browse/scales/" data-dialog="info" title="'.$oLang->Get('frontpage_view_all_scales_title').'" class="ViewAllGames">
-					-- '.$oLang->Get('frontpage_view_all').' --
-					</a>
-					<div class="clear"></div>
+			<div class="ContentBoxBodyContainer">
+				<div class="ContentBoxBody">
+					'.$oTemplate->RenderContentResource('
+					<div>
+						{{availability}}
+						<a href="/game/{{permlink}}" data-dialog="game" title="{{info}}" class="OpenGame">
+							{{title}}
+						</a>
+						<div class="clear"></div>
+					</div>
+					', $rScale, 7, false).'
+					<div>
+						<a href="/browse/scales/" data-dialog="info" title="'.$oLang->Get('frontpage_view_all_scales_title').'" class="ViewAllGames">
+						-- '.$oLang->Get('frontpage_view_all').' --
+						</a>
+						<div class="clear"></div>
+					</div>
 				</div>
 			</div>
 		</div>

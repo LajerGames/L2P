@@ -27,17 +27,17 @@ game.setSharp('F');
 
 applyTact([
 createNote('quarter', 0, 'D'),
-createNote('quarter', 0, 'E'),
-createNote('quarter', 0, 'E'),
-createNote('quarter', 0, 'E')
+createNote('quarter', 0, 'G'),
+createNote('quarter', 0, 'G'),
+createNote('quarter', 0, 'G')
 ]);
 
 
 applyTact([
 createNote('quarter', 0, 'D'),
-createNote('quarter', 0, 'E'),
-createNote('quarter', 0, 'E'),
-createNote('quarter', 0, 'E')
+createNote('quarter', 0, 'G'),
+createNote('quarter', 0, 'G'),
+createNote('quarter', 0, 'G')
 ]);
 
 applyTact([
@@ -45,33 +45,33 @@ createNote('eighth', 0, 'B'),
 createNote('eighth', 0, 'B'),
 createNote('eighth', 0, 'A'),
 createNote('eighth', 0, 'A'),
-createNote('eighth', 0, 'B'),
-createNote('eighth', 0, 'B'),
+createNote('eighth', 0, 'A'),
+createNote('eighth', 0, 'A'),
 createNote('eighth', 0, 'A'),
 createNote('eighth', 0, 'A')
 ]);
 
 applyTact([
-createNote('eighth', 0, 'E'),
+createNote('eighth', 0, 'G'),
 createNote('eighth', 0, 'A'),
 createNote('quarter', 0, 'B'),
-createNote('quarter', 0, 'E'),
-createNote('quarter', 0, 'E')
+createNote('quarter', 0, 'G'),
+createNote('quarter', 0, 'G')
 ]);
 
 applyTact([
 createNote('quarter', 0, 'D'),
-createNote('quarter', 0, 'E'),
-createNote('quarter', 0, 'E'),
-createNote('quarter', 0, 'E')
+createNote('quarter', 0, 'G'),
+createNote('quarter', 0, 'G'),
+createNote('quarter', 0, 'G')
 ]);
 
 
 applyTact([
 createNote('quarter', 0, 'D'),
-createNote('quarter', 0, 'E'),
-createNote('quarter', 0, 'E'),
-createNote('quarter', 0, 'E')
+createNote('quarter', 0, 'G'),
+createNote('quarter', 0, 'G'),
+createNote('quarter', 0, 'G')
 ]);
 
 applyTact([
@@ -79,25 +79,30 @@ createNote('eighth', 0, 'B'),
 createNote('eighth', 0, 'B'),
 createNote('eighth', 0, 'A'),
 createNote('eighth', 0, 'A'),
-createNote('eighth', 0, 'B'),
-createNote('eighth', 0, 'B'),
+createNote('eighth', 0, 'A'),
+createNote('eighth', 0, 'A'),
 createNote('eighth', 0, 'A'),
 createNote('eighth', 0, 'A')
 ]);
 
 applyTact([
-createNote('eighth', 0, 'E'),
+createNote('eighth', 0, 'G'),
 createNote('eighth', 0, 'A'),
 createNote('quarter', 0, 'B'),
-createNote('quarter', 0, 'E'),
-createNote('quarter', 0, 'E')
+createNote('quarter', 0, 'G'),
+createNote('quarter', 0, 'G')
 ]);
 
 applyTact([
 createNote('quarter', 1, 'D'),
 createNote('half', 1, 'D'),
 createNote('quarter', 0, 'B')
+]);
 
+applyTact([
+createNote('quarter', 1, 'D'),
+createNote('half', 1, 'D'),
+createNote('quarter', 0, 'B')
 ]);
 
 applyTact([
@@ -145,7 +150,8 @@ createNote('eighth', 1, 'C')
 
 applyTact([
 createNote('eighth', 0, 'B'),
-createNote('half', 0, 'G'),
+createNote('eighth', 0, 'A'),
+createNote('quarter', 0, 'G'),
 createNote('quarter', 0, 'G'),
 createNote('quarter', 0, 'G')
 ]);
