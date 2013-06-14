@@ -34,10 +34,10 @@ require(['jquery', 'browserdetect', 'bootstrap.min'], function ($, AC) {
 			return;
 		}
 	}
+	$('#intro').addClass('ready');
 	if(location.host === 'magic-tune.com' || location.host === 'magic-tune.dk') {
 		return;
 	}
-	$('#intro').addClass('ready');
 
 	require(['fM', 'l2p'], function (fM, L2P) {
 		l2p	= L2P;
