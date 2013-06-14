@@ -2,7 +2,7 @@
 $this
 # System
 ->SetMenu('system_')
-->Set('title_welcome', 'Velkommen til Play.now')
+->Set('title_welcome', 'Velkommen til Magic Tune')
 
 # Global
 ->SetMenu('global_')

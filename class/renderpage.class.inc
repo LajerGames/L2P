@@ -24,7 +24,7 @@ class PageRenderer
 	* @param string $strTitle
 	* @param array $arrCSSFiles
 	*/
-	function Renderpage(Language $oLang, $strHtmlContent, $strTitle = 'play.now', $arrCSSFiles = array())
+	function Renderpage(Language $oLang, $strHtmlContent, $strTitle = 'Magic Tune', $arrCSSFiles = array())
 	{
 		$strCSSFiles = '';
 		if(is_array($arrCSSFiles) && count($arrCSSFiles) > 0)
