@@ -58,6 +58,7 @@ class UserHandler
 		}
 		require_once(SERVER_PROJECT_ROOT_LIBS.'PHPMailer_5.2.2-beta2/class.phpmailer.php');
 		$oMail = new phpmailer();
+		$oMail->IsSendmail();
 
 		$oMail->From        = SYSTEM_MAIL;
 		$oMail->FromName    = SYSTEM_NAME;

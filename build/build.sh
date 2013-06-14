@@ -1,3 +1,3 @@
 #!/bin/sh
 
-node r.js -o build.js minimize=none
+node /srv/http/l2p/build/r.js -o /srv/http/l2p/build/build.js optimize=none

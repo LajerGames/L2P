@@ -1,6 +1,7 @@
 <?php
 require_once($_SERVER['DOCUMENT_ROOT'].'/include/config.php');
 
+/*
 #Hack 1
 if(!isset($oCreateUserForm))
 {
@@ -15,6 +16,11 @@ if(!isset($oCreateUserForm))
 $strBody    = $oCreateUserForm->RenderFields(false);
 
 $strDialog	= $oPageRenderer->RenderDialogAction($oTemplate, $oLang->Get('create_user_headline'), $strBody, '#8D32B7', $oLang->Get('create_user_submit'));
+*/
+
+$strBody	= 'PREVIEW';
+
+$strDialog	= $oPageRenderer->RenderDialogAction($oTemplate, $oLang->Get('global_closed_preview'), $oLang->Get('global_closed_preview'), '#8D32B7', '');
 
 if(IS_DIALOG)
 {

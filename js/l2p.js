@@ -71,15 +71,19 @@ define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, opt
 						L2P.$modal	= $(modalText).addClass('modal-action');
 						L2P.$modal.find('.modal-header').css('background-color', color).find(' h2').text(title);
 						L2P.$modal.find('.modal-body').html(html);
-						L2P.$modal.find('.modal-footer button.btn-primary').html(submitText);
+						if(submitText === '') {
+							L2P.$modal.find('.modal-footer button.btn-primary').remove();
+						} else {
+							L2P.$modal.find('.modal-footer button.btn-primary').html(submitText);
+						}
 						L2P.$modal.find('button.btn[data-dismiss]').text(lang.global_button_close);
 
 						if(normalPost) {
 
 							var	action	= url || document.location.pathname;
-							if(getQueryString() !== '')
+							if(location.search.substring(1) !== '')
 							{
-								action += "?" + getQueryString();
+								action += "?" + getQuerlocation.search.substring(1);
 							}
 
 							L2P.$modal.attr('action', action).attr('method', 'post');

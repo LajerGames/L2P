@@ -57,7 +57,7 @@ require(['fragments/game', 'game/game', 'game/tact', 'game/note', 'game/options'
 	applyTact([
 		createNote('quarterPeriod', 0, 'A'),
 		createNote('quarter', 0, 'A'),
-		createNote('eighth', 1, 'B')
+		createNote('eighth', 0, 'B')
 	]);
 
 	applyTact([
@@ -66,7 +66,7 @@ require(['fragments/game', 'game/game', 'game/tact', 'game/note', 'game/options'
 	]);
 
 	applyTact([
-		createNote('quarter', 1, 'B'),
+		createNote('quarter', 0, 'B'),
 		createNote('eighth', 0, 'A'),
 		createNote('quarter', 0, 'B'),
 		createNote('eighth', 1, 'C')
@@ -124,8 +124,8 @@ require(['fragments/game', 'game/game', 'game/tact', 'game/note', 'game/options'
 
 	applyTact([
 		createNote('quarterPeriod', 0, 'F'),
-		createNote('quarter', 0, 'C'),
-        createNote('eighth', 0, 'C')
+		createRest('quarter'),
+        createRest('eighth')
 	]);
 
 	gameController.setGame(game);

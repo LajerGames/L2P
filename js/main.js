@@ -33,12 +33,14 @@ require(['jquery', 'browserdetect'], function ($, AC) {
 			}
 		});
 	}
-	$intro	=
-		$('#intro')
-			.addClass('ready');
-	setTimeout(function () {
-		$intro.remove();
-	}, 2000);
+	$intro	= $('#intro');
+	if($intro.length > 0) {
+		$intro.addClass('ready');
+		setTimeout(function () {
+			$intro.remove();
+		}, 2000);
+	}
+
 	if(location.host === 'magic-tune.com' || location.host === 'magic-tune.dk') {
 		return;
 	}
@@ -143,10 +145,3 @@ require(['jquery', 'browserdetect'], function ($, AC) {
 		});
 	});
 });
-function getQueryString() {
-	var assoc  = {};
-	var decode = function (s) { return decodeURIComponent(s.replace(/\+/g, " ")); };
-	var queryString = location.search.substring(1);
-
-	return queryString;
-}

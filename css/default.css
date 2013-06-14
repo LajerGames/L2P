@@ -279,3 +279,9 @@ table#ViolinFingerBoard td div {
 	100% { opacity: 0;}
 }
 
+body.ShowGame.song #logo svg path {
+    fill: #71C211;
+}
+body.ShowGame.scale #logo svg path {
+    fill: #E2A30C;
+}

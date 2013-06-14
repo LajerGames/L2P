@@ -19,6 +19,7 @@ $this
 ->Set('new', 'New')
 ->Set('last', 'Last')
 ->Set('octave', 'Octave')
+->Set('closed_preview', 'Closed Preview')
 
 # Validation Errors
 ->SetMenu('validation_')
