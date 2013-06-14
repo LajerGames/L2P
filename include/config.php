@@ -20,8 +20,9 @@ define('HTTP_PROJECT_ROOT_CSS', HTTP_PROJECT_ROOT.'css/');
 define('HTTP_PROJECT_ROOT_JAVASCRIPT', HTTP_PROJECT_ROOT.'js/');
 define('HTTP_PROJECT_ROOT_CLASS', HTTP_PROJECT_ROOT.'class/');
 define('HTTP_PROJECT_ROOT_MODULES', HTTP_PROJECT_ROOT.'modules/');
+define('HTTP_PROJECT_ROOT_MODULES', HTTP_PROJECT_ROOT.'include/');
 
-// Name some constants
+# Name some constants
 define('SYSTEM_NAME', 'L2P');
 define('SYSTEM_MAIL', 'noreply@l2p.com');
 define('SYSETM_DOMANE', 'http://l2p.fmads.dk/');

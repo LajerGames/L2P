@@ -216,7 +216,7 @@ table#ViolinFingerBoard span.TopNote {
     color: #000;
     line-height: 44px;
     -webkit-border-radius: 22px;
-    display: block; 
+    display: block;
 }
 table#ViolinFingerBoard td div {
     height: 250px;
@@ -236,7 +236,7 @@ table#ViolinFingerBoard td div {
 }
 
 #system_requirements {
-	z-index: 1050;
+	z-index: 10500;
 	position: fixed;
 	top: 50%;
 	left: 50%;
@@ -245,3 +245,37 @@ table#ViolinFingerBoard td div {
 	height: 200px;
 	margin-top: -100px;
 }
+
+#intro {
+    position: absolute;  left: 0;  top: 0;  width: 100%;  height: 100%;  background: #FFF;  z-index: 9999;
+    opacity: 1;
+    background-color: #71C211;
+    -webkit-transition: 1s;
+    vertical-align: middle;
+}
+#intro svg {
+    opacity: 0;
+    height: 13.5vw;
+    width: 80vw;
+    display: inline-block;
+    position: relative;
+    top: 50%;
+    margin-top: -5.75vw;
+    left: 50%;
+    margin-left: -40vw;
+    z-index: 1000;
+}
+#intro.ready {
+	opacity: 0;
+	-webkit-animation-name: intro;
+	-webkit-animation-duration: 2s;
+}
+#intro.ready svg {
+    opacity: 1;
+}
+@-webkit-keyframes intro {
+	0% { opacity: 1;}
+	50% { opacity: 1;}
+	100% { opacity: 0;}
+}
+

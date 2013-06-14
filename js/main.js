@@ -3,7 +3,8 @@ var svgController,
 	fm;
 require.config({
 	paths:	{
-		'socket.io':	'/node/node_modules/socket.io/node_modules/socket.io-client/dist/socket.io.min'
+		'socket.io':	'/node/node_modules/socket.io/node_modules/socket.io-client/dist/socket.io.min',
+		'jquery':		'jquery-2.0.2.min'
 	},
 	shim:	{
 		highcharts:	{
@@ -14,7 +15,7 @@ require.config({
 		}
 	}
 });
-require(['jquery', 'browserdetect', '/bootstrap/js/bootstrap.min.js'], function ($, AC) {
+require(['jquery', 'browserdetect', 'bootstrap.min'], function ($, AC) {
 	if(!AC.Detector.isChrome() || (AC.Detector.isWin() && !AC.Detector.winAtLeastVersion(6))) {
 		if(location.host !== 'l2p.fmads.dk') {
 			$([
@@ -33,6 +34,11 @@ require(['jquery', 'browserdetect', '/bootstrap/js/bootstrap.min.js'], function 
 			return;
 		}
 	}
+	$('#intro').addClass('ready');
+	if(location.host === 'magic-tune.com' || location.host === 'magic-tune.dk') {
+		return;
+	}
+
 	require(['fM', 'l2p'], function (fM, L2P) {
 		l2p	= L2P;
 		fm	= fM;

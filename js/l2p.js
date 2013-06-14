@@ -1,4 +1,4 @@
-define(['jquery', 'api', 'game/options', '/bootstrap/js/bootstrap.min.js'], function ($, api, options) {
+define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, options) {
 	function goBack(e, doGoBack) {
 		if(doGoBack !== false) {
 			window.history.back();
@@ -67,7 +67,7 @@ define(['jquery', 'api', 'game/options', '/bootstrap/js/bootstrap.min.js'], func
 		dialog:	{
 			action:	function (url, title, html, color, submitText, normalPost, callback) {
 				api.get.lang(function (lang) {
-					require(['fM', 'text!/templates/modal.html', '/bootstrap/js/bootstrap.min.js'], function (fM, modalText) {
+					require(['fM', 'text!templates/modal.html'], function (fM, modalText) {
 						L2P.$modal	= $(modalText).addClass('modal-action');
 						L2P.$modal.find('.modal-header').css('background-color', color).find(' h2').text(title);
 						L2P.$modal.find('.modal-body').html(html);
@@ -130,11 +130,11 @@ define(['jquery', 'api', 'game/options', '/bootstrap/js/bootstrap.min.js'], func
 			},
 			info: function (url, title, html, color, buttons, script) {
 				api.get.lang(function (lang) {
-					var	requireScripts	= ['fM', 'text!/templates/info.html', '/bootstrap/js/bootstrap.min.js'];
+					var	requireScripts	= ['fM', 'text!templates/info.html'];
 					if(script) {
 						requireScripts.push('dialog/info/'+script);
 					}
-					require(requireScripts, function (fM, modalText, UNUSE, infoScript) {
+					require(requireScripts, function (fM, modalText, infoScript) {
 						if(L2P.$modal) {
 							//L2P.$modal.off('hide').modal('hide');
 						}
@@ -186,7 +186,7 @@ define(['jquery', 'api', 'game/options', '/bootstrap/js/bootstrap.min.js'], func
 					//L2P.$modal.trigger('hide-no-back');
 				}
 
-				require(['fM', 'text!/templates/game.html', 'game/game-controller', 'game/sound', 'sound-input', 'compass', '/bootstrap/js/bootstrap.min.js', 'underscore-min'], function (fM, gameText, GameController, Sound, SoundInput, Compass) {
+				require(['fM', 'text!templates/game.html', 'game/game-controller', 'game/sound', 'sound-input', 'compass', 'underscore-min'], function (fM, gameText, GameController, Sound, SoundInput, Compass) {
 					var	generate	= !L2P.gameController,
 						$compassBox	= $('div.ContentBoxGameCompass'),
 						compass		= new Compass($compassBox),
