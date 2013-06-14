@@ -6638,15 +6638,19 @@ require(['jquery', 'browserdetect'], function ($, AC) {
 		});
 	}
 	$intro	= $('#intro');
+
+	if(location.host === 'magic-tune.com' || location.host === 'magic-tune.dk') {
+		if($intro.length > 0) {
+			$intro.addClass('show');
+		}
+		return;
+	}
+
 	if($intro.length > 0) {
 		$intro.addClass('ready');
 		setTimeout(function () {
 			$intro.remove();
 		}, 2000);
-	}
-
-	if(location.host === 'magic-tune.com' || location.host === 'magic-tune.dk') {
-		return;
 	}
 
 	require(['fM', 'l2p'], function (fM, L2P) {
