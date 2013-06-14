@@ -1,7 +1,7 @@
 ({
 	baseUrl:	'../js/',
 	name:		'main',
-	out:		'magic-tune.js',
+	out:		'output/magic-tune.js',
 	findNestedDependencies:	true,
 	paths:		{
 		jquery:	'jquery-2.0.2.min',

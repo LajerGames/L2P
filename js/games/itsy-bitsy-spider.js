@@ -25,7 +25,7 @@ require(['fragments/game', 'game/game', 'game/tact', 'game/note', 'game/options'
 		createRest('quarter'),
 		createRest('quarter'),
 		createRest('eighth'),
-		createNote('eighth', 0, 'D')
+		createNote('eighth', 0, 'C')
 	]);
 
 	applyTact([
@@ -42,37 +42,71 @@ require(['fragments/game', 'game/game', 'game/tact', 'game/note', 'game/options'
 	]);
 
 	applyTact([
-		createNote('quarter', 0, 'A'),
-		createNote('eighth', 0, 'G'),
-		createNote('quarter', 0, 'A'),
-		createNote('eighth', 0, 'B')
+		createNote('quarter', 0, 'G'),
+		createNote('eighth', 0, 'F'),
+		createNote('quarter', 0, 'G'),
+		createNote('eighth', 0, 'A')
 	]);
 
 	applyTact([
-		createNote('halfPeriod', 0, 'G')
-
+		createNote('quarterPeriod', 0, 'F'),
+        createRest('quarter'),
+        createRest('eighth')
 	]);
 
 	applyTact([
-		createNote('quarterPeriod', 0, 'B'),
+		createNote('quarterPeriod', 0, 'A'),
+		createNote('quarter', 0, 'A'),
+		createNote('eighth', 1, 'B')
+	]);
+
+	applyTact([
+		createNote('quarterPeriod', 1, 'C'),
+		createNote('quarterPeriod', 1, 'C')
+	]);
+
+	applyTact([
+		createNote('quarter', 1, 'B'),
+		createNote('eighth', 0, 'A'),
 		createNote('quarter', 0, 'B'),
 		createNote('eighth', 1, 'C')
 	]);
 
 	applyTact([
-		createNote('quarterPeriod', 1, 'D'),
-		createNote('quarterPeriod', 1, 'D')
+        createNote('quarterPeriod', 0, 'A'),
+        createRest('quarter'),
+        createRest('eighth')
+    ]);
+
+	applyTact([
+		createNote('quarterPeriod', 0, 'F'),
+		createNote('quarter', 0, 'F'),
+		createNote('eighth', 0, 'G')
 	]);
 
 	applyTact([
-		createNote('quarter', 1, 'C'),
-		createNote('eighth', 0, 'B'),
+		createNote('quarterPeriod', 0, 'A'),
+		createNote('quarterPeriod', 0, 'A')
+	]);
+
+	applyTact([
+		createNote('quarter', 0, 'G'),
+		createNote('eighth', 0, 'F'),
+		createNote('quarter', 0, 'G'),
+		createNote('eighth', 0, 'A')
+	]);
+
+	applyTact([
+		createNote('quarterPeriod', 0, 'F'),
 		createNote('quarter', 0, 'C'),
-		createNote('eighth', 1, 'D')
+		createNote('eighth', 0, 'C')
 	]);
 
 	applyTact([
-		createNote('halfPeriod', 0, 'B')
+		createNote('quarter', 0, 'F'),
+		createNote('eighth', 0, 'F'),
+		createNote('quarter', 0, 'F'),
+		createNote('eighth', 0, 'G')
 	]);
 
 	applyTact([
@@ -82,47 +116,16 @@ require(['fragments/game', 'game/game', 'game/tact', 'game/note', 'game/options'
 	]);
 
 	applyTact([
-		createNote('quarterPeriod', 0, 'B'),
-		createNote('quarterPeriod', 0, 'B')
-	]);
-
-	applyTact([
-		createNote('quarter', 0, 'A'),
-		createNote('eighth', 0, 'G'),
-		createNote('quarter', 0, 'A'),
-		createNote('eighth', 0, 'B')
-	]);
-
-	applyTact([
-		createNote('quarterPeriod', 0, 'G'),
-		createNote('quarter', 0, 'D'),
-		createNote('eighth', 0, 'D')
-	]);
-
-	applyTact([
 		createNote('quarter', 0, 'G'),
-		createNote('eighth', 0, 'G'),
+		createNote('eighth', 0, 'F'),
 		createNote('quarter', 0, 'G'),
 		createNote('eighth', 0, 'A')
 	]);
 
 	applyTact([
-		createNote('quarterPeriod', 0, 'B'),
-		createNote('quarter', 0, 'B'),
-		createNote('eighth', 0, 'B')
-	]);
-
-	applyTact([
-		createNote('quarter', 0, 'A'),
-		createNote('eighth', 0, 'G'),
-		createNote('quarter', 0, 'A'),
-		createNote('eighth', 0, 'B')
-	]);
-
-	applyTact([
-		createNote('quarterPeriod', 0, 'G'),
-		createNote('quarter', 0, 'G', false, true),
-		createRest('eighth')
+		createNote('quarterPeriod', 0, 'F'),
+		createNote('quarter', 0, 'C'),
+        createNote('eighth', 0, 'C')
 	]);
 
 	gameController.setGame(game);
