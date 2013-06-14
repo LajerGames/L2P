@@ -270,6 +270,7 @@ table#ViolinFingerBoard td div {
 	-webkit-animation-name: intro;
 	-webkit-animation-duration: 2s;
 }
+#intro.show svg,
 #intro.ready svg {
     opacity: 1;
 }
