@@ -266,9 +266,9 @@ table#ViolinFingerBoard td div {
     z-index: 1000;
 }
 #intro.ready {
-	/*opacity: 0;
+	opacity: 0;
 	-webkit-animation-name: intro;
-	-webkit-animation-duration: 2s;*/
+	-webkit-animation-duration: 2s;
 }
 #intro.ready svg {
     opacity: 1;

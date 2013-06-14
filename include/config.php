@@ -1,8 +1,7 @@
 <?php
 session_start();
-ini_set('error_reporting', E_ERROR);
 // Ensure the project is UTF-8
-header ('Content-type: text/html; charset=utf-8');
+header('Content-type: text/html; charset=utf-8');
 // Define project path variables
 
 # Server root
@@ -12,6 +11,7 @@ define('SERVER_PROJECT_ROOT_MODULES', SERVER_PROJECT_ROOT.'/modules/');
 define('SERVER_PROJECT_ROOT_CLASS', SERVER_PROJECT_ROOT.'/class/');
 define('SERVER_PROJECT_ROOT_CLASS_MODULE', SERVER_PROJECT_ROOT_CLASS.'/module-classes/');
 define('SERVER_PROJECT_ROOT_LIBS', SERVER_PROJECT_ROOT.'/libs/');
+define('SERVER_PROJECT_ROOT_INCLUDE', SERVER_PROJECT_ROOT.'/include/');
 
 # Http root
 define('HTTP_PROJECT_ROOT', '/'); // Until we have our own server we have to use entire http url to get to project root
@@ -20,12 +20,10 @@ define('HTTP_PROJECT_ROOT_CSS', HTTP_PROJECT_ROOT.'css/');
 define('HTTP_PROJECT_ROOT_JAVASCRIPT', HTTP_PROJECT_ROOT.'js/');
 define('HTTP_PROJECT_ROOT_CLASS', HTTP_PROJECT_ROOT.'class/');
 define('HTTP_PROJECT_ROOT_MODULES', HTTP_PROJECT_ROOT.'modules/');
-define('HTTP_PROJECT_ROOT_MODULES', HTTP_PROJECT_ROOT.'include/');
+
+require_once(SERVER_PROJECT_ROOT_INCLUDE.'conf.php');
 
 # Name some constants
-define('SYSTEM_NAME', 'L2P');
-define('SYSTEM_MAIL', 'noreply@l2p.com');
-define('SYSETM_DOMANE', 'http://l2p.fmads.dk/');
 define('DEFAULT_LANGUAGE', 'da-DK');
 
 # Patterns
@@ -42,7 +40,7 @@ $strRequestURI = strpos($_SERVER['REQUEST_URI'], '?') !== false ? substr($_SERVE
 define('REQUEST_URI', !IS_DIALOG ? $strRequestURI : str_replace('/dialog', '', $strRequestURI));
 
 // Connect to the database
-$oMysqli = new mysqli('localhost', 'l2p', 'yE98Ebre', 'l2p');
+$oMysqli = new mysqli('localhost', MYSQL_USER, MYSQL_PASS, MYSQL_DATABASE);
 $oMysqli->set_charset('utf8');
 
 // Include and create new instance of neccesary classes

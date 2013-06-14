@@ -3,38 +3,42 @@ var svgController,
 	fm;
 require.config({
 	paths:	{
-		'socket.io':	'/node/node_modules/socket.io/node_modules/socket.io-client/dist/socket.io.min',
 		'jquery':		'jquery-2.0.2.min'
 	},
 	shim:	{
 		highcharts:	{
 			exports:	'Highcharts'
-		},
-		'socket.io': {
-			exports:	'io'
 		}
 	}
 });
-require(['jquery', 'browserdetect', 'bootstrap.min'], function ($, AC) {
+require(['jquery', 'browserdetect'], function ($, AC) {
+	var	$intro;
 	if(!AC.Detector.isChrome() || (AC.Detector.isWin() && !AC.Detector.winAtLeastVersion(6))) {
-		if(location.host !== 'l2p.fmads.dk') {
-			$([
-				'<div id="system_requirements">',
-					'<h1>System Requirements</h1>',
-					'<ul>',
-						'<li>Windows Vista or newer</li>',
-						'<li>Chrome version 27 or newer</li>',
-					'</ul>',
-				'</div>'
-			].join('')).modal({
-				backdrop:	'static',
-				keyboard:	false,
-				show:		true
-			});
-			return;
-		}
+		require(['bootstrap.min'], function () {
+			if(location.host !== 'l2p.fmads.dk') {
+				$([
+					'<div id="system_requirements">',
+						'<h1>System Requirements</h1>',
+						'<ul>',
+							'<li>Windows Vista or newer</li>',
+							'<li>Chrome version 27 or newer</li>',
+						'</ul>',
+					'</div>'
+				].join('')).modal({
+					backdrop:	'static',
+					keyboard:	false,
+					show:		true
+				});
+				return;
+			}
+		});
 	}
-	$('#intro').addClass('ready');
+	$intro	=
+		$('#intro')
+			.addClass('ready');
+	setTimeout(function () {
+		$intro.remove();
+	}, 2000);
 	if(location.host === 'magic-tune.com' || location.host === 'magic-tune.dk') {
 		return;
 	}
@@ -80,7 +84,6 @@ require(['jquery', 'browserdetect', 'bootstrap.min'], function ($, AC) {
 			}
 			var	hasFirstPopstate	= false;
 			$(window).on('popstate', function (e, a, b, c) {
-				//console.log(e, a, b, c);
 				if(L2P.$modal && L2P.$modal.is(':visible')) {
 					L2P.$modal.modal('hide');
 				}

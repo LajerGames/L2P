@@ -673,7 +673,10 @@ function reportError($strErrorDescription, $strUniqueErrorID = "", $strFilename 
 	- HAVE FUN!!!
 	";
 
-	echo $message;
+	if(SYSTEM_DEV)
+	{
+		echo $message;
+	}
 
 	return;
 }
