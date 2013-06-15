@@ -8,7 +8,7 @@ body, div, p, span, td, a, button {
 	color :#FFF
 }
 h2 {
-    font-size: 4vh;
+	font-size: 4vh;
 }
 h3 {
 	font-size: 2vh;
@@ -26,7 +26,7 @@ a {
 }
 .clear--left {
 	float: none;
-	clear: left;
+	clear: both;
 }
 .clear--right {
 	float: none;
@@ -42,7 +42,7 @@ select, textarea, input[type="text"], input[type="password"], input[type="dateti
 	box-sizing: content-box;
 }
 input[type="checkbox"], input[type="radio"] {
-    margin: 1vh 2vw 2vh 2vw;
+	margin: 1vh 2vw 2vh 2vw;
 }
 input.std::-webkit-input-placeholder {
 	color: #1DBAE7;
@@ -200,29 +200,29 @@ body > div.countdown > div.countdown-illustration div#ViolinFingerBoard {
 * Illustrations class
 */
 table#ViolinFingerBoard {
-    width: 200px;
-    margin-top: 30px;
-    position: relative;
+	width: 200px;
+	margin-top: 30px;
+	position: relative;
 }
 table#ViolinFingerBoard td {
-    padding-left: 3px;
-    vertical-align: top;
-    text-align: center;
-    position: relative;
+	padding-left: 3px;
+	vertical-align: top;
+	text-align: center;
+	position: relative;
 }
 table#ViolinFingerBoard span.TopNote {
-    background-color: #95A5A6;
-    width: 44px;
-    color: #000;
-    line-height: 44px;
-    -webkit-border-radius: 22px;
-    display: block;
+	background-color: #95A5A6;
+	width: 44px;
+	color: #000;
+	line-height: 44px;
+	-webkit-border-radius: 22px;
+	display: block;
 }
 table#ViolinFingerBoard td div {
-    height: 250px;
-    width: 2px;
-    background-color: #000;
-    display: inline-block;
+	height: 250px;
+	width: 2px;
+	background-color: #000;
+	display: inline-block;
 }
 
 
@@ -247,23 +247,23 @@ table#ViolinFingerBoard td div {
 }
 
 #intro {
-    position: absolute;  left: 0;  top: 0;  width: 100%;  height: 100%;  background: #FFF;  z-index: 9999;
-    opacity: 1;
-    background-color: #71C211;
-    -webkit-transition: 1s;
-    vertical-align: middle;
+	position: absolute;  left: 0;  top: 0;  width: 100%;  height: 100%;  background: #FFF;  z-index: 9999;
+	opacity: 1;
+	background-color: #71C211;
+	-webkit-transition: 1s;
+	vertical-align: middle;
 }
 #intro svg {
-    opacity: 0;
-    height: 13.5vw;
-    width: 80vw;
-    display: inline-block;
-    position: relative;
-    top: 50%;
-    margin-top: -5.75vw;
-    left: 50%;
-    margin-left: -40vw;
-    z-index: 1000;
+	opacity: 0;
+	height: 13.5vw;
+	width: 80vw;
+	display: inline-block;
+	position: relative;
+	top: 50%;
+	margin-top: -5.75vw;
+	left: 50%;
+	margin-left: -40vw;
+	z-index: 1000;
 }
 #intro.ready {
 	opacity: 0;
@@ -272,7 +272,7 @@ table#ViolinFingerBoard td div {
 }
 #intro.show svg,
 #intro.ready svg {
-    opacity: 1;
+	opacity: 1;
 }
 @-webkit-keyframes intro {
 	0% { opacity: 1;}
@@ -281,8 +281,8 @@ table#ViolinFingerBoard td div {
 }
 
 body.ShowGame.song #logo svg path {
-    fill: #71C211;
+	fill: #71C211;
 }
 body.ShowGame.scale #logo svg path {
-    fill: #E2A30C;
+	fill: #E2A30C;
 }
