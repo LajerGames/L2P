@@ -24,7 +24,9 @@ class UserHandler
 				users.game_time,
 				users_settings.concert_pitch,
 				users_settings.colored_notes,
-				users_settings.kiddie_mode
+                users_settings.kiddie_mode,
+                users_settings.countdown_time,
+				users_settings.metronome
 			FROM
 				users
 			LEFT JOIN

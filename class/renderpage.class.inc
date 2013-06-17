@@ -70,12 +70,14 @@ class PageRenderer
         }
 
 		$arrL2PGlobals	= array(
-			'username'		=> $_SESSION['UserObject']->username,
-			'kiddie_mode'	=> intval($_SESSION['UserObject']->kiddie_mode),
-			'colored_notes'	=> intval($_SESSION['UserObject']->colored_notes),
-			'concert_pitch'	=> empty($_SESSION['UserObject']->concert_pitch) ? 442 : $_SESSION['UserObject']->concert_pitch,
-			'lang'			=> $arrPreloadLang,
-            'internal_load' => $bInternalPageLoad
+			'username'		    => $_SESSION['UserObject']->username,
+			'kiddie_mode'	    => intval($_SESSION['UserObject']->kiddie_mode),
+			'colored_notes'	    => intval($_SESSION['UserObject']->colored_notes),
+			'concert_pitch'	    => empty($_SESSION['UserObject']->concert_pitch) ? 442 : $_SESSION['UserObject']->concert_pitch,
+			'lang'			    => $arrPreloadLang,
+            'internal_load'     => $bInternalPageLoad,
+            'countdown_time'    => intval($_SESSION['UserObject']->countdown_time),
+            'metronome'         => intval($_SESSION['UserObject']->metronome)
 		);
 
 		return '

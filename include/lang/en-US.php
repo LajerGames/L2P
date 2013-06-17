@@ -104,7 +104,7 @@ $this
 ->Set('submit', 'Create')
 ->Set('username', 'Username')
 ->Set('email', 'E-mail')
-->Set('language', 'Vælg sprog')
+->Set('language', 'Choose language')
 ->Set('repeat_email', 'Repeat e-mail')
 ->Set('password', 'Password')
 ->Set('repeat_password', 'Repeat password')
@@ -141,6 +141,8 @@ $this
 ->Set('color_notes', 'Colored notes')
 ->Set('kiddie_mode', 'Kiddie mode')
 ->Set('validation_concert_pitch', 'Concert pitch must be numeric')
+->Set('countdown_time', 'Gamestart countdown')
+->Set('metronome', 'Metronome')
 
 # Activate user
 ->SetMenu('activate_')

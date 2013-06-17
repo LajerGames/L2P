@@ -141,6 +141,8 @@ $this
 ->Set('color_notes', 'Farvede noder')
 ->Set('kiddie_mode', 'Begyndertilstand')
 ->Set('validation_concert_pitch', 'Kammertonen skal være numerisk')
+->Set('countdown_time', 'Spilstart nedtælling')
+->Set('metronome', 'Metronom')
 
 # Activate user
 ->SetMenu('activate_')
