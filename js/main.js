@@ -34,13 +34,6 @@ require(['jquery', 'browserdetect'], function ($, AC) {
 		});
 	}
 	$intro	= $('#intro');
-/*
-	if(location.host === 'magic-tune.com' || location.host === 'magic-tune.dk') {
-		if($intro.length > 0) {
-			$intro.addClass('show');
-		}
-		return;
-	}*/
 
 	if($intro.length > 0) {
 		$intro.addClass('ready');
@@ -58,7 +51,7 @@ require(['jquery', 'browserdetect'], function ($, AC) {
 				break;
 		}
 
-		$(document).ready(function () {
+		$(function () {
 			var	$CenteringContainer	= $('#CenteringContainer');
 			L2P.click.set($CenteringContainer);
 
@@ -88,7 +81,7 @@ require(['jquery', 'browserdetect'], function ($, AC) {
 					document.title	= $CenteringContainer.attr('data-default-title');
 				}
 			}
-			var	hasFirstPopstate	= false;
+			var	hasFirstPopstate	= true; //false;
 			$(window).on('popstate', function (e, a, b, c) {
 				if(L2P.$modal && L2P.$modal.is(':visible')) {
 					L2P.$modal.modal('hide');
@@ -108,7 +101,7 @@ require(['jquery', 'browserdetect'], function ($, AC) {
 				}
 				hasFirstPopstate	= true;
 			});
-			fM.link.navigate(document.location.pathname);
+			$(window).trigger('popstate');
 
 			$('#DialogContainer').each(function () {
 				var	$this		= $(this),

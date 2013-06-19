@@ -169,26 +169,33 @@ function GetMusic($oSql, $strType = 'song', $iLimit = 0, $strSearch = '')
 		';
 	}
 
+    $strLang = $_COOKIE['country_code'] == 'da-DK'? 'da-DK' : 'en-US';
+
 	return $rMusic = $oSql->Select('
-		SELECT
-			games.id,
-			games.title,
-			games.permlink,
-			games.availability,
-			games.octave
-		FROM
-			games
-		WHERE
-			games.deleted    = 0
-		 && games.type       = "'.$strType.'"
-		 '.$strWhereCondition.'
-		GROUP BY
-			games.title
-		ORDER BY
-			games.availability ASC,
-			games.title ASC
-		'.$strLimit.'
-	');
+        SELECT
+            games.id,
+            games_titles.title,
+            games.permlink,
+            games.availability,
+            games.octave
+        FROM
+            games
+        RIGHT JOIN
+            games_titles ON
+                games_titles.deleted = 0
+             && games_titles.game_id = games.id
+             && games_titles.lang    = "'.$strLang.'"
+        WHERE
+            games.deleted    = 0
+         && games.type       = "'.$strType.'"
+         '.$strWhereCondition.'
+        GROUP BY
+            games_titles.title
+        ORDER BY
+            games.availability ASC,
+            games.title ASC
+        '.$strLimit.'
+    ');
 }
 
 /**

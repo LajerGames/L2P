@@ -1,6 +1,58 @@
 <?php
 // Always have access to config file
 require_once($_SERVER['DOCUMENT_ROOT'].'/include/config.php');
+function SaveTitle($strLang, $iGameID, $strTitle)
+{
+    global $oSql;
+
+    $oSql->Insert('games_titles', array('lang' => $strLang, 'game_id' => $iGameID, 'title' => $strTitle));   
+}
+
+if(!empty($_POST))
+{
+    SaveTitle('da-DK', $_POST['GameID'], $_POST['da-DK']);
+    SaveTitle('en-US', $_POST['GameID'], $_POST['en-US']);
+
+    header('location: /manipulate-games.php');
+    exit;
+}
+
+// Fetch games which hasn't received a multilanguage title yet
+$rUntitledSongs = $oSql->Select('
+    SELECT
+        *
+    FROM
+        games
+    WHERE
+        games.deleted = 0
+     && games.id NOT IN(
+        SELECT
+            games_titles.game_id
+        FROM
+            games_titles
+     )
+');
+
+$oUntitledSong = mysqli_fetch_object($rUntitledSongs);
+echo '
+'.$oUntitledSong->title.':
+<form action="" method="post">
+<input type="hidden" name="GameID" value="'.$oUntitledSong->id.'" />
+<table border="0" cellspacing="0" cellpadding="8">
+<tr>
+    <td>dk-DK</td>
+    <td><input type="text" name="da-DK" value="" autofocus /></td>
+</tr>
+<tr>
+    <td>en-US</td>
+    <td><input type="text" name="en-US" value="'.$oUntitledSong->title.'" /></td>
+</tr>
+<tr>
+    <td>&nbsp;</td>
+    <td><input type="submit" value="LEEEEEEROOOOOOOY (jenkins)" /></td>
+</tr>
+</table>
+';
 exit;
 // Fetch all scales
 $rScales = $oSql->Select('

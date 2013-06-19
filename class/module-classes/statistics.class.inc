@@ -131,13 +131,13 @@ class statistics
     * @param array $arrGameData
     * @param array $arrAverageData
     */
-    private function GetPrecisionArray($arrGameData, $arrAverageData = null)
+    private function GetPrecisionArray($arrGameData, $arrAverageData = array())
     {
         // Get note precision
         $arrNotesPrecision = $this->CalculateNotePrecision($arrGameData);
         // If we have a average gamedata we'll need to put that into a neat array aswell
         $arrAverageNotePrecision = array();
-        if(is_array($arrAverageData))
+        if(count($arrAverageData) > 0)
         {
             $arrAverageNotePrecision = $this->CalculateNotePrecision($arrAverageData);
         }
@@ -198,6 +198,10 @@ class statistics
             // Loop through all of the notes in the statistics
             foreach($arrGameStatistics as $strNote => $arrStatistics)
             {
+                if($strNote == ',')
+                {
+                    continue;
+                }
                 // Save the NoteLetter with no octave, sharp and flats
                 $strNoteLetter = substr($strNote, 0, 1);
 
@@ -215,7 +219,7 @@ class statistics
                 $arrNotesPrecision[$strNoteLetter]['played']        += $arrStatistics['played'];
             }
         }
-
+//echo '<br><br><hr><br><br>';
         return $arrNotesPrecision;
     }
 

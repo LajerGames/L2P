@@ -80,10 +80,12 @@ define(['jquery', 'l2p', 'api', 'fM'], function ($, L2P, api, fM) {
 	};
 	Playlist.prototype.start		= function () {
 		this.game_history_ids	= [];
+		this.loop				= -1;
 		this.restart();
 	};
 	Playlist.prototype.restart		= function () {
 		this.playing			= true;
+		this.playNow			= -1;
 		this.loop				+= 1;
 		this.nextGame();
 	};
@@ -114,7 +116,7 @@ define(['jquery', 'l2p', 'api', 'fM'], function ($, L2P, api, fM) {
 	Playlist.prototype.nextGame		= function () {
 		this.playNow	+= 1;
 		var	game	= this.games[this.playNow];
-		console.log('nextGame', game);
+		console.log('nextGame', game, this.playNow, this.games);
 		if(game) {
 			this.startGame(game);
 			this.firstPlay	= false;

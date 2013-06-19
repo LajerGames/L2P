@@ -210,7 +210,7 @@ $arrSavegame = array(
 );
 
 // Insert it <3
-$iGameHistoryID	= $oSql->Insert('users_games_history', $arrSavegame, 'Game saved');
+$iGameHistoryID	= $oSql->Insert('users_games_history', $arrSavegame);
 echo json_encode(array(
 	'game_history_id'	=>  $iGameHistoryID
 ));

@@ -90,6 +90,8 @@ define(['game/options', 'fM'], function (options, fM) {
 				duration	+= tact.type.nodes * that.secPrNode;
 			});
 
+			console.log(this.secPrNode, duration);
+
 			this.duration	= duration;
 		}
 

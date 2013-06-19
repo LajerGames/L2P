@@ -66,10 +66,14 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		});
 
 		for(var i = 50 + options.lineHeight; i <= 50 + options.lineHeight * 5; i += options.lineHeight) {
-			new SVGElement('line')
-				.setLine(0, i + options.topPos, '100%', i + options.topPos)
-				.setStroke('#000')
+			var	g	= new SVGElement('g')
 				.appendTo(this.svgBackground);
+
+			g.node.setAttribute('transform', 'translate(0, '+(i + options.topPos)+')');
+			new SVGElement('line')
+				.setLine(0, 0, '100%', 0)
+				.setStroke('#000')
+				.appendTo(g);
 		}
 		new SVGElement('image')
 			.setLink('/img/game/g-key.svg')
@@ -79,11 +83,15 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		this.svgStartContainer =
 			new SVGElement('g')
 				.appendTo(this.svgStart);
+		var	g	=
+			new SVGElement('g')
+				.appendTo(this.svgStart);
+		g.node.setAttribute('transform', 'translate('+(options.leftMargin + options.markerPos)+', '+(options.topPos + 25 + options.lineHeight)+')');
 		this.svgLine =
 			new SVGElement('line')
-				.setLine(options.leftMargin + options.markerPos, options.topPos + 25 + options.lineHeight, options.leftMargin + options.markerPos, options.topPos + 50 + options.lineHeight * 6)
+				.setLine(0, 0, 0, options.topPos + 50 + options.lineHeight * 6 - (options.topPos + 25 + options.lineHeight))
 				.setStroke('#090', 3)
-				.appendTo(this.svgStart);
+				.appendTo(g);
 		this.svgPointer	=
 			new SVGElement('use')
 				.setLink('#pointer')
@@ -160,7 +168,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 			if(this.useCountdown) {
 				api.get.lang(function (data) {
 					api.get.illustrations(function (illustration) {
-						L2P.countdown(3, data.game_start, that.game.title, illustration.illustration, function () {
+						L2P.countdown(L2P_global.countdown_time || 3, data.game_start, that.game.title, illustration.illustration, function () {
 							that.game.start();
 							that.$this.trigger('gameStart');
 
@@ -181,20 +189,44 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 	};
 	GameController.prototype.runGame	= function () {
 		var	gameController		= this,
-			totalWidth			= this.game.getWidth(),
+			totalWidth			= this.game.getWidth() - gameController.defWidth / 4,
 			totalDuration		= this.game.getDuration(),
 			currentLeft			= -this.svgNotes.getClientRects()[0].left,
-			relativeWidth		= totalWidth + currentLeft,
-			relativeDuration	= totalDuration * (totalWidth - currentLeft) / totalWidth;
+			relativeDuration	= totalDuration * (totalWidth - currentLeft) / totalWidth,
+			pulse				= 60 / gameController.game.speed * 1000;
 
-		this.paused	= false;
+		gameController.paused	= false;
 
-		this.SVGNotes.node.style.width				= totalWidth+'px';
+		gameController.SVGNotes.node.style.width	= (totalWidth + gameController.defWidth / 4)+'px';
 
-		this.SVGNotes.animateAbs(-totalWidth, -501, relativeDuration, this.gameDone.bind(this));
+		gameController.SVGNotes.animateAbs(-totalWidth, -501, relativeDuration, this.gameDone.bind(this));
+
+		$(gameController.svgLine.node).on('webkitAnimationEnd', function () {
+			gameController.svgLine.node.classList.remove('pulse');
+		});
+		var lastPulse	= Date.now(),
+			pulseFunc	= function () {
+				if(gameController.game && gameController.game.running) {
+					gameController.svgLine.node.classList.add('pulse');
+
+					setTimeout(pulseFunc, pulse - ((Date.now() - lastPulse) % pulse));
+				}
+			};
+
+		if(currentLeft === 0) {
+			setTimeout(function () {
+				gameController.svgLine.node.classList.add('pulse');
+				lastPulse	= Date.now();
+				setTimeout(pulseFunc, pulse);
+			}, pulse / 2 + pulse / 10);
+		} else {
+			gameController.svgLine.node.classList.add('pulse');
+			lastPulse	= Date.now();
+			setTimeout(pulseFunc, pulse);
+		}
 	};
 	GameController.prototype.pauseGame	= function () {
-		this.SVGNotes.animateAbs(-this.currentLeft() + 30, -501, 0);
+		this.SVGNotes.animateAbs((-Math.floor(this.currentLeft() / (this.defWidth / 4)) + 0.5) * (this.defWidth / 4) - 20, -501, 0);
 		this.paused	= true;
 	};
 	GameController.prototype.stopGame	= function () {
@@ -606,7 +638,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 				}
 				tact.nodes.forEach(function (note) {
 					var	noteLeftPos		= note.svgElement.getX() - newPos + 20,
-						noteLeftPosRel	= noteLeftPos + ((750 / 4) * (gameController.game.speed / 60) * (100 / 1000));
+						noteLeftPosRel	= noteLeftPos + ((750 / 4) * (gameController.game.speed / 60) * 0.1);
 
 					if(noteLeftPos <= (options.markerPos + options.leftMargin + 10) && (noteLeftPos + note.type.length * that.defWidth) > (options.markerPos + options.leftMargin + 10)) {
 						if(!note.hasPlayed && gameController.playSound) {
