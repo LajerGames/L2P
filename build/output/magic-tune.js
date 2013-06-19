@@ -2268,25 +2268,28 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 		$(gameController.svgLine.node).on('webkitAnimationEnd', function () {
 			gameController.svgLine.node.classList.remove('pulse');
 		});
-		var lastPulse	= Date.now(),
-			pulseFunc	= function () {
-				if(gameController.game && gameController.game.running) {
+
+		if(L2P_global.metronome) {
+			var lastPulse	= Date.now(),
+				pulseFunc	= function () {
+					if(gameController.game && gameController.game.running) {
+						gameController.svgLine.node.classList.add('pulse');
+
+						setTimeout(pulseFunc, pulse - ((Date.now() - lastPulse) % pulse));
+					}
+				};
+
+			if(currentLeft === 0) {
+				setTimeout(function () {
 					gameController.svgLine.node.classList.add('pulse');
-
-					setTimeout(pulseFunc, pulse - ((Date.now() - lastPulse) % pulse));
-				}
-			};
-
-		if(currentLeft === 0) {
-			setTimeout(function () {
+					lastPulse	= Date.now();
+					setTimeout(pulseFunc, pulse);
+				}, pulse / 2 + pulse / 10);
+			} else {
 				gameController.svgLine.node.classList.add('pulse');
 				lastPulse	= Date.now();
 				setTimeout(pulseFunc, pulse);
-			}, pulse / 2 + pulse / 10);
-		} else {
-			gameController.svgLine.node.classList.add('pulse');
-			lastPulse	= Date.now();
-			setTimeout(pulseFunc, pulse);
+			}
 		}
 	};
 	GameController.prototype.pauseGame	= function () {

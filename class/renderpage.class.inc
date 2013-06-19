@@ -77,7 +77,7 @@ class PageRenderer
 			'lang'			    => $arrPreloadLang,
             'internal_load'     => $bInternalPageLoad,
             'countdown_time'    => intval($_SESSION['UserObject']->countdown_time),
-            'metronome'         => intval($_SESSION['UserObject']->metronome)
+            'metronome'         => intval($_SESSION['UserObject']->metronome) === 1
 		);
 
 		return '
