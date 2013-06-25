@@ -60,8 +60,8 @@ require(['fragments/game', 'game/game', 'game/tact', 'game/note', 'game/options'
 		applyTact('threeForth', [
 			createNote("quarter", 4, "B"),
 			createNote("quarter", 4, "A"),
-			createNote("eighth", 5, "F"),
-			createNote("eighth", 5, "F")
+			createNote("eighth", 5, "E#"),
+			createNote("eighth", 5, "E#")
 		]);
 
 		applyTact('threeForth', [

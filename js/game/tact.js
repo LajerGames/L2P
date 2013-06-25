@@ -5,6 +5,7 @@ define(['jquery', 'game/options', 'game/note'], function ($, options, Node) {
 		this.remaining	= this.length;
 		this.nodes		= [];
 		this.points		= 0;
+		this.done		= false;
 
 		this.noteLength		= 0;
 		this.notePercent	= 0;

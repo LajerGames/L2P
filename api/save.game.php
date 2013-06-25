@@ -86,7 +86,6 @@ if(is_array($arrGame))
                                         continue; // This means that this is a rest note!
                                     }
                                     // Some statistics for this perticular note
-                                    $iPercentAccuracy   = $arrNoteInfoEntry[1]->percent;
                                     $iFactor            = $arrNoteInfoEntry[1]->factor;
                                     $strEvaluationText  = $arrNoteInfoEntry[1]->text;
                                     $strEvalTextColor   = $arrNoteInfoEntry[1]->color;
@@ -106,6 +105,8 @@ if(is_array($arrGame))
                                         );
                                     }
 
+                                    $iPercentAccuracy   = 0;
+                                    $iLoops             = 0;
                                     if(is_array($arrNoteInfoEntry[0]))
                                     {
                                         // Loop through each tick to find the avg frequency
@@ -118,11 +119,13 @@ if(is_array($arrGame))
                                                     // Add to tune analyser
                                                     $arrTuneAnalyser[$strExpectedNote.','.$strExpectedOctave]['avg_freq'] += $arrTick[1];
                                                     $arrTuneAnalyser[$strExpectedNote.','.$strExpectedOctave]['ticks']++;
-
+                                                    $iPercentAccuracy += $arrTick[0];
+                                                    $iLoops++;
                                                 }
                                             }
                                         }
                                     }
+                                    $iPercentAccuracy = $iPercentAccuracy / $iLoops;
 
                                     // We temporarily save the SUM of the accuracy in the percentage entry in the spicific note array, we'll recalculate when we've looped through all of the music-data
                                     $arrTuneAnalyser[$strExpectedNote.','.$strExpectedOctave]['pct'] += $iPercentAccuracy;

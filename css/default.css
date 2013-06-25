@@ -297,3 +297,100 @@ g#start line.pulse {
 	20% { -webkit-transform: scaleY(1.5) translateY(-18.75px);}
 	100% { -webkit-transform: scaleY(1) translateY(0);}
 }
+
+#overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	opacity: 0;
+	-webkit-transform: translate3d(0,-100%,0);
+
+	-webkit-transition: opacity 0.3s;
+	background-color: rgba(0,0,0,0.5);
+	z-index: 100;
+}
+#overlay.show {
+	-webkit-transform: translate3d(0,0,0);
+	opacity: 1;
+}
+#overlay.hide {
+	-webkit-animation-name: overlay;
+	-webkit-animation-duration: 0.3s;
+	-webkit-transform: translate3d(0,-100%,0);
+	opacity: 0;
+}
+@-webkit-keyframes overlay {
+	0% {-webkit-transform: translate3d(0,0,0);}
+	99% {-webkit-transform: translate3d(0,0,0);}
+	100% {-webkit-transform: translate3d(0,-100%,0);}
+}
+
+#overlay div.countdown {
+	text-align: center;
+}
+#overlay div.countdown div.number {
+	opacity: 0;
+	-webkit-animation-duration: 1s;
+
+	position: absolute;
+	font-weight: bold;
+	font-size:40vmin;
+	font-family: tahoma;
+	top: 50%;
+	width: 100%;
+}
+#overlay div.countdown div.number:nth-child(1) {
+	-webkit-animation-delay: 0s;
+}
+#overlay div.countdown div.number:nth-child(2) {
+	-webkit-animation-delay: 1s;
+}
+#overlay div.countdown div.number:nth-child(3) {
+	-webkit-animation-delay: 2s;
+}
+#overlay div.countdown div.number:nth-child(4) {
+	-webkit-animation-delay: 3s;
+}
+#overlay div.countdown div.number:nth-child(5) {
+	-webkit-animation-delay: 4s;
+}
+#overlay div.countdown div.number:nth-child(6) {
+	-webkit-animation-delay: 5s;
+}
+#overlay div.countdown div.number:nth-child(7) {
+	-webkit-animation-delay: 6s;
+}
+#overlay div.countdown div.number:nth-child(8) {
+	-webkit-animation-delay: 7s;
+}
+#overlay div.countdown div.number:nth-child(9) {
+	-webkit-animation-delay: 8s;
+}
+#overlay div.countdown div.number:nth-child(10) {
+	-webkit-animation-delay: 9s;
+}
+#overlay div.countdown div.number:nth-child(11) {
+	-webkit-animation-delay: 10s;
+}
+div.countdown .next {
+    margin-top: 19vmin;
+    font-size: 10vmin;
+}
+div.countdown .illustration {
+    position: absolute;
+    top: 50%;
+    margin-top: -120px;
+    background: rgba(255,255,255,0.5);
+    box-shadow: 0 0 5px #FFF;
+}
+div.countdown .illustration table#ViolinFingerBoard {
+    margin-top: 0;
+}
+@-webkit-keyframes countdown_number {
+	0% { -webkit-transform: scale(0.3); opacity: 0.5;}
+	5% { -webkit-transform: scale(1.5); opacity: 1;}
+	99% { -webkit-transform: scale(0.3); opacity: 0.5;}
+
+}

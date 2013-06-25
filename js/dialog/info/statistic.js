@@ -15,10 +15,14 @@ define(['jquery', 'fM', 'l2p', 'api', 'highcharts'], function ($, fM, L2P, api, 
         $dialog.find('.BottomTableView tr').on('click', function() {
             var	$tr		= $(this),
             	gameid			= $tr.attr('data-gameid'),
+            	gamestartoctave	= $tr.attr('data-gamestartoctave'),
             	gamehistoryid	= $tr.attr('data-gamehistoryid');
 
             if(gameid !== undefined) {
             	$formSearch.find('input[name="game_ids"]').val(gameid);
+			}
+            if(gamestartoctave !== undefined) {
+            	$formSearch.find('input[name="game_startoctave"]').val(gamestartoctave);
 			}
             if(gamehistoryid !== undefined) {
             	$formSearch.find('input[name="game_history_ids"]').val(gamehistoryid);

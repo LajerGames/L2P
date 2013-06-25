@@ -173,6 +173,11 @@ $this
 # User already logged in
 ->SetMenu('game_')
 ->Set('start', 'GO!')
+->Set('permission_ask', 'Please give permission to use your microphone above')
+->Set('measuring', 'Measuring background noise')
+->Set('measuring_quiet', 'Please make sure there is quiet in the room in')
+->Set('measuring_shh', 'Shh...')
+->Set('measuring_done', 'Færdig, god fornøjelse :)')
 
 # User statistics
 ->SetMenu('statistics_')

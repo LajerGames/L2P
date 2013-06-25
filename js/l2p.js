@@ -1,3 +1,4 @@
+var tuner;
 define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, options) {
 	function goBack(e, doGoBack) {
 		if(doGoBack !== false) {
@@ -264,7 +265,7 @@ define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, opt
 
 						$startGame.on('click', $.proxy(L2P.gameController.startGame, L2P.gameController));
 						$stopGame.on('click', $.proxy(L2P.gameController.stopGame, L2P.gameController));
-						$toggleGame.on('click', function () {
+						$toggleGame.on('click', function (e) {
 							if(L2P.gameController.game && !L2P.gameController.game.running) {
 								L2P.gameController.startGame();
 
@@ -287,9 +288,10 @@ define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, opt
 					}
 
 					if(generate) {
-						SoundInput(function (e) {
+						tuner	= new SoundInput(function (e) {
 							console.log(e);
 						}, $.proxy(L2P.gameController.soundInput, L2P.gameController), $.proxy(L2P.gameController.expectedTone, L2P.gameController));
+						$(tuner).on('tick', $.proxy(L2P.gameController.soundInput, L2P.gameController));
 					}
 
 					state.is_game	= true;
@@ -388,36 +390,35 @@ define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, opt
 			}
 		},
 		countdown: function (sec, text, next, illustration, callback) {
-			var	$countdownBox	= $('body > div.countdown-box').remove(),
-				i				= sec;
+			var	$overlay	= $('#overlay'),
+				$countdown	= $('<div class="countdown"></div>');
 
-			$countdownBox	= $('body').append('<div class="countdown-box opacity0"><div class="countdown-number animateCountdown"></div><div class="countdown-next"></div><div class="countdown-illustration"></div></div>').find('> div.countdown-box');
-
-			var	$textBox	= $countdownBox.css('opacity', 1).addClass('countdown').find('> div.countdown-number').text(i),
-				$nextBox	= $countdownBox.find('> div.countdown-next').text(next),
-				$illuBox	= $countdownBox.find('> div.countdown-illustration').html(illustration),
-				interval;
-
-			function decrement() {
-				i	-= 1;
-				if(i === 0) {
-					clearInterval(interval);
-					$textBox.text(text).removeClass('animateCountdown');
-					setTimeout(function () {
-						$countdownBox.css('opacity', 0);
-
-						setTimeout(function () {
-							callback();
-						}, 250);
-						setTimeout(function () {
-							$countdownBox.hide().removeClass('countdown');
-						}, 1000);
-					}, 500);
-				} else {
-					$textBox.text(i);
-				}
+			for(var i = sec; i > 0; i -= 1) {
+				$('<div class="number">'+i+'</div>')
+					.appendTo($countdown);
 			}
-			interval	= setInterval(decrement, 1000);
+
+			$('<div class="number">'+text+'</div>')
+				.appendTo($countdown)
+				.on('webkitAnimationEnd', function () {
+					$overlay.addClass('hide');
+					callback.call(null);
+				});
+
+			$('<div class="next"></div>')
+				.text(next)
+				.appendTo($countdown);
+
+			$('<div class="illustration"></div>')
+				.html(illustration)
+				.appendTo($countdown);
+
+			$overlay
+				.empty()
+				.append($countdown)
+				.removeClass('hide')
+				.find('div.number')
+					.css('-webkit-animation-name', 'countdown_number');
 		},
 		funcs:	{
 			tones:	{

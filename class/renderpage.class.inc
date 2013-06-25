@@ -98,6 +98,7 @@ class PageRenderer
 			</head>
 			<body>
                 '.$strIntro.'
+                <div id="overlay" class="show hide"></div>
 				<div id="CenteringContainer" data-default-title="'.$oLang->Get('system_title_welcome').'">
 					<a href="'.HTTP_PROJECT_ROOT.'" id="logo" data-internal-navigation="home" data-title="'.$oLang->Get('system_title_welcome').'"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="480px" height="81px" viewBox="0 0 960 162.058" enable-background="new 0 0 960 162.058" xml:space="preserve">
 						<g>

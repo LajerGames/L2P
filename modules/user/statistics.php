@@ -34,9 +34,9 @@ if(is_object($oStatisticsSearch))
 	{
 		$oStatisticsSearchObject->arrGameIDs		= explode(',', $oStatisticsSearch->arrSearch['game_ids']);
 	}
-	if(intval($oStatisticsSearch->arrSearch['start_octave']) > 0)
+	if(strlen($oStatisticsSearch->arrSearch['game_startoctave']) > 0)
 	{
-		$oStatisticsSearchObject->iStartOctave		= intval($oStatisticsSearch->arrSearch['start_octave']);
+		$oStatisticsSearchObject->arrStartOctaves	= explode(',', $oStatisticsSearch->arrSearch['game_startoctave']);
 	}
 }
 

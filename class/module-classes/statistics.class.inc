@@ -67,10 +67,18 @@ class statistics
         }
 
         # Start Octave
-        if($oCustomSearch->iStartOctave > 0)
+        if(is_array($oCustomSearch->arrStartOctaves))
         {
+            // Create a string which will contain CSV with GameIDs
+            $strINClause = '';
+            foreach($oCustomSearch->arrStartOctaves as $iStartOctave)
+            {
+                $strINClause .= $iStartOctave.',';
+            }
+            $strINClause = empty($strINClause) ? 0 : rtrim($strINClause, ',');
+
             $strConditions .= '
-             && users_games_history.game_start_octave	= '.$oCustomSearch->iStartOctave.'
+             && users_games_history.game_start_octave	IN('.$strINClause.')
             ';
         }
 
@@ -342,7 +350,7 @@ class statistics
         $arrFavouriteSongs = array();
         foreach($arrGameData as $oGameData)
         {
-            if(!is_array($arrFavouriteSongs[$oGameData->iGameID]))
+            if(!is_array($arrFavouriteSongs[$oGameData->iGameID][$oGameData->iGameStartOctave]))
             {
                 if($oGameData->iGameID > 0)
                 {
@@ -360,7 +368,7 @@ class statistics
 
                     $iSongFound = $oSongInfo->iSongID > 0 ? 1 : 0;
 
-                    $arrFavouriteSongs[$oGameData->iGameID] = array(
+                    $arrFavouriteSongs[$oGameData->iGameID][$oGameData->iGameStartOctave] = array(
                         'song_found'    => $iSongFound,
                         'name'          => $oSongInfo->strSongTitle,
                         'permlink'      => $oSongInfo->strPermlink,
@@ -371,15 +379,18 @@ class statistics
             }
 
             // Update the information about this song
-            $arrFavouriteSongs[$oGameData->iGameID]['played']++;
-            $arrFavouriteSongs[$oGameData->iGameID]['avg_points']	+= $oGameData->iPoints;
-            $arrFavouriteSongs[$oGameData->iGameID]['start_octave']	= $oGameData->iGameStartOctave;
+            $arrFavouriteSongs[$oGameData->iGameID][$oGameData->iGameStartOctave]['played']++;
+            $arrFavouriteSongs[$oGameData->iGameID][$oGameData->iGameStartOctave]['avg_points']	+= $oGameData->iPoints;
+            $arrFavouriteSongs[$oGameData->iGameID][$oGameData->iGameStartOctave]['start_octave']	= $oGameData->iGameStartOctave;
         }
 
         // Now loop through the song array in order to calculate the avrage points obtained on this song
-        foreach($arrFavouriteSongs as $iGameID => $arrGameInfo)
+        foreach($arrFavouriteSongs as $iGameID => $arrOctave)
         {
-            $arrFavouriteSongs[$iGameID]['avg_points'] = ($arrGameInfo['avg_points'] / $arrGameInfo['played']);
+            foreach($arrOctave as $iStartOctave => $arrGameInfo)
+            {
+                $arrFavouriteSongs[$iGameID][$iStartOctave]['avg_points'] = ($arrGameInfo['avg_points'] / $arrGameInfo['played']);
+            }
         }
 
         $this->SortArray($arrFavouriteSongs, 'played');
@@ -480,21 +491,24 @@ class statistics
         // Create rows for the table containing favourite songs
         $strFavouriteSongsRows = '';
         $iLoopID = 1;
-        foreach($arrFavouriteSongs as $iGameID => $arrGameInfo)
+        foreach($arrFavouriteSongs as $iGameID => $arrOctave)
         {
-            // Is points and played plural?
-            $strPlayed = $arrGameInfo['played'] == 1 ? $this->oLang->Get('statistics_time') : $this->oLang->Get('statistics_times');
-            $strPoints = $arrGameInfo['avg_points'] == 1 ? $this->oLang->Get('global_point') : $this->oLang->Get('global_points');
+            foreach($arrOctave as $iStartOctave => $arrGameInfo)
+            {
+                // Is points and played plural?
+                $strPlayed = $arrGameInfo['played'] == 1 ? $this->oLang->Get('statistics_time') : $this->oLang->Get('statistics_times');
+                $strPoints = $arrGameInfo['avg_points'] == 1 ? $this->oLang->Get('global_point') : $this->oLang->Get('global_points');
 
-            $strFavouriteSongs .= '
-                <tr data-gameid="'.$iGameID.'">
-                    <td>'.$iLoopID.'</td>
-                    <td><span class="octave">(Octave '.$arrGameInfo['start_octave'].')</span> '.$arrGameInfo['name'].'</td>
-                    <td>'.$arrGameInfo['played'].' '.$strPlayed.'</td>
-                    <td>'.round($arrGameInfo['avg_points']).' '.$strPoints.'</td>
-                </tr>
-            ';
-            $iLoopID++;
+                $strFavouriteSongs .= '
+                    <tr data-gameid="'.$iGameID.'" data-gamestartoctave="'.$iStartOctave.'">
+                        <td>'.$iLoopID.'</td>
+                        <td><span class="octave">(Octave '.$arrGameInfo['start_octave'].')</span> '.$arrGameInfo['name'].'</td>
+                        <td>'.$arrGameInfo['played'].' '.$strPlayed.'</td>
+                        <td>'.round($arrGameInfo['avg_points']).' '.$strPoints.'</td>
+                    </tr>
+                ';
+                $iLoopID++;
+            }
         }
         if(!empty($strFavouriteSongs))
         {
@@ -796,6 +810,7 @@ class statistics
                 <form class="hidden" name="search">
                     <input type="hidden" name="game_history_ids" value="'.implode(',', $this->oSearch->arrGameHistoryIDs).'" />
                     <input type="hidden" name="game_ids" value="'.implode(',', $this->oSearch->arrGameIDs).'" />
+                    <input type="hidden" name="game_startoctave" value="'.implode(',', $this->oSearch->arrStartOctaves).'" />
                     <input type="hidden" name="start_octave" value="'.$this->oSearch->iStartOctave.'" />
                 </form>
                 <div class="hidden" data-statistic="'.htmlentities(json_encode(array($arrLeftChart, $arrRightChart))).'"></div>
@@ -813,6 +828,7 @@ class AC_RenderStatisticsSearch
 {
     public $iUserID;
     public $arrGameIDs;
+    public $arrStartOctaves;
     public $arrGameHistoryIDs;
     public $iStartOctave;
 }

@@ -51,7 +51,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		this.sound;
 		this.game;
 		this.lastPos		= 0;
-		this.playSound		= false;
+		this.playSound		= true;
 		this.useCountdown	= true;
 		this.currentNote;
 		this.currentTact;
@@ -108,6 +108,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 	};
 	GameController.prototype.showPointBox	= function (points, stepFactor) {
 		var	div						= this.pointContainerDiv.cloneNode();
+		stepFactor					= stepFactor || L2P.steps[L2P.steps.length - 1];
 		div.innerHTML				= stepFactor.text+'<br>'+points+' Points';
 		div.style.backgroundColor	= stepFactor.color;
 		div.style.webkitTransition	= '1s';
@@ -129,9 +130,6 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 	GameController.prototype.setGame	= function (game) {
 		game.controller	= this;
 		this.game		= game;
-		this.status		= 0;
-		this.plus		= 0;
-		this.minus		= 0;
 		this.point		= 0;
 		this.pointCon	= $('#pointContainer');
 		this.currentNote	= undefined;
@@ -627,7 +625,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 
 		return useLeft;
 	};
-	GameController.prototype.soundInput = function (freq, tone, diff) {
+	GameController.prototype.soundInput = function (e, freq, tone, diff) {
 		var	that			= this,
 			gameController	= this,
 			ratio;
@@ -640,19 +638,68 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 					return;
 				}
 				tact.nodes.forEach(function (note) {
-					var	noteLeftPos		= note.svgElement.getX() - newPos + 20,
-						noteLeftPosRel	= noteLeftPos + ((750 / 4) * (gameController.game.speed / 60) * 0.1);
+					var	relWidth		= (750 / 4) * (gameController.game.speed / 60) * 0.1,
 
-					if(noteLeftPos <= (options.markerPos + options.leftMargin + 10) && (noteLeftPos + note.type.length * that.defWidth) > (options.markerPos + options.leftMargin + 10)) {
+						noteLeftPos		= note.svgElement.getX() - newPos + 20,
+						noteLeftPosRel	= noteLeftPos + relWidth,
+
+						noteRightPos	= noteLeftPos + note.type.length * that.defWidth,
+						noteRightPosRel	= noteLeftPosRel + note.type.length * that.defWidth,
+
+						currentPos		= options.markerPos + options.leftMargin + 10,
+						relNotePosLeft	= currentPos - noteLeftPosRel,
+						relNotePosRight	= noteRightPosRel - currentPos,
+
+						otherNote;
+
+					// Play the current note
+					if(noteLeftPos <= currentPos && noteRightPos > currentPos) {
 						if(!note.hasPlayed && gameController.playSound) {
 							that.playNote(note);
 						}
 					}
 
-					if(noteLeftPosRel <= (options.markerPos + options.leftMargin + 10) && (noteLeftPosRel + note.type.length * that.defWidth) > (options.markerPos + options.leftMargin + 10)) {
-						if(!note.hasPlayed && gameController.playSound) {
-							that.playNote(note);
+					// Check the current note + the relative width
+					if(noteLeftPosRel <= currentPos && noteRightPosRel > currentPos) {
+						// If we haven't enabled kiddieMode, we check weither we can use the note before or after
+						if(!gameController.kiddieMode) {
+							var	noteIndex	= note.tact.nodes.indexOf(note),
+								tactIndex,
+								otherTact;
+
+							if(relNotePosLeft < relWidth * 2) {
+								if(noteIndex === 0) {
+									tactIndex	= gameController.game.tacts.indexOf(note.tact);
+									if(tactIndex > 0) {
+										otherTact	= gameController.game.tacts[tactIndex - 1];
+										otherNote	= otherTact.nodes[otherTact.nodes.length - 1];
+									}
+								} else {
+									otherNote	= note.tact.nodes[noteIndex - 1];
+								}
+							} else if(relNotePosRight < relWidth * 2) {
+								if(noteIndex === note.tact.nodes.length - 1) {
+									tactIndex	= gameController.game.tacts.indexOf(note.tact);
+									if(tactIndex < gameController.game.tacts.length - 1) {
+										otherTact	= gameController.game.tacts[tactIndex + 1];
+										otherNote	= otherTact.nodes[0];
+									}
+								} else {
+									otherNote	= note.tact.nodes[noteIndex + 1];
+								}
+							}
+							if(otherNote) {
+								if(otherNote.isRest) {
+									otherNote	= undefined;
+								} else {
+									if(otherNote.tone === tone) {
+										note	= otherNote;
+									}
+								}
+							}
 						}
+
+						// If we got to a new note
 						if(that.currentNote !== note) {
 							if(!gameController.kiddieMode && that.currentTact !== note.tact) {
 								gameController.tactDone();
@@ -660,16 +707,20 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 							that.currentNote	= note;
 							that.currentTact	= tact;
 						}
+
+						// Find the closest tone
 						var	closeTone	= L2P.funcs.tones.getCloseTone(freq, tone, note.tone);
 						freq		= closeTone.freq;
 						tone		= closeTone.tone;
 						toneDiff	= L2P.funcs.tones.freqDiffToTone(note.tone, freq, 0);
 
+						// Update the compass
 						if(that.compass) {
 							that.compass.setTone(note.tone);
 							that.compass.setFreq(freq);
 						}
 
+						// If we have kiddiemode enabled, we check for the correct tone
 						if(gameController.kiddieMode) {
 							if(!note.isRest && (toneDiff.ratioRel > 0.15 || freq === -1) && !note.kiddieModeAccepted) {
 								if(!gameController.paused) {
@@ -682,32 +733,14 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 							note.kiddieModeAccepted	= true;
 						}
 
+						// Add the tick
 						note.ticks.push(new Tick(freq, toneDiff));
 
-						var	correct			= toneDiff.diffAbs < 5,
-							colorPercent	= Math.min(toneDiff.ratioRel, 1);
-
-						var	color			= that.generatePercentColor(colorPercent);
+						var	colorPercent	= Math.min(toneDiff.ratioRel, 1),
+							color			= that.generatePercentColor(colorPercent);
 
 						that.svgPointer.setFill(color);
 						that.svgLine.setStroke(color, 3);
-
-						var points	= 10 - toneDiff.diffAbs;
-						if(points < 0) {
-							points	= 0;
-						} else {
-							//that.point	+= +points.toFixed(0);
-							//that.pointCon.text(that.point);
-						}
-
-						that.status	= that.status + (correct ? 1 : -1);
-						if(correct) {
-							that.plus++;
-						} else {
-							that.minus++;
-						}
-
-						nodePlaying	= true;
 					}
 				});
 			});
@@ -810,11 +843,6 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 			data:	data
 		}, function (gameInfo) {
 			that.$this.trigger('gameEnd', {
-				points: {
-					status:	that.status,
-					plus:	that.plus,
-					minus:	that.minus
-				},
 				game_history_id:	gameInfo.game_history_id
 			});
 		});
