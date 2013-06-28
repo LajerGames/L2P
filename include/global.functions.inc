@@ -113,17 +113,17 @@ function GetCountryCode()
 			'GB'	=> 'en-GB'
 		);
 
-		$rCurl		= curl_init('http://freegeoip.net/xml/'.$_SERVER['REMOTE_ADDR']);
-		curl_setopt($rCurl, CURLOPT_RETURNTRANSFER, true);
-		$strTest	= curl_exec($rCurl);
-		curl_close($rCurl);
-
-		$oXML	= new SimpleXMLElement($strTest);
-
-		if(isset($arrCountryCodes[$oXML->CountryCode->__toString()]))
-		{
-			$strCountryCode	= $arrCountryCodes[$oXML->CountryCode->__toString()];
-		}
+		// Get available languages from $_SERVER
+        $arrAcceptedLanguages = explode(',', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
+        $bDanishHack = false;
+        foreach($arrAcceptedLanguages as $strLang)
+        {
+            if($strLang == 'da-DK')
+            {
+                $bDanishHack = true;
+            }
+        }
+        $strCountryCode = $bDanishHack ? 'da-DK' : 'en-US';
 	}
 
 	$strCountryCode	= $strCountryCode === '' ? DEFAULT_LANGUAGE : $strCountryCode;

@@ -307,7 +307,7 @@ g#start line.pulse {
 	opacity: 0;
 	-webkit-transform: translate3d(0,-100%,0);
 
-	-webkit-transition: opacity 0.3s;
+	-webkit-transition: opacity 0.3s, background-color 1s;
 	background-color: rgba(0,0,0,0.5);
 	z-index: 100;
 }
@@ -330,53 +330,44 @@ g#start line.pulse {
 #overlay div.countdown {
 	text-align: center;
 }
+#overlay div.countdown a {
+	text-decoration: none;
+}
 #overlay div.countdown div.number {
 	opacity: 0;
-	-webkit-animation-duration: 1s;
 
 	position: absolute;
 	font-weight: bold;
-	font-size:40vmin;
+	font-size:60vmin;
 	font-family: tahoma;
 	top: 50%;
 	width: 100%;
+	line-height: 40vmin;
+	margin-top: -20vmin;
 }
-#overlay div.countdown div.number:nth-child(1) {
-	-webkit-animation-delay: 0s;
+#overlay div.countdown div.number > * {
+	vertical-align: middle;
 }
-#overlay div.countdown div.number:nth-child(2) {
-	-webkit-animation-delay: 1s;
+#overlay div.countdown div.number.run {
+	-webkit-animation-name: countdown_number;
 }
-#overlay div.countdown div.number:nth-child(3) {
-	-webkit-animation-delay: 2s;
+#overlay div.countdown div.number.run.countdown-type--long {
+	-webkit-animation-name: countdown_number_long;
 }
-#overlay div.countdown div.number:nth-child(4) {
-	-webkit-animation-delay: 3s;
+#overlay div.countdown div.number.run.countdown-type--long_rebounce {
+	-webkit-animation-name: countdown_number_long_rebounce;
 }
-#overlay div.countdown div.number:nth-child(5) {
-	-webkit-animation-delay: 4s;
-}
-#overlay div.countdown div.number:nth-child(6) {
-	-webkit-animation-delay: 5s;
-}
-#overlay div.countdown div.number:nth-child(7) {
-	-webkit-animation-delay: 6s;
-}
-#overlay div.countdown div.number:nth-child(8) {
-	-webkit-animation-delay: 7s;
-}
-#overlay div.countdown div.number:nth-child(9) {
-	-webkit-animation-delay: 8s;
-}
-#overlay div.countdown div.number:nth-child(10) {
-	-webkit-animation-delay: 9s;
-}
-#overlay div.countdown div.number:nth-child(11) {
-	-webkit-animation-delay: 10s;
+#overlay div.countdown div.number.run.countdown-type--none {
+	-webkit-animation-name: none;
+	opacity: 1;
 }
 div.countdown .next {
     margin-top: 19vmin;
     font-size: 10vmin;
+}
+div.countdown .bottom {
+	margin-top: 55vmin;
+   	font-size: 10vmin;
 }
 div.countdown .illustration {
     position: absolute;
@@ -389,8 +380,26 @@ div.countdown .illustration table#ViolinFingerBoard {
     margin-top: 0;
 }
 @-webkit-keyframes countdown_number {
-	0% { -webkit-transform: scale(0.3); opacity: 0.5;}
-	5% { -webkit-transform: scale(1.5); opacity: 1;}
-	99% { -webkit-transform: scale(0.3); opacity: 0.5;}
+	0% { -webkit-transform: scale(0.2); opacity: 0.5;}
+	5% { -webkit-transform: scale(1); opacity: 1;}
+	100% { -webkit-transform: scale(0.2); opacity: 0.5;}
+}
+@-webkit-keyframes countdown_number_long {
+	0% { -webkit-transform: scale(0.2); opacity: 0.5;}
+	5% { -webkit-transform: scale(1); opacity: 1;}
+	85% { -webkit-transform: scale(0.9); opacity: 1;}
+	100% { -webkit-transform: scale(0.2); opacity: 0.5;}
+}
+@-webkit-keyframes countdown_number_long_rebounce {
+	0% { -webkit-transform: scale(0.2); opacity: 0.5;}
+	5% { -webkit-transform: scale(1); opacity: 1;}
+	85% { -webkit-transform: scale(0.9); opacity: 1;}
+	98% { -webkit-transform: scale(0.2); opacity: 0.5;}
+}
 
+div.countdown.microphone-permission .next {
+    margin-top: 5vmin;
+}
+#overlay div.countdown.microphone-permission .number {
+    font-size: 6.3vw;
 }

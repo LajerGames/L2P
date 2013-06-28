@@ -4,12 +4,14 @@ class statistics
     public $oSql;
     public $oSearch;
     public $oLang;
+    public $strLangCode;
 
     public function __construct(MySQLWrapper $oSql, AC_RenderStatisticsSearch $oSearch, Language $oLang)
     {
-        $this->oSql     = $oSql;
-        $this->oSearch  = $oSearch;
-        $this->oLang    = $oLang;
+        $this->oSql         = $oSql;
+        $this->oSearch      = $oSearch;
+        $this->oLang        = $oLang;
+        $this->strLangCode  = $_COOKIE['country_code'] == 'da-DK'? 'da-DK' : 'en-US';
 
         return;
     }
@@ -357,11 +359,16 @@ class statistics
                     // Find information about this song
                     $oSongInfo = $this->oSql->SelectSingleObject('
                         SELECT
-                            games.id        AS iSongID,
-                            games.title     AS strSongTitle,
-                            games.permlink  AS strPermlink
+                            games.id            AS iSongID,
+                            games_titles.title  AS strSongTitle,
+                            games.permlink      AS strPermlink
                         FROM
                             games
+                        RIGHT JOIN
+                            games_titles ON
+                                games_titles.deleted = 0
+                             && games_titles.game_id = games.id
+                             && games_titles.lang    = "'.$this->strLangCode.'"
                         WHERE
                             games.id = '.$oGameData->iGameID.'
                     ');
@@ -581,11 +588,13 @@ class statistics
     {
         $oSongInfo = $this->oSql->SelectSingleObject('
             SELECT
-                games.title     AS strSongTitle
+                games_titles.title     AS strSongTitle
             FROM
-                games
+                games_titles
             WHERE
-                games.id = '.$arrGameData[0]->iGameID.'
+                games_titles.deleted = 0
+             && games_titles.game_id = '.$arrGameData[0]->iGameID.'
+             && games_titles.lang    = "'.$this->strLangCode.'"
         ');
 
         // Calculate averages

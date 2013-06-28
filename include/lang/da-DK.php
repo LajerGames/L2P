@@ -20,6 +20,7 @@ $this
 ->Set('last', 'Sidste')
 ->Set('octave', 'Oktav')
 ->Set('closed_preview', 'Lukket Preview')
+->Set('refresh', 'Genindlæs')
 
 # Validation Errors
 ->SetMenu('validation_')
@@ -173,11 +174,25 @@ $this
 # User already logged in
 ->SetMenu('game_')
 ->Set('start', 'START!')
-->Set('permission_ask', 'Giv venligst tilladelse til at anvende din mikrofon ovenfor')
+->Set('permission_ask', 'Klik venligst tillad ovenfor')
+->Set('permission_ask_initial', 'Vi skal bruge din mikrofon')
+->Set('permission_ask_helpful', 'Du har ikke klikket tillad')
+->Set('permission_ask_helpful_2', 'Gik noget galt?')
+->Set('permission_ask_helpful_3', '... så opdater siden')
+->Set('permission_ask_impatient', 'Hallo, er du derude?')
+->Set('permission_ask_impatient_sigh', 'Vi venter stadig!')
+->Set('permission_denied', 'Du tillod ikke adgang, og kan derfor ikke spille')
 ->Set('measuring', 'Måler baggrundsstøj')
-->Set('measuring_quiet', 'Sørg venligst for stilhed i rummet om')
+->Set('measuring_quiet', 'Vær venligst stille om')
 ->Set('measuring_shh', 'Shh...')
-->Set('measuring_done', 'Done, enjoy :)')
+->Set('measuring_done', 'Færdig, god fornøjelse :)')
+->Set('grade_perfect', 'Perfekt')
+->Set('grade_good', 'Flot')
+->Set('grade_fair', 'Fint')
+->Set('grade_average', 'Gennemsnitligt')
+->Set('grade_poor', 'Svagt')
+->Set('grade_rubbish', 'Dårligt')
+->Set('grade_miserable', 'Frygteligt')
 
 # User statistics
 ->SetMenu('statistics_')
@@ -215,7 +230,8 @@ $this
 ->Set('wedding', 'Bryllup')
 
 ->SetMenu('tour_')
-->Set('1_0', 'Velkommen til Magic Tunes guidede rundvisning. Vi vil vise dig lidt rundt i spillets funktionalitet og vise dig hvordan man spiller. <br /><br />Klik på "Indstillinger"')
+->Set('0_0', 'Velkommen til Magic Tunes guidede rundvisning. Vi vil vise dig lidt rundt i spillets funktionalitet og vise dig hvordan man spiller. <br /><br /> <strong>Inden du starter bør du kontrollere at din mikrofon virker.</strong>"')
+->Set('1_0', 'Klik på "Indstillinger"')
 ->Set('1_1', 'Kammertonen: Her kan du angive hvilken kammertone du spiller med til dagligt, 440 og 442 er det mest normale at anvende. <br /><br /> Klik på "Videre" for at fortsætte')
 ->Set('1_2', 'Farvede norder: Hvis du sætter en fluevinge i denne kasse, vil vi sørge for at spillets noder har forskellige farver. Noder der ligger på G strengen vil være gule, noder der ligger på A strengen vil være røde og så videre. <br /><br /> Klik på "Videre" for at fortsætte.')
 ->Set('1_3', 'Her kan du ændre hvilket sprog du vil se Magic Tune i. <br /><br /> Klik på "Videre for at fortsætte.')

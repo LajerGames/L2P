@@ -201,23 +201,29 @@ class Game
 		}
 
 		$this->bHasData	= true;
+        $strLang = $_COOKIE['country_code'] == 'da-DK'? 'da-DK' : 'en-US';
 
 		$oData	= $this->oSql->SelectSingleObject('
 			SELECT
-				games.id				AS iGameID,
-				games.title				AS strGameTitle,
-				games.permlink			AS strGamePermlink,
-				games_info.author_id	AS iAuthorID,
-				games_info.released		AS iGameReleased
+				games.id				    AS iGameID,
+				games_titles.title          AS strGameTitle,
+				games.permlink			    AS strGamePermlink,
+				games_info.author_id	    AS iAuthorID,
+				games_info.released		    AS iGameReleased
 			FROM
 				games
+            RIGHT JOIN
+                games_titles ON
+                    games_titles.deleted    = 0
+                 && games_titles.game_id    = games.id
+                 && games_titles.lang       = "'.$strLang.'"
 			LEFT JOIN
 				games_info ON
-					games_info.deleted	= 0
-				 &&	games_info.game_id	= games.id
+					games_info.deleted	    = 0
+				 &&	games_info.game_id	    = games.id
 			WHERE
-				games.deleted			= 0
-			 &&	games.id				= '.$this->iGameID.'
+				games.deleted			    = 0
+			 &&	games.id				    = '.$this->iGameID.'
 		');
 
 		foreach($oData as $strName => $mValue)

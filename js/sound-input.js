@@ -1,4 +1,4 @@
-define(['jquery', 'dsp', 'game/tones'], function ($, dsp, tones) {
+define(['jquery', 'dsp', 'game/tones', 'l2p'], function ($, dsp, tones, L2P) {
 	var	DSP	= dsp.DSP,
 		setupTypedArray		= dsp.setupTypedArray,
 		FourierTransform	= dsp.FourierTransform,
@@ -32,7 +32,8 @@ define(['jquery', 'dsp', 'game/tones'], function ($, dsp, tones) {
 	var	requestAnimationFrame	= requestAnimationFrame || webkitRequestAnimationFrame || msRequestAnimationFrame || mozRequestAnimationFrame || oRequestAnimationFrame || function () {};
 
 	function Tuner(err, toneChange, expectedTone) {
-		var	tuner	= this;
+		var	tuner	= this,
+			countdown;
 
 		tuner.$tuner			= $(tuner);
 		tuner.noiseCount		= 0;
@@ -88,6 +89,9 @@ define(['jquery', 'dsp', 'game/tones'], function ($, dsp, tones) {
 		hp.frequency = 20;
 		hp.Q = 0.1;
 		success = function(stream) {
+			if(countdown) {
+				countdown.kill();
+			}
 			var src;
 			tuner.resetNoise();
 			try {
@@ -104,8 +108,80 @@ define(['jquery', 'dsp', 'game/tones'], function ($, dsp, tones) {
 		};
 		error = function(e) {
 			console.log(e);
+
+			if(countdown) {
+				countdown.kill();
+			}
+
+			countdown	= L2P.countdown(0, [
+				{
+					text:	L2P_global.lang.game_permission_denied,
+					sec:	1,
+					type:	'none',
+					css:	{
+						'font-size':	'4vw'
+					}
+				}
+			], '', '', function () {
+				//this.reload();
+			}, {
+				lazyHide:			true,
+				bottom:				'<a href="#" style="position: relative;z-index: 101;">Refresh<br><img src="/img/icons/refresh_white.svg" /></a>',
+				background_color:	'#71C211'
+			});
+
+			$('#overlay .countdown .bottom a').click(function (e) {
+				e.preventDefault();
+				location.href	= location.origin;
+			})
 		};
 
+		countdown = L2P.countdown(0, [
+			{
+				text:	L2P_global.lang.game_permission_ask_initial,
+				sec:	15,
+				type:	'long'
+			}
+		], L2P_global.lang.game_permission_ask, '', function () {
+			countdown	= L2P.countdown(0, [
+				{
+					text:	L2P_global.lang.game_permission_ask_helpful,
+					sec:	5,
+					type:	'long'
+				},
+				{
+					text:	L2P_global.lang.game_permission_ask_helpful_2,
+					sec:	5,
+					type:	'long'
+				},
+				{
+					text:	L2P_global.lang.game_permission_ask_helpful_3,
+					sec:	5,
+					type:	'long'
+				},
+				{
+					text:	L2P_global.lang.game_permission_ask_impatient,
+					sec:	5,
+					type:	'long'
+				},
+				{
+					text:	L2P_global.lang.game_permission_ask_impatient_sigh,
+					sec:	5,
+					type:	'long'
+				}
+			], L2P_global.lang.game_permission_ask, '', function () {
+				this.reload();
+			}, {
+				classList:	[
+					'microphone-permission'
+				],
+				lazyHide:	true
+			});
+		}, {
+			classList:	[
+				'microphone-permission'
+			]
+		});
 		return navigator.getUserMedia({
 			audio: true
 		}, success, error);
@@ -265,10 +341,42 @@ define(['jquery', 'dsp', 'game/tones'], function ($, dsp, tones) {
 		tuner.$tuner.trigger('tick', [freq, note, diff]);
 	};
 	Tuner.prototype.resetNoise	= function () {
+		var	tuner	= this;
 
-		tuner.noiseCount = 0;
-		tuner.noiseThreshold = -Infinity;
-		tuner.maxPeaks = 0;
+		L2P.countdown(0, [
+			{
+				text:	L2P_global.lang.game_measuring,
+				sec:	2,
+				type:	'long',
+				css:	{
+					'font-size':	'9vw'
+				}
+			}
+		], '', '', function () {
+			L2P.countdown(3, null, L2P_global.lang.game_measuring_quiet, '', function () {
+				setTimeout(function () {
+					tuner.noiseCount		= 0;
+					tuner.noiseThreshold	= -Infinity;
+					tuner.maxPeaks			= 0;
+				}, 1000);
+
+				L2P.countdown(0, [
+					{
+						text:	L2P_global.lang.game_measuring_shh,
+						sec:	2,
+						type:	'long'
+					},
+					{
+						text:	L2P_global.lang.game_measuring_done,
+						sec:	2,
+						type:	'long',
+						css:	{
+							'font-size':	L2P_global.lang.game_measuring_done.length <= 15 ? '12vw' : '7.5vw'
+						}
+					}
+				], '', '');
+			});
+		})
 	};
 	Tuner.prototype.getPitch	= function (freq) {
 		var	tuner	= this,

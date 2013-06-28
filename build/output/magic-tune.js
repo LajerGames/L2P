@@ -2268,7 +2268,7 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 			gameController.svgLine.node.classList.remove('pulse');
 		});
 
-		if(L2P_global.metronome) {
+		if(L2P_global.metronome && !gameController.kiddieMode) {
 			var lastPulse	= Date.now(),
 				pulseFunc	= function () {
 					if(gameController.game && gameController.game.running) {
@@ -2292,7 +2292,11 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 		}
 	};
 	GameController.prototype.pauseGame	= function () {
-		this.SVGNotes.animateAbs((-Math.floor(this.currentLeft() / (this.defWidth / 4)) + 0.5) * (this.defWidth / 4) - 20, -501, 0);
+		if(this.kiddieMode) {
+			this.SVGNotes.animateAbs(-this.currentLeft() + 30, -501, 0);
+		} else {
+			this.SVGNotes.animateAbs((-Math.floor(this.currentLeft() / (this.defWidth / 4)) + 0.5) * (this.defWidth / 4) - 20, -501, 0);
+		}
 		this.paused	= true;
 	};
 	GameController.prototype.stopGame	= function () {
@@ -2727,7 +2731,7 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 					// Check the current note + the relative width
 					if(noteLeftPosRel <= currentPos && noteRightPosRel > currentPos) {
 						// If we haven't enabled kiddieMode, we check weither we can use the note before or after
-						if(!gameController.kiddieMode) {
+						if(!gameController.kiddieMode || true) {
 							var	noteIndex	= note.tact.nodes.indexOf(note),
 								tactIndex,
 								otherTact;
@@ -5293,7 +5297,7 @@ define('dsp',[],function () {
 		Reverb:				Reverb
 	};
 });
-define('sound-input',['jquery', 'dsp', 'game/tones'], function ($, dsp, tones) {
+define('sound-input',['jquery', 'dsp', 'game/tones', 'l2p'], function ($, dsp, tones, L2P) {
 	var	DSP	= dsp.DSP,
 		setupTypedArray		= dsp.setupTypedArray,
 		FourierTransform	= dsp.FourierTransform,
@@ -5327,7 +5331,8 @@ define('sound-input',['jquery', 'dsp', 'game/tones'], function ($, dsp, tones) {
 	var	requestAnimationFrame	= requestAnimationFrame || webkitRequestAnimationFrame || msRequestAnimationFrame || mozRequestAnimationFrame || oRequestAnimationFrame || function () {};
 
 	function Tuner(err, toneChange, expectedTone) {
-		var	tuner	= this;
+		var	tuner	= this,
+			countdown;
 
 		tuner.$tuner			= $(tuner);
 		tuner.noiseCount		= 0;
@@ -5383,6 +5388,9 @@ define('sound-input',['jquery', 'dsp', 'game/tones'], function ($, dsp, tones) {
 		hp.frequency = 20;
 		hp.Q = 0.1;
 		success = function(stream) {
+			if(countdown) {
+				countdown.kill();
+			}
 			var src;
 			tuner.resetNoise();
 			try {
@@ -5399,8 +5407,80 @@ define('sound-input',['jquery', 'dsp', 'game/tones'], function ($, dsp, tones) {
 		};
 		error = function(e) {
 			console.log(e);
+
+			if(countdown) {
+				countdown.kill();
+			}
+
+			countdown	= L2P.countdown(0, [
+				{
+					text:	L2P_global.lang.game_permission_denied,
+					sec:	1,
+					type:	'none',
+					css:	{
+						'font-size':	'4vw'
+					}
+				}
+			], '', '', function () {
+				//this.reload();
+			}, {
+				lazyHide:			true,
+				bottom:				'<a href="#" style="position: relative;z-index: 101;">Refresh<br><img src="/img/icons/refresh_white.svg" /></a>',
+				background_color:	'#71C211'
+			});
+
+			$('#overlay .countdown .bottom a').click(function (e) {
+				e.preventDefault();
+				location.href	= location.origin;
+			})
 		};
 
+		countdown = L2P.countdown(0, [
+			{
+				text:	L2P_global.lang.game_permission_ask_initial,
+				sec:	15,
+				type:	'long'
+			}
+		], L2P_global.lang.game_permission_ask, '', function () {
+			countdown	= L2P.countdown(0, [
+				{
+					text:	L2P_global.lang.game_permission_ask_helpful,
+					sec:	5,
+					type:	'long'
+				},
+				{
+					text:	L2P_global.lang.game_permission_ask_helpful_2,
+					sec:	5,
+					type:	'long'
+				},
+				{
+					text:	L2P_global.lang.game_permission_ask_helpful_3,
+					sec:	5,
+					type:	'long'
+				},
+				{
+					text:	L2P_global.lang.game_permission_ask_impatient,
+					sec:	5,
+					type:	'long'
+				},
+				{
+					text:	L2P_global.lang.game_permission_ask_impatient_sigh,
+					sec:	5,
+					type:	'long'
+				}
+			], L2P_global.lang.game_permission_ask, '', function () {
+				this.reload();
+			}, {
+				classList:	[
+					'microphone-permission'
+				],
+				lazyHide:	true
+			});
+		}, {
+			classList:	[
+				'microphone-permission'
+			]
+		});
 		return navigator.getUserMedia({
 			audio: true
 		}, success, error);
@@ -5560,10 +5640,42 @@ define('sound-input',['jquery', 'dsp', 'game/tones'], function ($, dsp, tones) {
 		tuner.$tuner.trigger('tick', [freq, note, diff]);
 	};
 	Tuner.prototype.resetNoise	= function () {
+		var	tuner	= this;
 
-		tuner.noiseCount = 0;
-		tuner.noiseThreshold = -Infinity;
-		tuner.maxPeaks = 0;
+		L2P.countdown(0, [
+			{
+				text:	L2P_global.lang.game_measuring,
+				sec:	2,
+				type:	'long',
+				css:	{
+					'font-size':	'9vw'
+				}
+			}
+		], '', '', function () {
+			L2P.countdown(3, null, L2P_global.lang.game_measuring_quiet, '', function () {
+				setTimeout(function () {
+					tuner.noiseCount		= 0;
+					tuner.noiseThreshold	= -Infinity;
+					tuner.maxPeaks			= 0;
+				}, 1000);
+
+				L2P.countdown(0, [
+					{
+						text:	L2P_global.lang.game_measuring_shh,
+						sec:	2,
+						type:	'long'
+					},
+					{
+						text:	L2P_global.lang.game_measuring_done,
+						sec:	2,
+						type:	'long',
+						css:	{
+							'font-size':	L2P_global.lang.game_measuring_done.length <= 15 ? '12vw' : '7.5vw'
+						}
+					}
+				], '', '');
+			});
+		})
 	};
 	Tuner.prototype.getPitch	= function (freq) {
 		var	tuner	= this,
@@ -6150,11 +6262,6 @@ define('l2p',['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, ap
 					fM.link.navigated('/', title, {
 						title:	title
 					});
-
-					if(L2P.$modal && false) {
-						//L2P.$modal.off('hide', goBack);
-						//L2P.$modal.modal('hide');
-					}
 				});
 			},
 			url:	function (url) {
@@ -6182,36 +6289,152 @@ define('l2p',['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, ap
 				});
 			}
 		},
-		countdown: function (sec, text, next, illustration, callback) {
-			var	$overlay	= $('#overlay'),
-				$countdown	= $('<div class="countdown"></div>');
+		countdown: function (sec, text, next, illustration, callback, options) {
+			var	$overlay	= $('#overlay').css('background-color', ''),
+				$countdown	= $('<div class="countdown"></div>'),
+				items		= [],
+				delay		= 0,
+				done		= false,
+				countdown	= {
+					kill:	function () {
+						if(done) {
+							return;
+						}
+						done	= true;
+						$overlay
+							.on('webkitAnimationEnd', function () {
+								$countdown.remove();
+							})
+							.addClass('hide');
+					},
+					reload:	function () {
+						$overlay
+							.find('div.number')
+								.removeClass('run')
+						setTimeout(function () {
+							$overlay
+								.find('div.number')
+									.addClass('run');
+						}, 0);
+					}
+				};
+
+			options	= options || {};
+
+			if(options.background_color) {
+				$overlay
+					.css('background-color', options.background_color);
+			}
+			if(options.css) {
+				$.each(options.css, function (name, value) {
+					$countdown.css(name, value);
+				});
+			}
+			if(options.classList && options.classList.length > 0) {
+				options.classList.forEach(function (className) {
+					$countdown.addClass(className);
+				});
+			}
 
 			for(var i = sec; i > 0; i -= 1) {
-				$('<div class="number">'+i+'</div>')
+				items.push({
+					text:	i,
+					sec:	1
+				});
+			}
+			if($.isArray(text)) {
+				items	= items.concat(text);
+			} else if(text && text.text) {
+				items.push(text);
+			} else if(text) {
+				items.push({
+					text:	text,
+					sec:	1
+				});
+			}
+
+			items.forEach(function (item, i) {
+				var	$elem;
+
+				item.sec	= item.sec || 1;
+
+				$elem	=
+					$('<div class="number"></div>')
+						.html(item.text)
+						.css('-webkit-animation-delay', delay+'s')
+						.css('-webkit-animation-duration', item.sec+'s')
+						.css('-webkit-transition-delay', delay+'s')
+						.css('-webkit-transition-duration', item.sec+'s')
+						.appendTo($countdown);
+
+				if(item.type) {
+					$elem.addClass('countdown-type--'+item.type);
+				}
+				if(item.css) {
+					$.each(item.css, function (name, value) {
+						$elem.css(name, value);
+					});
+				}
+				if(i === items.length - 1) {
+					$elem.on('webkitAnimationEnd', function () {
+						done	= true;
+						if(!options.lazyHide || !callback) {
+							$overlay.addClass('hide');
+						}
+
+						if(callback) {
+							callback.call(countdown, function () {
+								$overlay.addClass('hide');
+							});
+						}
+					});
+				}
+
+				delay	+= item.sec;
+			});
+
+			if(next) {
+				if(next.text) {
+					var	$elem	=
+						$('<div class="next"></div>')
+							.text(next.text)
+							.appendTo($countdown);
+					if(next.css) {
+						$.each(next.css, function (name, value) {
+							$elem.css(name, value);
+						});
+					}
+					if(next.classList) {
+						next.classList.forEach(function (className) {
+							$elem.addClass(className);
+						});
+					}
+				} else {
+					$('<div class="next"></div>')
+						.text(next)
+						.appendTo($countdown);
+				}
+			}
+			if(options.bottom) {
+				$('<div class="bottom"></div>')
+					.html(options.bottom)
 					.appendTo($countdown);
 			}
 
-			$('<div class="number">'+text+'</div>')
-				.appendTo($countdown)
-				.on('webkitAnimationEnd', function () {
-					$overlay.addClass('hide');
-					callback.call(null);
-				});
-
-			$('<div class="next"></div>')
-				.text(next)
-				.appendTo($countdown);
-
-			$('<div class="illustration"></div>')
-				.html(illustration)
-				.appendTo($countdown);
+			if(illustration) {
+				$('<div class="illustration"></div>')
+					.html(illustration)
+					.appendTo($countdown);
+			}
 
 			$overlay
 				.empty()
 				.append($countdown)
-				.removeClass('hide')
-				.find('div.number')
-					.css('-webkit-animation-name', 'countdown_number');
+				.removeClass('hide');
+
+			countdown.reload();
+
+			return countdown;
 		},
 		funcs:	{
 			tones:	{
@@ -6566,47 +6789,127 @@ define('l2p',['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, ap
 			{
 				percent:	95,
 				factor:		1,
-				text:		'Perfect',
+				text:		L2P_global.lang.game_grade_perfect,
 				color:		'#090'
 			},
 			{
 				percent:	80,
 				factor:		0.95,
-				text:		'Good',
+				text:		L2P_global.lang.game_grade_good,
 				color:		'#0D0'
 			},
 			{
 				percent:	60,
 				factor:		0.9,
-				text:		'Fair',
-				color:		'#FF0'
+				text:		L2P_global.lang.game_grade_fair,
+				color:		'#DD0'
 			},
 			{
 				percent:	45,
 				factor:		0.8,
-				text:		'Average',
+				text:		L2P_global.lang.game_grade_average,
 				color:		'#990'
 			},
 			{
 				percent:	30,
 				factor:		0.65,
-				text:		'Poor',
+				text:		L2P_global.lang.game_grade_poor,
 				color:		'#F90'
 			},
 			{
 				percent:	10,
 				factor:		0.65,
-				text:		'Rubbish',
+				text:		L2P_global.lang.game_grade_rubbish,
 				color:		'#C60'
 			},
 			{
 				percent:	0,
 				factor:		0.65,
-				text:		'Miserable',
+				text:		L2P_global.lang.game_grade_miserable,
 				color:		'#900'
 			}
-		]
+		],
+		countdown_test:	 function () {
+			var	start	= new Date(),
+				to		= new Date('2013-07-05 22:00:00 GMT'),
+				d		= new Date(),
+				secLeft	= Math.ceil((to.getTime() - d.getTime()) / 1000),
+				realDelay,
+				items	= [],
+				itemsB	= [],
+				item;
+
+			secLeft	= Math.min(secLeft, 8);
+
+			if(Date.now() > to) {
+				console.log('skip countdown');
+				return;
+			}
+
+			start.setMilliseconds(0);
+
+			for(var i = secLeft; i > 0; i -= 1) {
+				items.push({
+					text:	i,
+					sec:	1
+				});
+			}
+			itemsB.push({
+				text:	'We\'re',
+				sec:	2,
+				type:	'long'
+			});
+			itemsB.push({
+				text:	'now',
+				sec:	2,
+				type:	'long'
+			});
+			itemsB.push({
+				text:	'LIVE',
+				sec:	3,
+				type:	'long'
+			});
+			itemsB.push({
+				text:	'<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin-top: -20vmin;width: 96vw;height: 75vh;" x="0px" y="0px" width="720px" height="122px" viewBox="0 0 960 162.058" enable-background="new 0 0 960 162.058" xml:space="preserve"><g><path fill="#FFF" d="M213.521,38.61v10.726c8.362-8.363,16.181-12.362,23.816-12.362c10.363,0,18.908,5.091,24.363,14.727 c7.09-7.999,15.635-14.727,27.271-14.727c16.545,0,27.09,12.726,27.09,31.997v51.271h-16.181V69.698 c0-12.362-7.637-19.089-16.909-19.089c-5.271-0.182-12.362,4.363-18.181,10.362v59.271H248.61V69.515 c0-13.272-6.728-18.907-14.727-18.907c-8.182,0-13.636,2.545-20.363,10.362v59.271H197.34V38.608h16.182V38.61z"></path><path fill="#FFF" d="M399.87,115.515c-7.454,4.907-10.545,6.362-15.636,6.362c-7.092,0-10.909-2.545-12.363-8.362 c-7.091,5.636-14.545,8.362-21.999,8.362c-12,0-20-9.455-20-19.998c0-16.183,14.727-21.092,27.817-25.818l14.362-5.09v-4.363 c0-10.183-4.909-14.362-14.727-14.362c-8.908,0-17.999,4.18-25.817,13.453V48.062c6.364-7.452,15.272-11.089,27.09-11.089 c16.544,0,29.636,8.363,29.636,26.908v41.997c0,3.092,1.09,4.184,3.09,4.184c1.636,0,4.909-1.637,8.545-4.364v9.818H399.87z M372.053,79.879c-13.816,4.727-25.816,9.453-25.816,19.09c0,6.728,4.908,11.455,11.636,11.455c5.09,0,9.817-2.547,14.181-6.728 V79.879z"></path><path fill="#FFF" d="M505.096,51.154h-44.145c6.363,6.363,8.545,10.909,8.545,17.817c0,6.728-3.818,14.546-7.636,18.363 c-10.909,11.635-33.089,5.816-33.089,15.453c0,4.545,8.545,7.272,24.907,10.545c17.454,3.455,23.635,12.362,23.635,22.726 c0,16.182-14.363,26-38.542,26c-22,0-37.636-10.362-37.636-24.728c0-11.998,6.363-19.09,20.544-22.543 c-5.636-3.455-8.181-6.728-8.181-10.365c0-5.271,5.09-9.816,12.909-11.635v-0.363c-6-2.545-10.545-6-13.636-10.362 c-2.909-4.183-4.364-9.272-4.364-15.272c0-17.454,13.636-28.18,35.635-28.18h61.053V51.154z M434.953,124.241 c-10.908,0-18.544,5.092-18.544,12.363c0,8.182,8,12.545,22.726,12.545c14.183,0,22.545-4.363,22.545-11.816 C461.679,126.969,444.952,124.241,434.953,124.241z M439.134,52.608c-8.908,0-16.181,6.728-16.181,14.729 c0,8.906,6.545,14.907,16.363,14.907c9.091,0,15.635-6.362,15.635-15.271C454.952,59.154,447.68,52.608,439.134,52.608z"></path><path fill="#FFF" d="M505.125,120.243h-16.18V64.685h16.18V120.243z"></path><path fill="#FFF" d="M586.756,59.881c-9.271-6.182-15.453-7.999-22.543-7.999c-14.727,0-24.908,11.089-24.908,27.634 c0,16.908,10.908,27.09,27.635,27.09c6.908,0,13.453-1.818,21.635-5.455v16c-5.453,2.546-15.816,4.729-24.361,4.729 c-24.363,0-41.453-16.91-41.453-40.908c0-26.907,15.635-43.997,40.361-43.997c9.455,0,15.816,2.182,23.635,5.636V59.881z"></path><path fill="#FFF" d="M672.563,38.61h56.408v14.544h-56.408v41.815c0,9.636,6.908,12.363,11.637,12.363 c5.816,0,11.816-2,18.361-6v15.09c-5.637,3.092-14.363,5.455-19.635,5.455c-17.637,0-26.545-10.908-26.545-25.637V53.153h-14.18 v-1.818L672.563,21.7V38.61z"></path><path fill="#FFF" d="M764.373,120.243v-10.363c-6.729,7.271-16.18,12-24.18,12c-16.545,0-28.182-11.817-28.182-32.545V64.686 h16.182v25.74c0,11.453,5.635,18,16.727,18c7.271,0,14.182-4.002,19.453-11.455v-58.36h16.182v81.634h-16.182V120.243z"></path><path fill="#FFF" d="M817.641,49.336h0.361c6.184-7.817,15.273-12.362,24.363-12.362c15.453,0,27.816,10.545,27.816,32.907 v50.361H854V69.698c0-11.999-6.182-19.816-16-19.816c-7.09,0-12.725,3.272-20.361,11.817v58.544h-16.182V38.61h16.182v10.726 H817.641z"></path><path fill="#FFF" d="M959.266,112.242c-9.816,6.546-18.727,9.638-32.543,9.638c-25.455,0-39.637-20.91-39.637-43.453 c0-24.727,15.637-41.452,38.182-41.452c21.635,0,35.453,14.727,35.453,44.907h-57.453c2.547,16.181,11.818,24.543,27.453,24.543 c9.818,0,19.09-3.637,28.545-9.817V112.242L959.266,112.242z M944.721,71.153c-0.545-12.362-7.637-20.181-19.09-20.181 c-12.363,0-19.818,7.271-22,20.181H944.721z"></path></g><g><path fill="#FFF" d="M94.404,141.6c-7.867-17.328-7.938-38.852,1.684-54.75c10.923-18.047,26.561-28.658,46.117-32.729 c-3.263-12.452-9.752-23.598-18.52-32.492c-0.215,0.099-0.43,0.193-0.645,0.292c-19.941,9.265-38.215,21.103-51.938,38.736 c-15.911,20.449-23.955,43.287-17.583,69.204c1.22,4.961,2.806,9.604,4.719,13.956c4.459,0.857,9.061,1.313,13.77,1.313 C79.824,145.129,87.35,143.889,94.404,141.6z"></path><path fill="#FFF" d="M44.29,139.642c-3.076-8.517-5.209-17.741-6.396-27.646C32.592,67.788,48.221,31.288,83.196,3.356 c0.865-0.691,1.738-1.368,2.612-2.04C81.34,0.455,76.727,0,72.008,0C31.932,0-0.556,32.488-0.556,72.564 C-0.557,102.824,17.966,128.752,44.29,139.642z"></path><path fill="#FFF" d="M142.979,87.738c-10.028,0.532-21.638,5.623-29.525,13.187c-11.212,10.757-14.875,24.226-10.684,37.375 C123.045,128.795,138.202,110.189,142.979,87.738z"></path></g></svg>',
+				sec:	4,
+				type:	'long_rebounce'
+			});
+
+			var	options	= {
+				background_color:	'#71C211',
+				bottom:				'<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="720px" height="122px" viewBox="0 0 960 162.058" enable-background="new 0 0 960 162.058" xml:space="preserve"><g><path fill="#FFF" d="M213.521,38.61v10.726c8.362-8.363,16.181-12.362,23.816-12.362c10.363,0,18.908,5.091,24.363,14.727 c7.09-7.999,15.635-14.727,27.271-14.727c16.545,0,27.09,12.726,27.09,31.997v51.271h-16.181V69.698 c0-12.362-7.637-19.089-16.909-19.089c-5.271-0.182-12.362,4.363-18.181,10.362v59.271H248.61V69.515 c0-13.272-6.728-18.907-14.727-18.907c-8.182,0-13.636,2.545-20.363,10.362v59.271H197.34V38.608h16.182V38.61z"></path><path fill="#FFF" d="M399.87,115.515c-7.454,4.907-10.545,6.362-15.636,6.362c-7.092,0-10.909-2.545-12.363-8.362 c-7.091,5.636-14.545,8.362-21.999,8.362c-12,0-20-9.455-20-19.998c0-16.183,14.727-21.092,27.817-25.818l14.362-5.09v-4.363 c0-10.183-4.909-14.362-14.727-14.362c-8.908,0-17.999,4.18-25.817,13.453V48.062c6.364-7.452,15.272-11.089,27.09-11.089 c16.544,0,29.636,8.363,29.636,26.908v41.997c0,3.092,1.09,4.184,3.09,4.184c1.636,0,4.909-1.637,8.545-4.364v9.818H399.87z M372.053,79.879c-13.816,4.727-25.816,9.453-25.816,19.09c0,6.728,4.908,11.455,11.636,11.455c5.09,0,9.817-2.547,14.181-6.728 V79.879z"></path><path fill="#FFF" d="M505.096,51.154h-44.145c6.363,6.363,8.545,10.909,8.545,17.817c0,6.728-3.818,14.546-7.636,18.363 c-10.909,11.635-33.089,5.816-33.089,15.453c0,4.545,8.545,7.272,24.907,10.545c17.454,3.455,23.635,12.362,23.635,22.726 c0,16.182-14.363,26-38.542,26c-22,0-37.636-10.362-37.636-24.728c0-11.998,6.363-19.09,20.544-22.543 c-5.636-3.455-8.181-6.728-8.181-10.365c0-5.271,5.09-9.816,12.909-11.635v-0.363c-6-2.545-10.545-6-13.636-10.362 c-2.909-4.183-4.364-9.272-4.364-15.272c0-17.454,13.636-28.18,35.635-28.18h61.053V51.154z M434.953,124.241 c-10.908,0-18.544,5.092-18.544,12.363c0,8.182,8,12.545,22.726,12.545c14.183,0,22.545-4.363,22.545-11.816 C461.679,126.969,444.952,124.241,434.953,124.241z M439.134,52.608c-8.908,0-16.181,6.728-16.181,14.729 c0,8.906,6.545,14.907,16.363,14.907c9.091,0,15.635-6.362,15.635-15.271C454.952,59.154,447.68,52.608,439.134,52.608z"></path><path fill="#FFF" d="M505.125,120.243h-16.18V64.685h16.18V120.243z"></path><path fill="#FFF" d="M586.756,59.881c-9.271-6.182-15.453-7.999-22.543-7.999c-14.727,0-24.908,11.089-24.908,27.634 c0,16.908,10.908,27.09,27.635,27.09c6.908,0,13.453-1.818,21.635-5.455v16c-5.453,2.546-15.816,4.729-24.361,4.729 c-24.363,0-41.453-16.91-41.453-40.908c0-26.907,15.635-43.997,40.361-43.997c9.455,0,15.816,2.182,23.635,5.636V59.881z"></path><path fill="#FFF" d="M672.563,38.61h56.408v14.544h-56.408v41.815c0,9.636,6.908,12.363,11.637,12.363 c5.816,0,11.816-2,18.361-6v15.09c-5.637,3.092-14.363,5.455-19.635,5.455c-17.637,0-26.545-10.908-26.545-25.637V53.153h-14.18 v-1.818L672.563,21.7V38.61z"></path><path fill="#FFF" d="M764.373,120.243v-10.363c-6.729,7.271-16.18,12-24.18,12c-16.545,0-28.182-11.817-28.182-32.545V64.686 h16.182v25.74c0,11.453,5.635,18,16.727,18c7.271,0,14.182-4.002,19.453-11.455v-58.36h16.182v81.634h-16.182V120.243z"></path><path fill="#FFF" d="M817.641,49.336h0.361c6.184-7.817,15.273-12.362,24.363-12.362c15.453,0,27.816,10.545,27.816,32.907 v50.361H854V69.698c0-11.999-6.182-19.816-16-19.816c-7.09,0-12.725,3.272-20.361,11.817v58.544h-16.182V38.61h16.182v10.726 H817.641z"></path><path fill="#FFF" d="M959.266,112.242c-9.816,6.546-18.727,9.638-32.543,9.638c-25.455,0-39.637-20.91-39.637-43.453 c0-24.727,15.637-41.452,38.182-41.452c21.635,0,35.453,14.727,35.453,44.907h-57.453c2.547,16.181,11.818,24.543,27.453,24.543 c9.818,0,19.09-3.637,28.545-9.817V112.242L959.266,112.242z M944.721,71.153c-0.545-12.362-7.637-20.181-19.09-20.181 c-12.363,0-19.818,7.271-22,20.181H944.721z"></path></g><g><path fill="#FFF" d="M94.404,141.6c-7.867-17.328-7.938-38.852,1.684-54.75c10.923-18.047,26.561-28.658,46.117-32.729 c-3.263-12.452-9.752-23.598-18.52-32.492c-0.215,0.099-0.43,0.193-0.645,0.292c-19.941,9.265-38.215,21.103-51.938,38.736 c-15.911,20.449-23.955,43.287-17.583,69.204c1.22,4.961,2.806,9.604,4.719,13.956c4.459,0.857,9.061,1.313,13.77,1.313 C79.824,145.129,87.35,143.889,94.404,141.6z"></path><path fill="#FFF" d="M44.29,139.642c-3.076-8.517-5.209-17.741-6.396-27.646C32.592,67.788,48.221,31.288,83.196,3.356 c0.865-0.691,1.738-1.368,2.612-2.04C81.34,0.455,76.727,0,72.008,0C31.932,0-0.556,32.488-0.556,72.564 C-0.557,102.824,17.966,128.752,44.29,139.642z"></path><path fill="#FFF" d="M142.979,87.738c-10.028,0.532-21.638,5.623-29.525,13.187c-11.212,10.757-14.875,24.226-10.684,37.375 C123.045,128.795,138.202,110.189,142.979,87.738z"></path></g></svg>'
+			};
+
+			var	run	= function () {
+				realDelay	= (Date.now() - start) % 1000;
+
+				if(items.length > 0) {
+
+					if(realDelay > 100) {
+						delay	= Math.floor(realDelay / 100) / 10;
+						items[0].sec	= (items[0].sec || 1) - delay;
+					} else {
+						items[0].sec	= items[0].sec || 1;
+					}
+
+					L2P.countdown(0, items.splice(0, 5), 'Launching in', '', run, options);
+				} else if(itemsB.length > 0) {
+					if(realDelay > 100) {
+						delay	= Math.floor(realDelay / 100) / 10;
+						itemsB[0].sec	= (itemsB[0].sec || 1) - delay;
+					} else {
+						itemsB[0].sec	= itemsB[0].sec || 1;
+					}
+
+					L2P.countdown(0, itemsB.splice(0, 10), '', '', run, {
+						background_color:	'#71C211'
+					});
+				}
+			};
+			run();
+		}
 	};
+	var t;
 
 	return L2P;
 });
@@ -6704,6 +7007,8 @@ require(['jquery', 'browserdetect'], function ($, AC) {
 	}
 
 	require(['fM', 'l2p'], function (fM, L2P) {
+		//L2P.countdown_test();
+
 		l2p	= L2P;
 		fm	= fM;
 		switch(fM.link.fileName()) {

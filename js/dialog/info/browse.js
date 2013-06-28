@@ -29,7 +29,7 @@ define(['jquery', 'l2p', 'playlist', 'api', 'fM'], function ($, L2P, Playlist, a
 					api.get.game_info(function (data) {
 						$info
 							.find('[data-content="title"]').text(data.title).end()
-							.find('[data-content="octave"]').text('Octave '+octave).end()
+							.find('[data-content="octave"]').text(L2P_global.lang.global_octave+' '+octave).end()
 							.find('[data-content="author"]').text(data.author).end()
 							.find('[data-content="year"]').text(data.year === 0 ? '' : data.year).end()
 							.find('[data-content="difficulty"]').text(data.difficulty).end()

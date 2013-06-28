@@ -38,7 +38,27 @@ class PageRenderer
 		$arrPreloadLang	= $this->getLang($oLang, array(
 			'global_play',
 			'global_play_again',
-			'global_pause'
+            'global_pause',
+			'global_octave',
+            'game_permission_ask',
+            'game_permission_ask_initial',
+            'game_permission_ask_helpful',
+            'game_permission_ask_helpful_2',
+            'game_permission_ask_helpful_3',
+            'game_permission_ask_impatient',
+            'game_permission_ask_impatient_sigh',
+            'game_permission_denied',
+            'game_measuring',
+            'game_measuring_quiet',
+            'game_measuring_shh',
+            'game_measuring_done',
+            'game_grade_perfect',
+            'game_grade_good',
+            'game_grade_fair',
+            'game_grade_average',
+            'game_grade_poor',
+            'game_grade_rubbish',
+            'game_grade_miserable'
 		));
 
         // Check if we're comming from inside this page :)

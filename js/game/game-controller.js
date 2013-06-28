@@ -203,7 +203,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 			gameController.svgLine.node.classList.remove('pulse');
 		});
 
-		if(L2P_global.metronome) {
+		if(L2P_global.metronome && !gameController.kiddieMode) {
 			var lastPulse	= Date.now(),
 				pulseFunc	= function () {
 					if(gameController.game && gameController.game.running) {
@@ -227,7 +227,11 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		}
 	};
 	GameController.prototype.pauseGame	= function () {
-		this.SVGNotes.animateAbs((-Math.floor(this.currentLeft() / (this.defWidth / 4)) + 0.5) * (this.defWidth / 4) - 20, -501, 0);
+		if(this.kiddieMode) {
+			this.SVGNotes.animateAbs(-this.currentLeft() + 30, -501, 0);
+		} else {
+			this.SVGNotes.animateAbs((-Math.floor(this.currentLeft() / (this.defWidth / 4)) + 0.5) * (this.defWidth / 4) - 20, -501, 0);
+		}
 		this.paused	= true;
 	};
 	GameController.prototype.stopGame	= function () {
@@ -662,7 +666,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 					// Check the current note + the relative width
 					if(noteLeftPosRel <= currentPos && noteRightPosRel > currentPos) {
 						// If we haven't enabled kiddieMode, we check weither we can use the note before or after
-						if(!gameController.kiddieMode) {
+						if(!gameController.kiddieMode || true) {
 							var	noteIndex	= note.tact.nodes.indexOf(note),
 								tactIndex,
 								otherTact;

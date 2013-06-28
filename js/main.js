@@ -43,6 +43,8 @@ require(['jquery', 'browserdetect'], function ($, AC) {
 	}
 
 	require(['fM', 'l2p'], function (fM, L2P) {
+		//L2P.countdown_test();
+
 		l2p	= L2P;
 		fm	= fM;
 		switch(fM.link.fileName()) {

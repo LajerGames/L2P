@@ -20,6 +20,7 @@ $this
 ->Set('last', 'Last')
 ->Set('octave', 'Octave')
 ->Set('closed_preview', 'Closed Preview')
+->Set('refresh', 'Refresh')
 
 # Validation Errors
 ->SetMenu('validation_')
@@ -173,11 +174,25 @@ $this
 # User already logged in
 ->SetMenu('game_')
 ->Set('start', 'GO!')
-->Set('permission_ask', 'Please give permission to use your microphone above')
-->Set('measuring', 'Measuring background noise')
-->Set('measuring_quiet', 'Please make sure there is quiet in the room in')
+->Set('permission_ask', 'Please click allow, above')
+->Set('permission_ask_initial', 'We need your microphone')
+->Set('permission_ask_helpful', 'You haven\'t clicked allow yet')
+->Set('permission_ask_helpful_2', 'Did something go wrong?')
+->Set('permission_ask_helpful_3', '... then please refresh the page')
+->Set('permission_ask_impatient', 'Hallo, are you out there?')
+->Set('permission_ask_impatient_sigh', 'We\'re waiting!')
+->Set('permission_denied', 'You denied access, and therefor you cannot play.')
+->Set('measuring', 'Measuring noise')
+->Set('measuring_quiet', 'Please be quiet in')
 ->Set('measuring_shh', 'Shh...')
-->Set('measuring_done', 'Færdig, god fornøjelse :)')
+->Set('measuring_done', 'Done, enjoy :)')
+->Set('grade_perfect', 'Perfect')
+->Set('grade_good', 'Good')
+->Set('grade_fair', 'Fair')
+->Set('grade_average', 'Average')
+->Set('grade_poor', 'Poor')
+->Set('grade_rubbish', 'Rubbish')
+->Set('grade_miserable', 'Miserable')
 
 # User statistics
 ->SetMenu('statistics_')
@@ -215,7 +230,8 @@ $this
 ->Set('wedding', 'Wedding')
 
 ->SetMenu('tour_')
-->Set('1_0', 'Welcome to the Magic Tune guided tour, where we will show you some of the games functionallity and how to play. <br /><br /> Please click on "Settings"')
+->Set('0_0', 'Welcome to the Magic Tune guided tour, where we will show you some of the games functionallity and how to play. <br /><br /> <strong>Before you start playing, please make sure your microphone works properly.</strong>')
+->Set('1_0', 'Please click on "Settings"')
 ->Set('1_1', 'Concert pitch: Here you can set your concert pitch, it is most common to use 440 or 442. <br /><br /> Click "Got it" to proceed.')
 ->Set('1_2', 'Colored notes: By checking this box, we will make the notes different colors when you play. Notes which belong to the G string will be yellow, notes on the A string will be red and so forth. <br /><br /> Click "Got it" to proceed.')
 ->Set('1_3', 'Here you can change the language in which Magic Tune is shown. <br /><br />  Click "Got it" to proceed.')
