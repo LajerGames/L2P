@@ -199,7 +199,7 @@ define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, opt
 
 					L2P.resetBoxText($('#song_title'));
 					L2P.resetBoxText($('#scale_title'));
-console.log(options.tones);
+
 					state.is_game	= true;
 
 					if(generate) {
