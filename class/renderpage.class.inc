@@ -122,7 +122,7 @@ class PageRenderer
 				<link rel="stylesheet" href="'.HTTP_PROJECT_ROOT_CSS.'default.css">
 				'.$strCSSFiles.'
 
-                <script data-main="'.HTTP_PROJECT_ROOT_JAVASCRIPT.(!SYSTEM_DEV ? 'main' : 'magic-tune').'" src="'.HTTP_PROJECT_ROOT_JAVASCRIPT.'require.js"></script>
+                <script data-main="'.HTTP_PROJECT_ROOT_JAVASCRIPT.(SYSTEM_DEV ? 'main' : 'magic-tune').'" src="'.HTTP_PROJECT_ROOT_JAVASCRIPT.'require.js"></script>
 				<script>
 					var	L2P_global	= '.json_encode($arrL2PGlobals, JSON_FORCE_OBJECT).';
 				</script>
