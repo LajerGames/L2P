@@ -202,6 +202,7 @@ $this
 ->Set('graph_precision', 'Precision')
 ->Set('graph_pointsprminute', 'Points per minute')
 ->Set('graph_pointsprtact', 'Points per tact')
+->Set('graph_precisionprtact', 'Precision per tact')
 ->Set('favourites', 'Favourites')
 ->Set('view_all', 'View all')
 ->Set('title', 'Title')

@@ -1,15 +1,17 @@
 define(['jquery', 'fM', 'l2p', 'api', 'highcharts'], function ($, fM, L2P, api, Highcharts) {
 	return (function ($dialog) {
-		console.log('test');
-
 		var	data		= JSON.parse($dialog.find('[data-statistic]').attr('data-statistic')) || {},
 			$containers	= $dialog.find('.statistic-graph'),
 			$formSearch	= $dialog.find('form[name="search"]'),
             path		= location.pathname.split('/'),
 			precision,
-			pointsprminute,
+			pointsPerMinute,
+			precisionPerTact,
 			formatter	= function () {
-				return '<b>'+this.x+':</b> '+this.y;
+				return '<b>'+this.x+': '+this.y;
+			},
+			formatterKey	= function () {
+				return '<b>'+this.x+': '+this.y+' %</b><br><br>'+this.key;
 			};
 
         $dialog.find('.BottomTableView tr').on('click', function() {
@@ -35,92 +37,138 @@ define(['jquery', 'fM', 'l2p', 'api', 'highcharts'], function ($, fM, L2P, api, 
             	path[4]	= data.uuid;
             	path[5]	= '';
 
-            	console.log('nav', path);
             	fM.link.navigate(path.join('/'));
             }, fM.form.getElements.call($formSearch[0]));
         });
 
-		api.get.lang(function (lang) {
-			precision	= new Highcharts.Chart({
-				chart:	{
-					renderTo:	$containers[0],
-					type:		'column'
-				},
-				credits: {
-					enabled:	false
-				},
-				legend:	{
-					enabled:			data[0].series.length !== 1,
-					backgroundColor:	'#FFFFFF',
-					layout:				'vertical',
-					align:				'right',
-					verticalAlign:		'top',
-					floating:			true,
-					y:					5
-				},
-				title:	{
-					text:		lang.statistics_graph_precision
-				},
-				xAxis:	{
-					categories:	data[0].categories
-				},
-				yAxis:	{
-					min:	0,
-					max:	100,
+        console.log(data);
+        data.forEach(function (graphData, i) {
+			if(graphData.type === 'GamePrecision') {
+				precision	= new Highcharts.Chart({
+					chart:	{
+						renderTo:	$containers[i],
+						type:		'column'
+					},
+					credits: {
+						enabled:	false
+					},
+					legend:	{
+						enabled:			graphData.graph.series.length !== 1,
+						backgroundColor:	'#FFFFFF',
+						layout:				'vertical',
+						align:				'right',
+						verticalAlign:		'top',
+						floating:			true,
+						y:					5
+					},
 					title:	{
-						text:	'%'
+						text:		graphData.name
+					},
+					xAxis:	{
+						categories:	graphData.graph.categories
+					},
+					yAxis:	{
+						min:	0,
+						max:	100,
+						title:	{
+							text:	graphData.y
+						}
+					},
+					series:	graphData.graph.series.map(function (serie) {
+						serie.data	= serie.data.map(function (y) {
+							return +(+y).toFixed(2);
+						});
+						return serie;
+					}),
+					tooltip:	{
+						formatter:	formatter
 					}
-				},
-				series:	data[0].series.map(function (serie) {
-					serie.data	= serie.data.map(function (y) {
-						return +(+y).toFixed(2);
-					});
-					return serie;
-				}),
-				tooltip:	{
-					formatter:	formatter
-				}
-			});
-			pointsprminute	= new Highcharts.Chart({
-				chart:	{
-					renderTo:	$containers[1],
-					type:		'line'
-				},
-				credits: {
-					enabled:	false
-				},
-				legend:	{
-					enabled:			data[1].series.length !== 1,
-					backgroundColor:	'#FFFFFF',
-					layout:				'vertical',
-					align:				'right',
-					verticalAlign:		'top',
-					floating:			true,
-					y:					5
-				},
-				title:	{
-					text:		lang.statistics_graph_pointsprminute
-				},
-				xAxis:	{
-					categories:	data[1].categories
-				},
-				yAxis:	{
-					min:	0,
+				});
+			} else if(graphData.type === 'PrecisionPerTact') {
+				precisionPerTact	= new Highcharts.Chart({
+					chart:	{
+						renderTo:	$containers[i],
+						type:		'line'
+					},
+					credits: {
+						enabled:	false
+					},
+					legend:	{
+						enabled:			graphData.graph.series.length !== 1,
+						backgroundColor:	'#FFFFFF',
+						layout:				'vertical',
+						align:				'right',
+						verticalAlign:		'top',
+						floating:			true,
+						y:					5
+					},
 					title:	{
-						text:	lang.global_points
+						text:		graphData.name
+					},
+					xAxis:	{
+						categories:	graphData.graph.categories
+					},
+					yAxis:	{
+						min:	0,
+						title:	{
+							text:	graphData.y
+						}
+					},
+					series:	graphData.graph.series.map(function (serie) {
+						serie.data.forEach(function (point) {
+							point.y		= +(+point.y).toFixed(2);
+							point.name	= $.map(point.notes, function (value, key) {
+								return key+': '+(value.toFixed(2))+' %';
+							}).join('<br>');
+						});
+
+						return serie;
+					}),
+					tooltip:	{
+						formatter:	formatterKey
 					}
-				},
-				series:	data[1].series.map(function (serie) {
-					serie.data	= serie.data.map(function (y) {
-						return +(+y).toFixed(2);
-					});
-					return serie;
-				}),
-				tooltip:	{
-					formatter:	formatter
-				}
-			});
-		},
-        ['global_points', 'statistics_graph_precision', 'statistics_graph_pointsprminute']);
+				});
+			} else if(graphData.type === 'PointsPerMinute') {
+				pointsPerMinute	= new Highcharts.Chart({
+					chart:	{
+						renderTo:	$containers[i],
+						type:		'line'
+					},
+					credits: {
+						enabled:	false
+					},
+					legend:	{
+						enabled:			graphData.graph.series.length !== 1,
+						backgroundColor:	'#FFFFFF',
+						layout:				'vertical',
+						align:				'right',
+						verticalAlign:		'top',
+						floating:			true,
+						y:					5
+					},
+					title:	{
+						text:		graphData.name
+					},
+					xAxis:	{
+						categories:	graphData.graph.categories
+					},
+					yAxis:	{
+						min:	0,
+						title:	{
+							text:	graphData.y
+						}
+					},
+					series:	graphData.graph.series.map(function (serie) {
+						serie.data	= serie.data.map(function (y) {
+							return +(+y).toFixed(2);
+						});
+						return serie;
+					}),
+					tooltip:	{
+						formatter:	formatter
+					}
+				});
+			}
+        });
 	});
 });

@@ -59,15 +59,22 @@ class UserHandler
 			$strEmailContent = 'This is default e-mail content';
 		}
 		require_once(SERVER_PROJECT_ROOT_LIBS.'PHPMailer_5.2.2-beta2/class.phpmailer.php');
-		$oMail = new phpmailer();
-		$oMail->IsSendmail();
-
-		$oMail->From        = SYSTEM_MAIL;
-		$oMail->FromName    = SYSTEM_NAME;
-		$oMail->AddAddress($oUserdata->email, $oUserdata->username);
+		$oMail	= new phpmailer();
+		$oMail->IsSMTP();
 		$oMail->IsHTML(true); // set email format to HTML
-		$oMail->CharSet     = 'UTF-8';
 
+		$oMail->Host		= 'smtp.live.com';
+		$oMail->SMTPDebug	= 1;
+		$oMail->SMTPAuth	= true;
+		$oMail->Port		= 25;
+		$oMail->SMTPSecure	= 'tls';
+		$oMail->Username	= 'noreply@magic-tune.com';
+		$oMail->Password	= 'mt2013!!';
+
+		$oMail->CharSet     = 'UTF-8';
+		$oMail->SetFrom(SYSTEM_MAIL, SYSTEM_NAME);
+
+		$oMail->AddAddress($oUserdata->email, $oUserdata->username);
 		$oMail->Subject     = $strMailHeadline.' '.SYSTEM_NAME;
 		$oMail->Body        = $strEmailContent;
 		$oMail->Send();

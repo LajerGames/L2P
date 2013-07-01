@@ -1,19 +1,31 @@
 define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], function ($, SVGElement, options, fM, api, L2P, Tick) {
-	function getImagePath(note, connect) {
-		var	path	= options.gameImagePath;
+	function getImagePath(note, connect, coloredNotes) {
+		var	path		= options.gameImagePath,
+			colorName	= '';
+		coloredNotes	= coloredNotes || [];
+
 		if(note.isRest) {
 			path	+= note.type.name.substr(4, 1).toLowerCase() + note.type.name.substr(5) + 'rest';
 		} else if(note.isPeriod) {
 			path	+= note.type.name.substr(0, note.type.name.length - 6) + 'note-period';
 		} else {
 			if(connect) {
-				path	+= 'quarter' + 'note';
+				path	+= 'quarternote';
 			} else {
 				path	+= note.type.name + 'note';
 			}
 		}
 
-		return path + options.gameImageType;
+		if(!note.isRest) {
+			for(var colorNo = 0; colorNo < coloredNotes.length; colorNo += 1) {
+				if(coloredNotes[colorNo].pos <= note.tone.pos) {
+					colorName	= coloredNotes[colorNo].color;
+					break;
+				}
+			}
+		}
+
+		return path + colorName + options.gameImageType;
 	}
 	function flipNote(note) {
 		note.svgElement.setPos(note.svgElement.getX(), -175 - note.svgElement.getY() + 2 * 4);
@@ -51,7 +63,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		this.sound;
 		this.game;
 		this.lastPos		= 0;
-		this.playSound		= true;
+		this.playSound		= false;
 		this.useCountdown	= true;
 		this.currentNote;
 		this.currentTact;
@@ -134,12 +146,12 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		this.pointCon	= $('#pointContainer');
 		this.currentNote	= undefined;
 
-		console.log(this.game);
+		DEBUG && console.log(this.game);
 		this.game.reset();
 
 		this.SVGNotes.animateAbs(0, -501, 0);
 
-		console.log('reset-pos', this.SVGNotes.node.style.webkitTransition, this.SVGNotes.node.style.webkitTransform);
+		DEBUG && console.log('reset-pos', this.SVGNotes.node.style.webkitTransition, this.SVGNotes.node.style.webkitTransform);
 		this.initView();
 
 		this.$this.trigger('gameLoadSpeedChange', this.game.speed);
@@ -296,6 +308,26 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		this.SVGNotes.animateAbs(0, -501, 0);
 		this.SVGNotes.removeChildNodes();
 
+		var	coloredNotes	= [];
+		if(L2P_global.colored_notes) {
+			coloredNotes.push({
+				pos:	options.tones.names[4]['C#'].pos,
+				color:	'-yellow'
+			});
+			coloredNotes.push({
+				pos:	options.tones.names[4]['G#'].pos,
+				color:	'-green'
+			});
+			coloredNotes.push({
+				pos:	options.tones.names[5]['D#'].pos,
+				color:	'-red'
+			});
+			coloredNotes.push({
+				pos:	-10000,
+				color:	'-blue'
+			});
+		}
+
 		if(this.game) {
 			var	lastNote;
 			this.game.tacts.forEach(function (tact) {
@@ -332,7 +364,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 
 						note.svgElement	= new SVGElement(options.gameImageNodeType)
 											.setRef(note)
-											.setLink('/'+getImagePath(note, connect))
+											.setLink('/'+getImagePath(note, connect, coloredNotes))
 											.setPos(notePos, tonePos)
 											.setDimensions(50, 100)
 											.appendTo(tact.svgElement.node);
@@ -404,7 +436,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 									flip	= first.svgElement.options.flip;
 
 								connections.forEach(function (note) {
-									note.svgElement.setLink('/'+getImagePath(note, true));
+									note.svgElement.setLink('/'+getImagePath(note, true, coloredNotes));
 									if(note !== first) {
 										if(flip && !note.svgElement.options.flip) {
 											flipNote(note);
@@ -665,40 +697,38 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 
 					// Check the current note + the relative width
 					if(noteLeftPosRel <= currentPos && noteRightPosRel > currentPos) {
-						// If we haven't enabled kiddieMode, we check weither we can use the note before or after
-						if(!gameController.kiddieMode || true) {
-							var	noteIndex	= note.tact.nodes.indexOf(note),
-								tactIndex,
-								otherTact;
+						// We check weither we can use the note before or after
+						var	noteIndex	= note.tact.nodes.indexOf(note),
+							tactIndex,
+							otherTact;
 
-							if(relNotePosLeft < relWidth * 2) {
-								if(noteIndex === 0) {
-									tactIndex	= gameController.game.tacts.indexOf(note.tact);
-									if(tactIndex > 0) {
-										otherTact	= gameController.game.tacts[tactIndex - 1];
-										otherNote	= otherTact.nodes[otherTact.nodes.length - 1];
-									}
-								} else {
-									otherNote	= note.tact.nodes[noteIndex - 1];
+						if(relNotePosLeft < relWidth * 2) {
+							if(noteIndex === 0) {
+								tactIndex	= gameController.game.tacts.indexOf(note.tact);
+								if(tactIndex > 0) {
+									otherTact	= gameController.game.tacts[tactIndex - 1];
+									otherNote	= otherTact.nodes[otherTact.nodes.length - 1];
 								}
-							} else if(relNotePosRight < relWidth * 2) {
-								if(noteIndex === note.tact.nodes.length - 1) {
-									tactIndex	= gameController.game.tacts.indexOf(note.tact);
-									if(tactIndex < gameController.game.tacts.length - 1) {
-										otherTact	= gameController.game.tacts[tactIndex + 1];
-										otherNote	= otherTact.nodes[0];
-									}
-								} else {
-									otherNote	= note.tact.nodes[noteIndex + 1];
-								}
+							} else {
+								otherNote	= note.tact.nodes[noteIndex - 1];
 							}
-							if(otherNote) {
-								if(otherNote.isRest) {
-									otherNote	= undefined;
-								} else {
-									if(otherNote.tone === tone) {
-										note	= otherNote;
-									}
+						} else if(relNotePosRight < relWidth * 2) {
+							if(noteIndex === note.tact.nodes.length - 1) {
+								tactIndex	= gameController.game.tacts.indexOf(note.tact);
+								if(tactIndex < gameController.game.tacts.length - 1) {
+									otherTact	= gameController.game.tacts[tactIndex + 1];
+									otherNote	= otherTact.nodes[0];
+								}
+							} else {
+								otherNote	= note.tact.nodes[noteIndex + 1];
+							}
+						}
+						if(otherNote) {
+							if(otherNote.isRest) {
+								otherNote	= undefined;
+							} else {
+								if(otherNote.tone === tone) {
+									note	= otherNote;
 								}
 							}
 						}
@@ -738,9 +768,11 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 						}
 
 						// Add the tick
-						note.ticks.push(new Tick(freq, toneDiff));
+						if(!note.isRest) {
+							note.ticks.push(new Tick(freq, toneDiff));
+						}
 
-						var	colorPercent	= Math.min(toneDiff.ratioRel, 1),
+						var	colorPercent	= note.isRest ? 0 : Math.min(toneDiff.ratioRel, 1),
 							color			= that.generatePercentColor(colorPercent);
 
 						that.svgPointer.setFill(color);
@@ -754,33 +786,29 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		}
 
 		if(tone) {
-			if(Math.abs(diff) < 2 && false) {
-				that.setPointerPos(tone.pos);
-			} else {
-				var	pos	= options.tones.all.indexOf(tone);
-				if(pos === -1) {
-					return;
-				}
-				if(diff > 0) {
-					var	toneAbove	= options.tones.all[pos + 1],
-						toneDiffs	= Math.abs(toneAbove.hz - tone.hz);
-					if(toneDiffs === 0) {
-						toneAbove	= options.tones.all[pos + 2];
-						toneDiffs	= Math.abs(toneAbove.hz - tone.hz);
-					}
-					var	ratio		= diff / toneDiffs;
-				} else {
-					var	toneAbove	= options.tones.all[pos - 1],
-						toneDiffs	= Math.abs(toneAbove.hz - tone.hz);
-					if(toneDiffs === 0) {
-						toneAbove	= options.tones.all[pos - 2];
-						toneDiffs	= Math.abs(toneAbove.hz - tone.hz);
-					}
-					var	ratio		= diff / toneDiffs;
-				}
-
-				that.setPointerPos(tone.pos - ratio);
+			var	pos	= options.tones.all.indexOf(tone);
+			if(pos === -1) {
+				return;
 			}
+			if(diff > 0) {
+				var	toneAbove	= options.tones.all[pos + 1],
+					toneDiffs	= Math.abs(toneAbove.hz - tone.hz);
+				if(toneDiffs === 0) {
+					toneAbove	= options.tones.all[pos + 2];
+					toneDiffs	= Math.abs(toneAbove.hz - tone.hz);
+				}
+				var	ratio		= diff / toneDiffs;
+			} else {
+				var	toneAbove	= options.tones.all[pos - 1],
+					toneDiffs	= Math.abs(toneAbove.hz - tone.hz);
+				if(toneDiffs === 0) {
+					toneAbove	= options.tones.all[pos - 2];
+					toneDiffs	= Math.abs(toneAbove.hz - tone.hz);
+				}
+				var	ratio		= diff / toneDiffs;
+			}
+
+			that.setPointerPos(tone.pos - ratio);
 		}
 	};
 	GameController.prototype.expectedTone	= function () {
@@ -816,7 +844,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 				note.ticks.forEach(function (tick) {
 					var	tickData	= [
 						tick.percent,			// 0	percent
-						tick.freq,				// 1	freq
+						+tick.freq.toFixed(2),	// 1	freq
 						tick.time - data[4][0]	// 2	time
 					];
 					noteData[0].push(tickData);
@@ -827,7 +855,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 			data[2].push(JSON.stringify(tactData));
 		});
 
-		//console.log(data);
+		DEBUG && console.log(data);
 
 		return JSON.stringify(data);
 	};

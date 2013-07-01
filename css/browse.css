@@ -150,3 +150,6 @@
 	width: 5vw;
 	margin-top: 0;
 }
+#StatsGraph {
+    width: 3vmin;   
+}

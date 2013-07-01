@@ -63,7 +63,7 @@ $strBody	= '
 				<li data-content="year"></li>
 				<li data-content="difficulty"></li>
 			</ul>
-			<a href="#" data-content="statistics" data-dialog="info"><img src="/img/icons/statistics.svg" /> Statistics</a>
+			<a href="#" data-content="statistics" data-dialog="info"><img src="/img/icons/statistics.svg" id="StatsGraph" /> Statistics</a>
 		</td>
 		<td id="SongContainer">
 			<input type="text" name="title" value="" placeholder="Title" data-value="Title" data-type="'.$strType.'" autocomplete="off" class="std" id="musicSearch">

@@ -40,6 +40,7 @@ class PageRenderer
 			'global_play_again',
             'global_pause',
 			'global_octave',
+			'global_points',
             'game_permission_ask',
             'game_permission_ask_initial',
             'game_permission_ask_helpful',
@@ -89,10 +90,13 @@ class PageRenderer
             ';
         }
 
+        $strTrackingSubID	= SYSTEM_DEV ? '2' : '1';
+        $strTrackingDomain	= SYSTEM_DEV ? 'fmads.dk' : $_SERVER['SERVER_NAME'];
+
 		$arrL2PGlobals	= array(
 			'username'		    => $_SESSION['UserObject']->username,
 			'kiddie_mode'	    => intval($_SESSION['UserObject']->kiddie_mode),
-			'colored_notes'	    => intval($_SESSION['UserObject']->colored_notes),
+			'colored_notes'	    => intval($_SESSION['UserObject']->colored_notes) === 1,
 			'concert_pitch'	    => empty($_SESSION['UserObject']->concert_pitch) ? 442 : $_SESSION['UserObject']->concert_pitch,
 			'lang'			    => $arrPreloadLang,
             'internal_load'     => $bInternalPageLoad,
@@ -105,8 +109,16 @@ class PageRenderer
 		<html>
 			<head>
 				<title>'.$strTitle.'</title>
+
+				<link rel="icon" href="'.HTTP_PROJECT_ROOT_IMG.'favicon16.png" sizes="16x16">
+				<link rel="icon" href="'.HTTP_PROJECT_ROOT_IMG.'favicon32.png" sizes="32x32">
+				<link rel="icon" href="'.HTTP_PROJECT_ROOT_IMG.'favicon48.png" sizes="48x48">
+				<link rel="icon" href="'.HTTP_PROJECT_ROOT_IMG.'favicon64.png" sizes="64x64">
+				<link rel="icon" href="'.HTTP_PROJECT_ROOT_IMG.'favicon128.png" sizes="128x128">
+
 				<link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Open Sans">
 				<link rel="stylesheet" href="'.HTTP_PROJECT_ROOT.'bootstrap/css/bootstrap.min.css">
+				<link rel="stylesheet" href="'.HTTP_PROJECT_ROOT_CSS.'bootstrap-tour.min.css">
 				<link rel="stylesheet" href="'.HTTP_PROJECT_ROOT_CSS.'default.css">
 				'.$strCSSFiles.'
 
@@ -120,6 +132,7 @@ class PageRenderer
                 '.$strIntro.'
                 <div id="overlay" class="show hide"></div>
 				<div id="CenteringContainer" data-default-title="'.$oLang->Get('system_title_welcome').'">
+                    <!--a href="javascript:void(0);" id="guide"><img src="/img/icons/vidcam.svg" alt="guided tour"/>Guided tour</a-->
 					<a href="'.HTTP_PROJECT_ROOT.'" id="logo" data-internal-navigation="home" data-title="'.$oLang->Get('system_title_welcome').'"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="480px" height="81px" viewBox="0 0 960 162.058" enable-background="new 0 0 960 162.058" xml:space="preserve">
 						<g>
 							<path fill="#FFF" d="M213.521,38.61v10.726c8.362-8.363,16.181-12.362,23.816-12.362c10.363,0,18.908,5.091,24.363,14.727 c7.09-7.999,15.635-14.727,27.271-14.727c16.545,0,27.09,12.726,27.09,31.997v51.271h-16.181V69.698 c0-12.362-7.637-19.089-16.909-19.089c-5.271-0.182-12.362,4.363-18.181,10.362v59.271H248.61V69.515 c0-13.272-6.728-18.907-14.727-18.907c-8.182,0-13.636,2.545-20.363,10.362v59.271H197.34V38.608h16.182V38.61z"/>
@@ -143,6 +156,23 @@ class PageRenderer
 					</div>
 				</div>
 				<div id="game_container"></div>
+
+				<script type="text/javascript">
+					var _gaq = _gaq || [];
+					_gaq.push(["_setAccount", "UA-42155613-'.$strTrackingSubID.'"]);
+					_gaq.push(["_setDomainName", "'.$strTrackingDomain.'"]);
+					_gaq.push(["_setAllowLinker", true]);
+					_gaq.push(["_trackPageview"]);
+
+					(function() {
+						var ga = document.createElement("script"); ga.type = "text/javascript";
+				  		ga.async = true;
+						ga.src = ("https:" == document.location.protocol ? "https://ssl" : "http://www") + ".google-analytics.com/ga.js";
+						var s = document.getElementsByTagName("script")[0];
+				  		s.parentNode.insertBefore(ga, s);
+					})();
+				</script>
+				'.$strTackingCode.'
 			</body>
 		</html>
 		';
@@ -153,15 +183,18 @@ class PageRenderer
 	*
 	* @param string $strLink
 	* @param PageRenderer::DialogType $strDialogType
-	* @param string $strInnerHTML
+    * @param string $strInnerHTML
+	* @param string $strIconPath
 	* @param array $arrProperties
 	*/
-	public function RenderDialogLink($strLink, $strDialogType, $strInnerHTML, $arrProperties = array())
+	public function RenderDialogLink($strLink, $strDialogType, $strInnerHTML, $strIconPath, $arrProperties = array())
 	{
 		$arrProperties['href']						= $strLink;
 		$arrProperties['data-dialog']				= $strDialogType;
 
-		return '<a '.RenderProperties($arrProperties).'>'.$strInnerHTML.'</a>';
+        $strIcon = !empty($strIconPath) ? '<img src="'.$strIconPath.'" alt="" />' : '';
+
+		return '<a '.RenderProperties($arrProperties).' class="IconLink">'.$strIcon.' '.$strInnerHTML.'</a>';
 	}
 
 	public function RenderDialogAction(Template $oTemplate, $strTitle, $strBody, $strColor, $strSubmitText)

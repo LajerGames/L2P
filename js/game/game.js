@@ -90,7 +90,7 @@ define(['game/options', 'fM'], function (options, fM) {
 				duration	+= tact.type.nodes * that.secPrNode;
 			});
 
-			console.log(this.secPrNode, duration);
+			DEBUG && console.log(this.secPrNode, duration);
 
 			this.duration	= duration;
 		}
@@ -119,7 +119,7 @@ define(['game/options', 'fM'], function (options, fM) {
 		} else {
 			this.nodePlaying.img = images.nodes[this.nodePlaying.type.name+'False'];
 		}
-		console.log(this.nodePlaying.tone.hz, feq);
+		DEBUG && console.log(this.nodePlaying.tone.hz, feq);
 	};
 
 	return Game;

@@ -416,7 +416,7 @@ class statistics
         $strTactString = $arrGameData[0]->strTactStatistics;
 
         // Make JSON string into a array
-        $arrTacts = json_decode($strTactString);
+        $arrTacts = json_decode($strTactString, true);
 
         // Create HighChart friendly array to return
         $arrChartData = array();
@@ -433,9 +433,17 @@ class statistics
 
         // Create array with y-axis values for this game
         $arrTactPrecisionThisGame = array();
-        foreach($arrTacts as $iAvgPct)
+        foreach($arrTacts as $arrTactInfo)
         {
-            $arrTactPrecisionThisGame[] = $iAvgPct;
+            $arrNotesAccuracy = array();
+            foreach($arrTactInfo['notes'] as $strNotename => $fNoteAccuracy)
+            {
+                $arrNotesAccuracy[$strNotename] = $fNoteAccuracy;
+            }
+            $arrTactPrecisionThisGame[] = array(
+                'notes'     => $arrNotesAccuracy,
+                'y'   => $arrTactInfo['total_pct']
+            );
         }
 
         // Add data to the series
@@ -452,27 +460,44 @@ class statistics
             foreach($arrAverageData as $oAverageGameData)
             {
                 // Add the pct of this game foreach tact foreach game
-                $arrTactAverageGame    = json_decode($oAverageGameData->strTactStatistics);
+                $arrTactAverageGame    = json_decode($oAverageGameData->strTactStatistics, true);
 
                 // Loop through each tact in this particular game
                 $iLoopNo = 0;
-                foreach($arrTactAverageGame as $iAvgPct)
+                foreach($arrTactAverageGame as $arrTactInfo)
                 {
                     $iLoopNo++;
                     if(!isset($arrAverageTactData[$iLoopNo]))
                     {
-                        $arrAverageTactData[$iLoopNo] = 0;
+                        $arrAverageTactData[$iLoopNo] = array(
+                            'total_pct' => $arrTactInfo['total_pct'],
+                            'notes'     => $arrTactInfo['notes']
+                        );
                     }
-
-                    $arrAverageTactData[$iLoopNo] += $iAvgPct;
+                    else
+                    {
+                        $arrAverageTactData[$iLoopNo]['total_pct'] += $arrTactInfo['total_pct'];
+                        foreach($arrTactInfo['notes'] as $strNotename => $fNoteAccuracy)
+                        {
+                            $arrAverageTactData[$iLoopNo]['notes'][$strNotename] += $fNoteAccuracy;
+                        }   
+                    }
                 }
             }
 
             // Loop through the average tact data and divide the percentage in the values by the amount of times this is played
             $arrTactPrecisionAverageGame = array();
-            foreach($arrAverageTactData as $iTactNo => $iAvgPct)
+            foreach($arrAverageTactData as $iTactNo => $arrTactData)
             {
-                $arrTactPrecisionAverageGame[] = $iAvgPct / sizeof($arrAverageData);
+                $arrTactNotesData = array();
+                foreach($arrTactData['notes'] as $strNotename => $fNoteAccuracy)
+                {
+                    $arrTactNotesData[$strNotename] = $fNoteAccuracy / sizeof($arrAverageData);
+                }
+                $arrTactPrecisionAverageGame[] = array(
+                    'notes'     => $arrTactNotesData,
+                    'y' => $arrTactData['total_pct'] / sizeof($arrAverageData)
+                );
             }
 
             // Add data to the series
@@ -509,7 +534,7 @@ class statistics
                 $strFavouriteSongs .= '
                     <tr data-gameid="'.$iGameID.'" data-gamestartoctave="'.$iStartOctave.'">
                         <td>'.$iLoopID.'</td>
-                        <td><span class="octave">(Octave '.$arrGameInfo['start_octave'].')</span> '.$arrGameInfo['name'].'</td>
+                        <td><span class="octave">('.$this->oLang->Get('global_octave').' '.$arrGameInfo['start_octave'].')</span> '.$arrGameInfo['name'].'</td>
                         <td>'.$arrGameInfo['played'].' '.$strPlayed.'</td>
                         <td>'.round($arrGameInfo['avg_points']).' '.$strPoints.'</td>
                     </tr>
@@ -543,6 +568,7 @@ class statistics
 
     private function RenderTopPlayed($arrGameData)
     {
+        $arrGameData = array_reverse($arrGameData);
         // Create rows for the table containing top played - meaning most most points gain playing this particular song
         $strTopPlayedRows = '';
         $iLoopID = 1;
@@ -765,10 +791,20 @@ class statistics
                     $strInfoList  = $this->RenderFavouriteSongs($arrGameData);
 
                     // Get array for user precision
-                    $arrLeftChart = $this->GetPrecisionArray($arrGameData);
+                    $arrLeftChart = array(
+                        'type'  => 'GamePrecision',
+                        'name'  => $this->oLang->Get('statistics_graph_precision'),
+                        'y'     => '%',
+                        'graph' => $this->GetPrecisionArray($arrGameData)
+                    );
 
                     // Get array for userpoints
-                    $arrRightChart = $this->GetPointsPerMinuteArray($arrGameData);
+                    $arrRightChart = array(
+                        'type'  => 'PointsPerMinute',
+                        'name'  => $this->oLang->Get('statistics_graph_pointsprminute'),
+                        'y'     => $this->oLang->Get('global_points'),
+                        'graph' => $this->GetPointsPerMinuteArray($arrGameData)
+                    );
                     break;
                 case 2 :
                     // If we look at multiple ID's in the game history, but those games only show one song (hence why we're at window 2) - then display average data
@@ -786,10 +822,21 @@ class statistics
                     $strInfoList  = $this->RenderTopPlayed($arrGameData);
 
                     // Get array for user precision
-                    $arrLeftChart = $this->GetPrecisionArray($arrGameData, $arrAverageData);
+                    $arrLeftChart = array(
+                        'type'  => 'GamePrecision',
+                        'name'  => $this->oLang->Get('statistics_graph_precision'),
+                        'y'     => '%',
+                        'graph' => $this->GetPrecisionArray($arrGameData, $arrAverageData)
+                    );
 
                     // Get array for userpoints
-                    $arrRightChart = $this->GetPointsPerMinuteArray($arrGameData, $arrAverageData);
+                    $arrRightChart = array(
+                        'type'  => 'PointsPerMinute',
+                        'name'  => $this->oLang->Get('statistics_graph_pointsprminute'),
+                        'y'     => $this->oLang->Get('global_points'),
+                        'graph' => $this->GetPointsPerMinuteArray($arrGameData, $arrAverageData)
+                    );
+
                     break;
                 case 3 :
                     // If we only have one specific GameID we'll show a bit more statistics about this game
@@ -804,9 +851,19 @@ class statistics
                     $arrAverageGameData = $this->GetGameData(false, $oAverageData);
 
                     // First of all, show a graph which will contain a graph over tacts
-                    $arrRightChart = $this->GetTactAccuracyArray($arrGameData, $arrAverageGameData);
+                    $arrLeftChart = array(
+                        'type'  => 'GamePrecision',
+                        'name'  => $this->oLang->Get('statistics_graph_precision'),
+                        'y'     => '%',
+                        'graph' => $this->GetPrecisionArray($arrGameData, $arrAverageGameData)
+                    );
 
-                    $arrLeftChart = $this->GetPrecisionArray($arrGameData, $arrAverageGameData);
+                    $arrRightChart = array(
+                        'type'  => 'PrecisionPerTact',
+                        'name'  => $this->oLang->Get('statistics_graph_precisionprtact'),
+                        'y'     => '%',
+                        'graph' => $this->GetTactAccuracyArray($arrGameData, $arrAverageGameData)
+                    );
 
                     $strInfoList  = $this->RenderSongAdditionalStats($arrGameData, $arrAverageGameData);
                     break;

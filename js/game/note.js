@@ -84,7 +84,7 @@ define(function() {
 
 			factor	= this.stepFactor && this.stepFactor.factor || 0;
 
-			this.points	= +((this.stepPercent * 100).toFixed(0) * factor * speedFactor * this.type.factor * 0.1).toFixed(0);
+			this.points	= +((this.stepPercent * 100).toFixed(0) * factor * speedFactor * this.type.factor * 0.1).toFixed(0) || 0;
 			$(gameController).trigger('notePoints', [this]);
 		};
 		return Note;

@@ -1,13 +1,22 @@
-var svgController,
-	l2p,
-	fm;
+if(typeof DEBUG === 'undefined') {
+	var	DEBUG	= true;
+}
+if(DEBUG) {
+	var	svgController,
+		l2p,
+		fm;
+}
 require.config({
 	paths:	{
-		'jquery':		'jquery-2.0.2.min'
+		'jquery':	'jquery-2.0.2.min',
+		'tour':		'bootstrap-tour'
 	},
 	shim:	{
 		highcharts:	{
 			exports:	'Highcharts'
+		},
+		tour:		{
+			exports:	'Tour'
 		}
 	}
 });

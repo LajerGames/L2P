@@ -91,12 +91,30 @@ div#CenteringContainer {
 	display: inline-block;
 	margin-bottom: 10vh;
 }
+#guide {
+    float: right;
+    background-color: #B73535;
+    padding: 0 1vw 0 1vw;
+    line-height: 5vh;
+    margin-right: 1vw;
+    opacity: 0.5;
+    -webkit-transition: 0.3s;
+}
+#guide:hover {
+    text-decoration: none;
+    opacity: 1;
+}
+#guide img {
+    height: 2vmin;
+    margin-right: 5px;
+    padding-bottom: 7px;
+}
 
 .popover {
 	z-index: 10002;
 }
 .popover .popover-title {
-	display: none;
+	/*display: none;*/
 }
 .popover .popover-content p {
 	color: black;

@@ -72,7 +72,7 @@ define(['jquery', 'game/options', 'game/note'], function ($, options, Node) {
 
 				notePercent	+= note.stepPercent * note.length;
 				noteLength	+= note.length;
-				tact.points	+= note.points;
+				tact.points	+= note.points || 0;
 			}
 		});
 

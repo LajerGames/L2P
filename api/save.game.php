@@ -75,6 +75,9 @@ if(is_array($arrGame))
                                 'notes_played'  => 0
                             );
                         }
+
+                        // We need to keep track on how many times a note has been played per tact, in order to get the final percentage on a specific note pr tact in the end
+                        $arrNotePlays = array();
                         foreach($arrTact as $iNote => $arrNote)
                         {
                             if(is_array($arrNote))
@@ -85,11 +88,27 @@ if(is_array($arrGame))
                                     {
                                         continue; // This means that this is a rest note!
                                     }
+
+                                    // Did we already save this notename in
+                                    if(!isset($arrTactTuneAnalyser[$iTactEntry]['notes'][$arrNoteInfoEntry[3]]))
+                                    {
+                                        $arrTactTuneAnalyser[$iTactEntry]['notes'][$arrNoteInfoEntry[3]] = 0;
+                                    }
+
+                                    // Count the amount of noteplays
+                                    if(!isset($arrNotePlays[$arrNoteInfoEntry[3]]))
+                                    {
+                                        $arrNotePlays[$arrNoteInfoEntry[3]] = 1;
+                                    }
+                                    else
+                                    {
+                                        $arrNotePlays[$arrNoteInfoEntry[3]]++;   
+                                    }
+
                                     // Some statistics for this perticular note
                                     $iFactor            = $arrNoteInfoEntry[1]->factor;
                                     $strEvaluationText  = $arrNoteInfoEntry[1]->text;
                                     $strEvalTextColor   = $arrNoteInfoEntry[1]->color;
-                                    //$iNotePoints        = $arrNoteInfoEntry[2];
                                     $strExpectedNote    = $arrNoteInfoEntry[3];
                                     $strExpectedOctave  = $arrNoteInfoEntry[4];
 
@@ -132,9 +151,18 @@ if(is_array($arrGame))
                                     $arrTuneAnalyser[$strExpectedNote.','.$strExpectedOctave]['played']++;
 
                                     // Add to tact tune analyser
-                                    $arrTactTuneAnalyser[$iTactEntry]['pct'] += $iPercentAccuracy;
+                                    $arrTactTuneAnalyser[$iTactEntry]['pct']                            += $iPercentAccuracy;
                                     $arrTactTuneAnalyser[$iTactEntry]['notes_played']++;
+                                    $arrTactTuneAnalyser[$iTactEntry]['notes'][$arrNoteInfoEntry[3]]    += $iPercentAccuracy;
                                 }
+                            }
+                            // Now divide the percentage in the note accuracy pr tact with the amount of times this note has been played :)
+                            foreach($arrTactTuneAnalyser[$iTactEntry]['notes'] as $strNotename => $iAccuracy)
+                            {
+                                // Just in case something weird happens!
+                                $iAmountOfPlays = $arrNotePlays[$strNotename] > 0 ? $arrNotePlays[$strNotename] : 1;
+
+                                $arrTactTuneAnalyser[$iTactEntry]['notes'][$strNotename] = ($iAccuracy / $arrNotePlays[$strNotename]);
                             }
                         }
                     }
@@ -189,7 +217,8 @@ foreach($arrTuneAnalyser as $strTuneIdentifyer => $arrTuneAnalyzerData)
 $arrTacts = array(); // Initializing an array which will contain avrage pct accuracy foreach tact
 foreach($arrTactTuneAnalyser as $iTactNo => $arrTactInfo)
 {
-    $arrTacts[$iTactNo] = $arrTactInfo['pct'] / $arrTactInfo['notes_played'];
+    $arrTacts[$iTactNo]['total_pct']    = $arrTactInfo['pct'] / $arrTactInfo['notes_played'];
+    $arrTacts[$iTactNo]['notes']        = $arrTactInfo['notes'];
 }
 
 // JSON'ify statistics arrays

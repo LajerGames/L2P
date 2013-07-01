@@ -259,7 +259,7 @@ define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, opt
 								ControllerSet('restart');
 							},
 							notePoints:	function (note) {
-								//console.log(note);
+
 							}
 						});
 
@@ -289,7 +289,7 @@ define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, opt
 
 					if(generate) {
 						tuner	= new SoundInput(function (e) {
-							console.log(e);
+							DEBUG && console.log(e);
 						}, $.proxy(L2P.gameController.soundInput, L2P.gameController), $.proxy(L2P.gameController.expectedTone, L2P.gameController));
 						$(tuner).on('tick', $.proxy(L2P.gameController.soundInput, L2P.gameController));
 					}
@@ -688,7 +688,7 @@ define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, opt
 				if(fromPing && localStorage.getItem(this.namespace) === JSON.stringify(this._storage)) {
 					return;
 				}
-				console.log('save', fromPing, this._storage);
+				DEBUG && console.log('save', fromPing, this._storage);
 				localStorage.setItem(this.namespace, JSON.stringify(this._storage));
 
 				containers[this.namespace].forEach(function ($storage, i) {
@@ -860,7 +860,6 @@ define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, opt
 								break;
 							}
 						}
-						//console.log(id);
 						playlist	= new Playlist({}, id, name);
 					}
 
@@ -937,7 +936,7 @@ define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, opt
 			secLeft	= Math.min(secLeft, 8);
 
 			if(Date.now() > to) {
-				console.log('skip countdown');
+				DEBUG && console.log('skip countdown');
 				return;
 			}
 
@@ -1002,6 +1001,45 @@ define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, opt
 				}
 			};
 			run();
+		},
+		guided_tour:	function () {
+			/*require(['tour'], function (Tour) {
+				var	tour	= new Tour({
+					useLocalStorage:	true,
+					container:			'body',
+					debug:				true,
+					keyboard:	true,
+					template:	function (i, step) {
+						DEBUG && console.log(i, step);
+						var	$elem	= $("<div><div class='popover tour'><div class='arrow'></div><h3 class='popover-title'></h3><div class='popover-content'></div></div></div>");
+						$elem
+							.find('.popover-title')
+								.text(this.title)
+								.end()
+							.find('.popover-content')
+								.text(this.content)
+								.end();
+						return "<div class='popover tour'><div class='arrow'></div><h3 class='popover-title'></h3><div class='popover-content'><p></p></div></div>";
+					}
+				});
+
+				tour.addStep({
+					element:	'#guide',
+					title:		'test',
+					content:	'blib blob',
+					placement:	'left',
+					backdrop:	true
+				});
+
+				tour.addStep({
+					element:	'#logo',
+					title:		'test',
+					content:	'blib blob',
+					placement:	'left'
+				});
+
+				tour.start(true);
+			});*/
 		}
 	};
 	var t;

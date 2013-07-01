@@ -1851,7 +1851,7 @@ define('game/game',['game/options', 'fM'], function (options, fM) {
 				duration	+= tact.type.nodes * that.secPrNode;
 			});
 
-			console.log(this.secPrNode, duration);
+			DEBUG && console.log(this.secPrNode, duration);
 
 			this.duration	= duration;
 		}
@@ -1880,7 +1880,7 @@ define('game/game',['game/options', 'fM'], function (options, fM) {
 		} else {
 			this.nodePlaying.img = images.nodes[this.nodePlaying.type.name+'False'];
 		}
-		console.log(this.nodePlaying.tone.hz, feq);
+		DEBUG && console.log(this.nodePlaying.tone.hz, feq);
 	};
 
 	return Game;
@@ -1971,7 +1971,7 @@ define('game/note',[],function() {
 
 			factor	= this.stepFactor && this.stepFactor.factor || 0;
 
-			this.points	= +((this.stepPercent * 100).toFixed(0) * factor * speedFactor * this.type.factor * 0.1).toFixed(0);
+			this.points	= +((this.stepPercent * 100).toFixed(0) * factor * speedFactor * this.type.factor * 0.1).toFixed(0) || 0;
 			$(gameController).trigger('notePoints', [this]);
 		};
 		return Note;
@@ -2054,7 +2054,7 @@ define('game/tact',['jquery', 'game/options', 'game/note'], function ($, options
 
 				notePercent	+= note.stepPercent * note.length;
 				noteLength	+= note.length;
-				tact.points	+= note.points;
+				tact.points	+= note.points || 0;
 			}
 		});
 
@@ -2064,21 +2064,33 @@ define('game/tact',['jquery', 'game/options', 'game/note'], function ($, options
 	return Tact;
 });
 define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], function ($, SVGElement, options, fM, api, L2P, Tick) {
-	function getImagePath(note, connect) {
-		var	path	= options.gameImagePath;
+	function getImagePath(note, connect, coloredNotes) {
+		var	path		= options.gameImagePath,
+			colorName	= '';
+		coloredNotes	= coloredNotes || [];
+
 		if(note.isRest) {
 			path	+= note.type.name.substr(4, 1).toLowerCase() + note.type.name.substr(5) + 'rest';
 		} else if(note.isPeriod) {
 			path	+= note.type.name.substr(0, note.type.name.length - 6) + 'note-period';
 		} else {
 			if(connect) {
-				path	+= 'quarter' + 'note';
+				path	+= 'quarternote';
 			} else {
 				path	+= note.type.name + 'note';
 			}
 		}
 
-		return path + options.gameImageType;
+		if(!note.isRest) {
+			for(var colorNo = 0; colorNo < coloredNotes.length; colorNo += 1) {
+				if(coloredNotes[colorNo].pos <= note.tone.pos) {
+					colorName	= coloredNotes[colorNo].color;
+					break;
+				}
+			}
+		}
+
+		return path + colorName + options.gameImageType;
 	}
 	function flipNote(note) {
 		note.svgElement.setPos(note.svgElement.getX(), -175 - note.svgElement.getY() + 2 * 4);
@@ -2116,7 +2128,7 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 		this.sound;
 		this.game;
 		this.lastPos		= 0;
-		this.playSound		= true;
+		this.playSound		= false;
 		this.useCountdown	= true;
 		this.currentNote;
 		this.currentTact;
@@ -2199,12 +2211,12 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 		this.pointCon	= $('#pointContainer');
 		this.currentNote	= undefined;
 
-		console.log(this.game);
+		DEBUG && console.log(this.game);
 		this.game.reset();
 
 		this.SVGNotes.animateAbs(0, -501, 0);
 
-		console.log('reset-pos', this.SVGNotes.node.style.webkitTransition, this.SVGNotes.node.style.webkitTransform);
+		DEBUG && console.log('reset-pos', this.SVGNotes.node.style.webkitTransition, this.SVGNotes.node.style.webkitTransform);
 		this.initView();
 
 		this.$this.trigger('gameLoadSpeedChange', this.game.speed);
@@ -2361,6 +2373,26 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 		this.SVGNotes.animateAbs(0, -501, 0);
 		this.SVGNotes.removeChildNodes();
 
+		var	coloredNotes	= [];
+		if(L2P_global.colored_notes) {
+			coloredNotes.push({
+				pos:	options.tones.names[4]['C#'].pos,
+				color:	'-yellow'
+			});
+			coloredNotes.push({
+				pos:	options.tones.names[4]['G#'].pos,
+				color:	'-green'
+			});
+			coloredNotes.push({
+				pos:	options.tones.names[5]['D#'].pos,
+				color:	'-red'
+			});
+			coloredNotes.push({
+				pos:	-10000,
+				color:	'-blue'
+			});
+		}
+
 		if(this.game) {
 			var	lastNote;
 			this.game.tacts.forEach(function (tact) {
@@ -2397,7 +2429,7 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 
 						note.svgElement	= new SVGElement(options.gameImageNodeType)
 											.setRef(note)
-											.setLink('/'+getImagePath(note, connect))
+											.setLink('/'+getImagePath(note, connect, coloredNotes))
 											.setPos(notePos, tonePos)
 											.setDimensions(50, 100)
 											.appendTo(tact.svgElement.node);
@@ -2469,7 +2501,7 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 									flip	= first.svgElement.options.flip;
 
 								connections.forEach(function (note) {
-									note.svgElement.setLink('/'+getImagePath(note, true));
+									note.svgElement.setLink('/'+getImagePath(note, true, coloredNotes));
 									if(note !== first) {
 										if(flip && !note.svgElement.options.flip) {
 											flipNote(note);
@@ -2730,40 +2762,38 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 
 					// Check the current note + the relative width
 					if(noteLeftPosRel <= currentPos && noteRightPosRel > currentPos) {
-						// If we haven't enabled kiddieMode, we check weither we can use the note before or after
-						if(!gameController.kiddieMode || true) {
-							var	noteIndex	= note.tact.nodes.indexOf(note),
-								tactIndex,
-								otherTact;
+						// We check weither we can use the note before or after
+						var	noteIndex	= note.tact.nodes.indexOf(note),
+							tactIndex,
+							otherTact;
 
-							if(relNotePosLeft < relWidth * 2) {
-								if(noteIndex === 0) {
-									tactIndex	= gameController.game.tacts.indexOf(note.tact);
-									if(tactIndex > 0) {
-										otherTact	= gameController.game.tacts[tactIndex - 1];
-										otherNote	= otherTact.nodes[otherTact.nodes.length - 1];
-									}
-								} else {
-									otherNote	= note.tact.nodes[noteIndex - 1];
+						if(relNotePosLeft < relWidth * 2) {
+							if(noteIndex === 0) {
+								tactIndex	= gameController.game.tacts.indexOf(note.tact);
+								if(tactIndex > 0) {
+									otherTact	= gameController.game.tacts[tactIndex - 1];
+									otherNote	= otherTact.nodes[otherTact.nodes.length - 1];
 								}
-							} else if(relNotePosRight < relWidth * 2) {
-								if(noteIndex === note.tact.nodes.length - 1) {
-									tactIndex	= gameController.game.tacts.indexOf(note.tact);
-									if(tactIndex < gameController.game.tacts.length - 1) {
-										otherTact	= gameController.game.tacts[tactIndex + 1];
-										otherNote	= otherTact.nodes[0];
-									}
-								} else {
-									otherNote	= note.tact.nodes[noteIndex + 1];
-								}
+							} else {
+								otherNote	= note.tact.nodes[noteIndex - 1];
 							}
-							if(otherNote) {
-								if(otherNote.isRest) {
-									otherNote	= undefined;
-								} else {
-									if(otherNote.tone === tone) {
-										note	= otherNote;
-									}
+						} else if(relNotePosRight < relWidth * 2) {
+							if(noteIndex === note.tact.nodes.length - 1) {
+								tactIndex	= gameController.game.tacts.indexOf(note.tact);
+								if(tactIndex < gameController.game.tacts.length - 1) {
+									otherTact	= gameController.game.tacts[tactIndex + 1];
+									otherNote	= otherTact.nodes[0];
+								}
+							} else {
+								otherNote	= note.tact.nodes[noteIndex + 1];
+							}
+						}
+						if(otherNote) {
+							if(otherNote.isRest) {
+								otherNote	= undefined;
+							} else {
+								if(otherNote.tone === tone) {
+									note	= otherNote;
 								}
 							}
 						}
@@ -2803,9 +2833,11 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 						}
 
 						// Add the tick
-						note.ticks.push(new Tick(freq, toneDiff));
+						if(!note.isRest) {
+							note.ticks.push(new Tick(freq, toneDiff));
+						}
 
-						var	colorPercent	= Math.min(toneDiff.ratioRel, 1),
+						var	colorPercent	= note.isRest ? 0 : Math.min(toneDiff.ratioRel, 1),
 							color			= that.generatePercentColor(colorPercent);
 
 						that.svgPointer.setFill(color);
@@ -2819,33 +2851,29 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 		}
 
 		if(tone) {
-			if(Math.abs(diff) < 2 && false) {
-				that.setPointerPos(tone.pos);
-			} else {
-				var	pos	= options.tones.all.indexOf(tone);
-				if(pos === -1) {
-					return;
-				}
-				if(diff > 0) {
-					var	toneAbove	= options.tones.all[pos + 1],
-						toneDiffs	= Math.abs(toneAbove.hz - tone.hz);
-					if(toneDiffs === 0) {
-						toneAbove	= options.tones.all[pos + 2];
-						toneDiffs	= Math.abs(toneAbove.hz - tone.hz);
-					}
-					var	ratio		= diff / toneDiffs;
-				} else {
-					var	toneAbove	= options.tones.all[pos - 1],
-						toneDiffs	= Math.abs(toneAbove.hz - tone.hz);
-					if(toneDiffs === 0) {
-						toneAbove	= options.tones.all[pos - 2];
-						toneDiffs	= Math.abs(toneAbove.hz - tone.hz);
-					}
-					var	ratio		= diff / toneDiffs;
-				}
-
-				that.setPointerPos(tone.pos - ratio);
+			var	pos	= options.tones.all.indexOf(tone);
+			if(pos === -1) {
+				return;
 			}
+			if(diff > 0) {
+				var	toneAbove	= options.tones.all[pos + 1],
+					toneDiffs	= Math.abs(toneAbove.hz - tone.hz);
+				if(toneDiffs === 0) {
+					toneAbove	= options.tones.all[pos + 2];
+					toneDiffs	= Math.abs(toneAbove.hz - tone.hz);
+				}
+				var	ratio		= diff / toneDiffs;
+			} else {
+				var	toneAbove	= options.tones.all[pos - 1],
+					toneDiffs	= Math.abs(toneAbove.hz - tone.hz);
+				if(toneDiffs === 0) {
+					toneAbove	= options.tones.all[pos - 2];
+					toneDiffs	= Math.abs(toneAbove.hz - tone.hz);
+				}
+				var	ratio		= diff / toneDiffs;
+			}
+
+			that.setPointerPos(tone.pos - ratio);
 		}
 	};
 	GameController.prototype.expectedTone	= function () {
@@ -2881,7 +2909,7 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 				note.ticks.forEach(function (tick) {
 					var	tickData	= [
 						tick.percent,			// 0	percent
-						tick.freq,				// 1	freq
+						+tick.freq.toFixed(2),	// 1	freq
 						tick.time - data[4][0]	// 2	time
 					];
 					noteData[0].push(tickData);
@@ -2892,7 +2920,7 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 			data[2].push(JSON.stringify(tactData));
 		});
 
-		//console.log(data);
+		DEBUG && console.log(data);
 
 		return JSON.stringify(data);
 	};
@@ -5406,7 +5434,7 @@ define('sound-input',['jquery', 'dsp', 'game/tones', 'l2p'], function ($, dsp, t
 			tuner.tickDone(-1);
 		};
 		error = function(e) {
-			console.log(e);
+			DEBUG && console.log(e);
 
 			if(countdown) {
 				countdown.kill();
@@ -5856,11 +5884,11 @@ define('playlist',['jquery', 'l2p', 'api', 'fM'], function ($, L2P, api, fM) {
 		if(!this.gameController) {
 			linkObject.onstart	= 'gameStart-'+Date.now();
 			$(L2P).on(linkObject.onstart, function (e, gameController) {
-				console.log(that, 'got new gameController');
+				DEBUG && console.log(that, 'got new gameController');
 				that.gameController	= gameController;
 
 				$(that.gameController).on('gameEnd', function (e, gameInfo) {
-					console.log('gameEnd', gameInfo.points, gameInfo);
+					DEBUG && console.log('gameEnd', gameInfo.points, gameInfo);
 					that.game_history_ids.push(gameInfo.game_history_id);
 					that.nextGame();
 				});
@@ -5871,7 +5899,7 @@ define('playlist',['jquery', 'l2p', 'api', 'fM'], function ($, L2P, api, fM) {
 	Playlist.prototype.nextGame		= function () {
 		this.playNow	+= 1;
 		var	game	= this.games[this.playNow];
-		console.log('nextGame', game, this.playNow, this.games);
+		DEBUG && console.log('nextGame', game, this.playNow, this.games);
 		if(game) {
 			this.startGame(game);
 			this.firstPlay	= false;
@@ -5884,7 +5912,7 @@ define('playlist',['jquery', 'l2p', 'api', 'fM'], function ($, L2P, api, fM) {
 				this.firstPlay	= false;
 				this.restart();
 			} else {
-				console.log('playlist done', this.game_history_ids, this);
+				DEBUG && console.log('playlist done', this.game_history_ids, this);
 				api.get.statistic_uuid(function (data) {
 					fM.link.navigate('/user/'+L2P_global.username+'/statistics/'+data.uuid+'/');
 				}, {
@@ -6164,7 +6192,7 @@ define('l2p',['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, ap
 								ControllerSet('restart');
 							},
 							notePoints:	function (note) {
-								//console.log(note);
+
 							}
 						});
 
@@ -6194,7 +6222,7 @@ define('l2p',['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, ap
 
 					if(generate) {
 						tuner	= new SoundInput(function (e) {
-							console.log(e);
+							DEBUG && console.log(e);
 						}, $.proxy(L2P.gameController.soundInput, L2P.gameController), $.proxy(L2P.gameController.expectedTone, L2P.gameController));
 						$(tuner).on('tick', $.proxy(L2P.gameController.soundInput, L2P.gameController));
 					}
@@ -6593,7 +6621,7 @@ define('l2p',['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, ap
 				if(fromPing && localStorage.getItem(this.namespace) === JSON.stringify(this._storage)) {
 					return;
 				}
-				console.log('save', fromPing, this._storage);
+				DEBUG && console.log('save', fromPing, this._storage);
 				localStorage.setItem(this.namespace, JSON.stringify(this._storage));
 
 				containers[this.namespace].forEach(function ($storage, i) {
@@ -6765,7 +6793,6 @@ define('l2p',['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, ap
 								break;
 							}
 						}
-						//console.log(id);
 						playlist	= new Playlist({}, id, name);
 					}
 
@@ -6842,7 +6869,7 @@ define('l2p',['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, ap
 			secLeft	= Math.min(secLeft, 8);
 
 			if(Date.now() > to) {
-				console.log('skip countdown');
+				DEBUG && console.log('skip countdown');
 				return;
 			}
 
@@ -6907,6 +6934,45 @@ define('l2p',['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, ap
 				}
 			};
 			run();
+		},
+		guided_tour:	function () {
+			/*require(['tour'], function (Tour) {
+				var	tour	= new Tour({
+					useLocalStorage:	true,
+					container:			'body',
+					debug:				true,
+					keyboard:	true,
+					template:	function (i, step) {
+						DEBUG && console.log(i, step);
+						var	$elem	= $("<div><div class='popover tour'><div class='arrow'></div><h3 class='popover-title'></h3><div class='popover-content'></div></div></div>");
+						$elem
+							.find('.popover-title')
+								.text(this.title)
+								.end()
+							.find('.popover-content')
+								.text(this.content)
+								.end();
+						return "<div class='popover tour'><div class='arrow'></div><h3 class='popover-title'></h3><div class='popover-content'><p></p></div></div>";
+					}
+				});
+
+				tour.addStep({
+					element:	'#guide',
+					title:		'test',
+					content:	'blib blob',
+					placement:	'left',
+					backdrop:	true
+				});
+
+				tour.addStep({
+					element:	'#logo',
+					title:		'test',
+					content:	'blib blob',
+					placement:	'left'
+				});
+
+				tour.start(true);
+			});*/
 		}
 	};
 	var t;
@@ -6962,16 +7028,25 @@ define('fragments/game',['jquery', 'api', 'game/game-controller', 'game/sound', 
 
 	return gameController;
 });
-var svgController,
-	l2p,
-	fm;
+if(typeof DEBUG === 'undefined') {
+	var	DEBUG	= true;
+}
+if(DEBUG) {
+	var	svgController,
+		l2p,
+		fm;
+}
 require.config({
 	paths:	{
-		'jquery':		'jquery-2.0.2.min'
+		'jquery':	'jquery-2.0.2.min',
+		'tour':		'bootstrap-tour'
 	},
 	shim:	{
 		highcharts:	{
 			exports:	'Highcharts'
+		},
+		tour:		{
+			exports:	'Tour'
 		}
 	}
 });

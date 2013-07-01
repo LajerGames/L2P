@@ -41,6 +41,9 @@ div.ContentBoxHeadline img {
 	margin-right: 5px;
 	margin-top: -1vmin;
 }
+div.ContentBoxHeadline a {
+    float: right;   
+}
 
 div.ContentBoxHeadline img#EditUser {
 	margin: 0;
@@ -69,6 +72,11 @@ div.ContentBoxBody img, div.ContentBoxBody span {
 	display: block;
 	width: 3vmin;
 	float: right;
+}
+a.IconLink img {
+    display: inline;
+    float: none;
+    width: 2.5vmin;   
 }
 body.ShowGame div:not(.ContentBoxBlue) div.ContentBoxBody {
 	-webkit-transform: translate3d(0, -100%, 0);

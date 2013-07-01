@@ -59,9 +59,10 @@ if(isset($_SESSION['UserObject']))
 			</div>
 			<div class="ContentBoxBodyContainer">
 				<div class="ContentBoxBody">
-	                <a href="/?mode=logout">'.$oLang->Get('frontpage_user_logout').'</a>
-					'.$oPageRenderer->RenderDialogLink('/user/'.$_SESSION['UserObject']->username.'/statistics/', PageRenderer::DialogType_Info, $oLang->Get('frontpage_user_statistics')).'
-	                <a href="/user/settings/" title="'.$oLang->Get('frontpage_user_settings').'" data-internal-navigation>'.$oLang->Get('frontpage_user_settings').'</a>
+					'.$oPageRenderer->RenderDialogLink('/user/'.$_SESSION['UserObject']->username.'/statistics/', PageRenderer::DialogType_Info, $oLang->Get('frontpage_user_statistics'), '/img/icons/statistics-white.svg').'
+                    '.$oPageRenderer->RenderDialogLink('/user/settings/', PageRenderer::DialogType_Info, $oLang->Get('frontpage_user_settings'), '/img/icons/settings.svg').'
+	                <!--a href="/user/settings/" title="'.$oLang->Get('frontpage_user_settings').'" data-internal-navigation></a-->
+                    <a href="/?mode=logout" class="IconLink"><img src="/img/icons/logout.svg" alt="" /> '.$oLang->Get('frontpage_user_logout').'</a>
 				</div>
 			</div>
 		</div>
@@ -73,7 +74,7 @@ if(isset($_SESSION['UserObject']))
 				</div>
 			</div>
 			<div class="ContentBoxBody">
-				Pointdims
+				&nbsp;
 			</div>
 		</div>
         <div class="ContentBoxGameControl">
@@ -111,7 +112,7 @@ else
 				</div>
 				'.$oPageRenderer->RenderDialogLink('/user/create/', PageRenderer::DialogType_Action, '
 					<span>'.$oLang->Get('frontpage_create_user').'</span>
-				', array('class' => 'ContentBoxBody lower')).'
+				',null, array('class' => 'ContentBoxBody lower')).'
 			</div>
 		</div>
 		<div class="ContentBoxPoint">
