@@ -2,8 +2,7 @@ if(typeof DEBUG === 'undefined') {
 	var	DEBUG	= true;
 }
 if(DEBUG) {
-	var	svgController,
-		l2p,
+	var	l2p,
 		fm;
 }
 require.config({
@@ -72,8 +71,8 @@ require(['jquery', 'browserdetect'], function ($, AC) {
 		if(wait < 0) {
 			L2P.countdown_test();
 		}
-		l2p	= L2P;
-		fm	= fM;
+		DEBUG && (l2p	= L2P);
+		DEBUG && (fm	= fM);
 		switch(fM.link.fileName()) {
 			case 'game.php':
 				require(['fragments/game']);
@@ -110,32 +109,28 @@ require(['jquery', 'browserdetect'], function ($, AC) {
 					document.title	= $CenteringContainer.attr('data-default-title');
 				}
 			}
-			var	hasFirstPopstate	= true; //false;
-			$(window).on('popstate', function (e, a, b, c) {
-				if(e.originalEvent) {
+			$(window).on('popstate', function (e) {
+				if(e.originalEvent && !e.originalEvent.state) {
 					return;
 				}
 				e.preventDefault();
 				e.stopPropagation();
-				DEBUG && console.log('a', e, a, b, c, location.pathname);
+
 				if(L2P.$modal && L2P.$modal.is(':visible')) {
 					L2P.$modal.modal('hide');
 				}
-				if(hasFirstPopstate) {
-					popstateTitle(e);
-				}
+				$('.popover.validation-error:visible').remove();
+
+				popstateTitle(e);
 
 				switch(document.location.pathname) {
 					case '/':
 						L2P.navigate.home(e);
 						break;
 					default:
-						if(hasFirstPopstate) {
-							L2P.navigate.url(location.pathname);
-						}
+						L2P.navigate.url(location.pathname);
 						break;
 				}
-				hasFirstPopstate	= true;
 			});
 			$(window).trigger('popstate', ['main.js']);
 

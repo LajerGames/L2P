@@ -739,8 +739,6 @@ function CalculateSubscriptionTimeleft($dSubscriptionEnd)
 
     $iDaysLeft              = ($iTimeLeft / 60 / 60 / 24) - 1; // Today is not included!
 
-    echo $iDaysLeft.'<br>';
-
     return;
 }
 class AC_LoadFileInfo

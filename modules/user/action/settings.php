@@ -28,6 +28,7 @@ if($oUserSettingsForm->Validate($_POST))
 
     SetLanguageCookie($strLanguage);
 
+    $oLang->strLanguageCode	= $strLanguage;
     $oUserHandler->SetUserSession($iUserID);
 
     Redirect(HTTP_PROJECT_ROOT);

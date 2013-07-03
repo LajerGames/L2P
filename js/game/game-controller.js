@@ -67,7 +67,6 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		this.useCountdown	= true;
 		this.currentNote;
 		this.currentTact;
-		this.kiddieMode		= L2P_global.kiddie_mode;
 		this.paused			= false;
 		this.lastLeft		= -1;
 
@@ -215,7 +214,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 			gameController.svgLine.node.classList.remove('pulse');
 		});
 
-		if(L2P_global.metronome && !gameController.kiddieMode) {
+		if(L2P_global.metronome && !L2P_global.kiddie_mode) {
 			var lastPulse	= Date.now(),
 				pulseFunc	= function () {
 					if(gameController.game && gameController.game.running) {
@@ -239,7 +238,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		}
 	};
 	GameController.prototype.pauseGame	= function () {
-		if(this.kiddieMode) {
+		if(L2P_global.kiddie_mode) {
 			this.SVGNotes.animateAbs(-this.currentLeft() + 30, -501, 0);
 		} else {
 			this.SVGNotes.animateAbs((-Math.floor(this.currentLeft() / (this.defWidth / 4)) + 0.5) * (this.defWidth / 4) - 20, -501, 0);
@@ -735,7 +734,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 
 						// If we got to a new note
 						if(that.currentNote !== note) {
-							if(!gameController.kiddieMode && that.currentTact !== note.tact) {
+							if(!L2P_global.kiddie_mode && that.currentTact !== note.tact) {
 								gameController.tactDone();
 							}
 							that.currentNote	= note;
@@ -755,7 +754,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 						}
 
 						// If we have kiddiemode enabled, we check for the correct tone
-						if(gameController.kiddieMode) {
+						if(L2P_global.kiddie_mode) {
 							if(!note.isRest && (toneDiff.ratioRel > 0.15 || freq === -1) && !note.kiddieModeAccepted) {
 								if(!gameController.paused) {
 									gameController.pauseGame();
@@ -860,13 +859,13 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		return JSON.stringify(data);
 	};
 	GameController.prototype.gameDone	= function () {
-		if(!this.kiddieMode && this.currentTact) {
+		if(!L2P_global.kiddie_mode && this.currentTact) {
 			this.tactDone();
 		}
 
 		this.stopGame();
 
-		if(this.kiddieMode) {
+		if(L2P_global.kiddie_mode) {
 			return;
 		}
 		var	data	= this.generateGameData(),

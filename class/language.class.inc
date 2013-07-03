@@ -2,8 +2,9 @@
 class Language
 {
 	private	$strMenu			= '',
-			$strLanguageCode	= '',
 			$arrTexts			= array();
+
+	public	$strLanguageCode	= '';
 
 	/**
 	* Will create the Language object. It will load the provided language. It will also load the defaultLanguage and fill in any missing textCodes

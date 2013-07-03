@@ -95,8 +95,9 @@ class PageRenderer
         $strTrackingDomain	= SYSTEM_DEV ? 'fmads.dk' : $_SERVER['SERVER_NAME'];
 
 		$arrL2PGlobals	= array(
+			'language_code'		=> $oLang->strLanguageCode,
 			'username'		    => $_SESSION['UserObject']->username,
-			'kiddie_mode'	    => intval($_SESSION['UserObject']->kiddie_mode),
+			'kiddie_mode'	    => intval($_SESSION['UserObject']->kiddie_mode) === 1,
 			'colored_notes'	    => intval($_SESSION['UserObject']->colored_notes) === 1,
 			'concert_pitch'	    => empty($_SESSION['UserObject']->concert_pitch) ? 442 : $_SESSION['UserObject']->concert_pitch,
 			'lang'			    => $arrPreloadLang,
@@ -240,9 +241,19 @@ class PageRenderer
 
 	public function RenderDialogRedirect(Template $oTemplate, $strUrl)
 	{
+		global	$oLang;
+
 		$arrDialog	= array(
 			'dialogType'	=> 'redirect',
-			'url'			=> $strUrl
+			'url'			=> $strUrl,
+			'user'			=> array(
+				'language_code'		=> $oLang->strLanguageCode,
+				'kiddie_mode'	    => intval($_SESSION['UserObject']->kiddie_mode) === 1,
+				'colored_notes'	    => intval($_SESSION['UserObject']->colored_notes) === 1,
+				'concert_pitch'	    => empty($_SESSION['UserObject']->concert_pitch) ? 442 : $_SESSION['UserObject']->concert_pitch,
+	            'countdown_time'    => intval($_SESSION['UserObject']->countdown_time),
+	            'metronome'         => intval($_SESSION['UserObject']->metronome) === 1
+			)
 		);
 
 		return json_encode($arrDialog);

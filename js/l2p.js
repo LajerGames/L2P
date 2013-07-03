@@ -1,4 +1,3 @@
-var tuner;
 define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, options) {
 	function goBack(e, doGoBack) {
 		if(doGoBack !== false) {
@@ -280,7 +279,7 @@ define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, opt
 					}
 
 					if(generate) {
-						tuner	= new SoundInput(function (e) {
+						var	tuner	= new SoundInput(function (e) {
 							DEBUG && console.log(e);
 						}, $.proxy(L2P.gameController.soundInput, L2P.gameController), $.proxy(L2P.gameController.expectedTone, L2P.gameController));
 						$(tuner).on('tick', $.proxy(L2P.gameController.soundInput, L2P.gameController));
@@ -318,7 +317,7 @@ define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, opt
 							$(this).popover({
 								trigger:	'focus',
 								placement:	placement,
-								template:	'<div class="popover"><div class="arrow"></div><div class="popover-content"><p></p></div></div>'
+								template:	'<div class="popover validation-error"><div class="arrow"></div><div class="popover-content"><p></p></div></div>'
 							}).popover('show');
 						} else { // We most sure have a dialog
 							if(inputName === undefined) { // Only do this once
@@ -381,6 +380,20 @@ define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, opt
 								}
 								break;
 							case 'redirect':
+								if(L2P_global.language_code !== data.user.language_code) {
+									location.href	= data.url;
+									return;
+								} else {
+									var	concert_pitch	= L2P_global.concert_pitch !== data.user.concert_pitch;
+
+									$.each(data.user, function (key, value) {
+										L2P_global[key]	= value;
+									});
+
+									if(concert_pitch) {
+										options.generateTones();
+									}
+								}
 								fM.link.navigate(data.url, 'Magic Tune');
 								break;
 						}

@@ -1,7 +1,19 @@
-define(['game/tones'], function (tones) {
+define(function () {
 	function capitaliseFirstLetter(string) {
 		return string.charAt(0).toUpperCase() + string.slice(1);
 	}
+	var	toneNames	= [
+			[9, 'C', true, true],
+			[7, 'D', true, true],
+			[5, 'E', true, true],
+			[4, 'F', false, true],
+			[2, 'G', true, true],
+			[0, 'A', true, true],
+			[-2, 'B', true, false]
+		],
+		tones	= [
+			{name:	'',		hz: 0,			pos: 1000,	octav:	0}
+		];
 
 	var options = {
 		leftMargin:		180,
@@ -20,25 +32,7 @@ define(['game/tones'], function (tones) {
 		},
 		svgStartContainerPosSharp: ['F', 'C', 'G', 'D', 'A', 'E'],
 		svgStartContainerPosFlat: ['B', 'E', 'A', 'D', 'G', 'C'],
-		tones:	{
-			all:	tones,
-			names:	{
-				0:	{},
-				1:	{},
-				2:	{},
-				3:	{},
-				4:	{},
-				5:	{},
-				6:	{},
-				7:	{},
-				8:	{}
-			},
-			hertz:	{},
-			pos:	{},
-			rest:	{
-				pos:	3
-			}
-		},
+		tones:	{},
 		tacts:	{
 			types:		{
 				quarter:	{
@@ -149,6 +143,113 @@ define(['game/tones'], function (tones) {
 				},
 				rest:	{}
 			}
+		},
+		generateTones:	function () {
+			options.tones	= {
+				all:	[],
+				names:	{
+					0:	{},
+					1:	{},
+					2:	{},
+					3:	{},
+					4:	{},
+					5:	{},
+					6:	{},
+					7:	{},
+					8:	{}
+				},
+				hertz:	{},
+				pos:	{},
+				rest:	{
+					pos:	3
+				}
+
+			};
+
+			options.tones.all.push({
+				name:	'',
+				hz: 	0,
+				pos: 	1000,
+				octav:	0
+			});
+
+			var	freq	= L2P_global.concert_pitch || 442;
+			for(var octave = 0; octave <= 8; octave++) {
+				var relOctave	= octave - 4;
+
+				toneNames.forEach(function (toneInfo, toneNo) {
+					var	pos			= toneInfo[0]
+						name		= toneInfo[1],
+						useFlat		= toneInfo[2],
+						useSharp	= toneInfo[3],
+						n			= relOctave * 12 - pos,
+						toneFreq	= freq * Math.pow(2, n / 12);
+
+					if(useFlat) {
+						options.tones.all.push({
+							name:	name+'b',
+							hz:		freq * Math.pow(2, (n - 1) / 12),
+							pos:	-relOctave * 7 - toneNo + 6,
+							octav:	octave
+						});
+					}
+
+					options.tones.all.push({
+						name:	name,
+						hz:		freq * Math.pow(2, n / 12),
+						pos:	-relOctave * 7 - toneNo + 6,
+						octav:	octave
+					});
+
+					if(useSharp) {
+						options.tones.all.push({
+							name:	name+'#',
+							hz:		freq * Math.pow(2, (n + 1) / 12),
+							pos:	-relOctave * 7 - toneNo + 6,
+							octav:	octave
+						});
+					}
+				});
+			}
+
+			options.tones.all.push({name:	'',		hz: 8000,		pos: -1000,	octav:	0});
+
+			options.tones.all.forEach(function (tone) {
+				options.tones.names[tone.octav][tone.name]	= tone;
+				options.tones.hertz[tone.hz]	= tone;
+
+				options.tones.pos[tone.pos]	= options.tones.pos[tone.pos] || {};
+				options.tones.pos[tone.pos][tone.name.substr(1)]	= tone;
+			});
+
+			function getClosestTone(tone, lower) {
+				var	pos	= options.tones.all.indexOf(tone),
+					t;
+
+				if((pos === 0 && lower) || (pos === (options.tones.all.length - 1) && !lower)) {
+					return null;
+				}
+				if(lower) {
+					t	= options.tones.all[pos - 1];
+					if(t.hz === tone.hz) {
+						t	= options.tones.all[pos - 2]
+					}
+				} else {
+					t	= options.tones.all[pos + 1];
+					if(t.hz === tone.hz) {
+						t	= options.tones.all[pos + 2]
+					}
+				}
+
+				return t;
+			}
+
+			options.tones.all.forEach(function (tone) {
+				tone.close	= {
+					lower:	getClosestTone(tone, true),
+					higher:	getClosestTone(tone, false)
+				};
+			});
 		}
 	};
 
@@ -167,42 +268,7 @@ define(['game/tones'], function (tones) {
 	}
 	makeRestNodes();
 
-	tones.forEach(function (tone) {
-		options.tones.names[tone.octav][tone.name]	= tone;
-		options.tones.hertz[tone.hz]	= tone;
-
-		options.tones.pos[tone.pos]	= options.tones.pos[tone.pos] || {};
-		options.tones.pos[tone.pos][tone.name.substr(1)]	= tone;
-	});
-
-	function getClosestTone(tone, lower) {
-		var	pos	= options.tones.all.indexOf(tone),
-			t;
-
-		if((pos === 0 && lower) || (pos === (options.tones.all.length - 1) && !lower)) {
-			return null;
-		}
-		if(lower) {
-			t	= options.tones.all[pos - 1];
-			if(t.hz === tone.hz) {
-				t	= options.tones.all[pos - 2]
-			}
-		} else {
-			t	= options.tones.all[pos + 1];
-			if(t.hz === tone.hz) {
-				t	= options.tones.all[pos + 2]
-			}
-		}
-
-		return t;
-	}
-
-	tones.forEach(function (tone) {
-		tone.close	= {
-			lower:	getClosestTone(tone, true),
-			higher:	getClosestTone(tone, false)
-		};
-	});
+	options.generateTones();
 
 	return options;
 });
