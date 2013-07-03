@@ -31,7 +31,7 @@ class PageRenderer
 		{
 			foreach($arrCSSFiles as $strCSSFile)
 			{
-				$strCSSFiles .= '<link rel="stylesheet" href="'.HTTP_PROJECT_ROOT_CSS.$strCSSFile.'">
+				$strCSSFiles .= '<link rel="stylesheet" href="'.HTTP_PROJECT_ROOT_CSS.$strCSSFile.'?v='.GIT_COMMIT_HASH.'">
 				';
 			}
 		}
@@ -41,6 +41,7 @@ class PageRenderer
             'global_pause',
 			'global_octave',
 			'global_points',
+			'global_button_close',
             'game_permission_ask',
             'game_permission_ask_initial',
             'game_permission_ask_helpful',
@@ -117,12 +118,12 @@ class PageRenderer
 				<link rel="icon" href="'.HTTP_PROJECT_ROOT_IMG.'favicon128.png" sizes="128x128">
 
 				<link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Open Sans">
-				<link rel="stylesheet" href="'.HTTP_PROJECT_ROOT.'bootstrap/css/bootstrap.min.css">
-				<link rel="stylesheet" href="'.HTTP_PROJECT_ROOT_CSS.'bootstrap-tour.min.css">
-				<link rel="stylesheet" href="'.HTTP_PROJECT_ROOT_CSS.'default.css">
+				<link rel="stylesheet" href="'.HTTP_PROJECT_ROOT.'bootstrap/css/bootstrap.min.css?v='.GIT_COMMIT_HASH.'">
+				<link rel="stylesheet" href="'.HTTP_PROJECT_ROOT_CSS.'bootstrap-tour.min.css?v='.GIT_COMMIT_HASH.'">
+				<link rel="stylesheet" href="'.HTTP_PROJECT_ROOT_CSS.'default.css?v='.GIT_COMMIT_HASH.'">
 				'.$strCSSFiles.'
 
-                <script data-main="'.HTTP_PROJECT_ROOT_JAVASCRIPT.(SYSTEM_DEV ? 'main' : 'magic-tune').'" src="'.HTTP_PROJECT_ROOT_JAVASCRIPT.'require.js"></script>
+                <script data-main="'.HTTP_PROJECT_ROOT_JAVASCRIPT.(SYSTEM_DEV ? 'main' : 'magic-tune').'" src="'.HTTP_PROJECT_ROOT_JAVASCRIPT.'require.js?v='.GIT_COMMIT_HASH.'"></script>
 				<script>
 					var	L2P_global	= '.json_encode($arrL2PGlobals, JSON_FORCE_OBJECT).';
 				</script>
@@ -207,16 +208,7 @@ class PageRenderer
 			'submitText'	=> $strSubmitText
 		);
 
-		if(IS_DIALOG)
-		{
-			return json_encode($arrDialog);
-		}
-		else
-		{
-			return $oTemplate->RenderContent('
-				<div id="DialogContainer" data-dialog="action" data-dialog-title="{{title}}" data-dialog-color="{{color}}" data-dialog-submit-text="{{submitText}}">{{body}}</div>
-			', $arrDialog);
-		}
+		return json_encode($arrDialog);
 	}
 
 	public function RenderDialogInfo(Template $oTemplate, $strTitle, $strBody, $strColor, $arrButtons = array(), $strScript = '')
@@ -230,17 +222,7 @@ class PageRenderer
 			'script'		=> $strScript
 		);
 
-		if(IS_DIALOG)
-		{
-			return json_encode($arrDialog);
-		}
-		else
-		{
-			$arrDialog['buttons']	= json_encode($arrDialog['buttons']);
-			return $oTemplate->RenderContent('
-				<div id="DialogContainer" data-dialog="info" data-dialog-title="{{title}}" data-dialog-color="{{color}}" data-dialog-buttons="{{buttons}}" data-dialog-script="{{script}}">{{body}}</div>
-			', $arrDialog);
-		}
+		return json_encode($arrDialog);
 	}
 
 	public function RenderDialogGame(Template $oTemplate, $strTitle, $strGameData, $strType, $iOctave = null)
@@ -253,16 +235,17 @@ class PageRenderer
 			'octave'		=> $iOctave
 		);
 
-		if(IS_DIALOG)
-		{
-			return json_encode($arrDialog);
-		}
-		else
-		{
-			return $oTemplate->RenderContent('
-				<div id="DialogContainer" data-dialog="game" data-game-title="{{title}}" data-game-data="{{data}}" data-game-type="{{type}}" data-game-octave="{{octave}}"></div>
-			', $arrDialog);
-		}
+		return json_encode($arrDialog);
+	}
+
+	public function RenderDialogRedirect(Template $oTemplate, $strUrl)
+	{
+		$arrDialog	= array(
+			'dialogType'	=> 'redirect',
+			'url'			=> $strUrl
+		);
+
+		return json_encode($arrDialog);
 	}
 }
 ?>

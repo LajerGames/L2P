@@ -6,6 +6,7 @@ header('Content-type: text/html; charset=utf-8');
 
 # Server root
 define('SERVER_PROJECT_ROOT', $_SERVER['DOCUMENT_ROOT'].'');
+define('SERVER_PROJECT_ROOT_GIT', SERVER_PROJECT_ROOT.'/.git/');
 define('SERVER_PROJECT_ROOT_LANG', SERVER_PROJECT_ROOT.'/include/lang/');
 define('SERVER_PROJECT_ROOT_MODULES', SERVER_PROJECT_ROOT.'/modules/');
 define('SERVER_PROJECT_ROOT_CLASS', SERVER_PROJECT_ROOT.'/class/');
@@ -24,8 +25,10 @@ define('HTTP_PROJECT_ROOT_MODULES', HTTP_PROJECT_ROOT.'modules/');
 require_once(SERVER_PROJECT_ROOT_INCLUDE.'conf.php');
 
 # Commit Hash
-$oFile	= new SplFileObject(SERVER_PROJECT_ROOT.'/.git/ORIG_HEAD');
-define('GIT_COMMIT_HASH', $oFile->fgets());
+$oFile	= new SplFileObject(SERVER_PROJECT_ROOT_GIT.'HEAD');
+define('GIT_BRANCH', trim(substr($oFile->fgets(), 5)));
+$oFile	= new SplFileObject(SERVER_PROJECT_ROOT_GIT.GIT_BRANCH);
+define('GIT_COMMIT_HASH', trim($oFile->fgets()));
 $oFile	= null;
 
 # Name some constants

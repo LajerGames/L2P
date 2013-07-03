@@ -14,7 +14,18 @@ function printr($arr)
 */
 function Redirect($strLocation)
 {
-	header('Location: '.$strLocation);
+	if(IS_DIALOG)
+	{
+		global	$oPageRenderer,
+				$oTemplate;
+
+		header('Content-type: application/json');
+		echo $oPageRenderer->RenderDialogRedirect($oTemplate, $strLocation);
+	}
+	else
+	{
+		header('Location: '.$strLocation);
+	}
 	exit;
 
 	return;

@@ -42,7 +42,7 @@ div.ContentBoxHeadline img {
 	margin-top: -1vmin;
 }
 div.ContentBoxHeadline a {
-    float: right;   
+    float: right;
 }
 
 div.ContentBoxHeadline img#EditUser {
@@ -76,7 +76,7 @@ div.ContentBoxBody img, div.ContentBoxBody span {
 a.IconLink img {
     display: inline;
     float: none;
-    width: 2.5vmin;   
+    width: 2.5vmin;
 }
 body.ShowGame div:not(.ContentBoxBlue) div.ContentBoxBody {
 	-webkit-transform: translate3d(0, -100%, 0);
@@ -319,9 +319,6 @@ body.ShowGame div.ContentBoxGameControl {
 	height: 7.5vh;
 }
 
-div#DialogContainer {
-	display: none;
-}
 div#game_container {
 	height: 0;
 	overflow: hidden;

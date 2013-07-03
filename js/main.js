@@ -21,7 +21,8 @@ require.config({
 	}
 });
 require(['jquery', 'browserdetect'], function ($, AC) {
-	var	$intro;
+	var	$intro,
+		wait	= 0;
 	if(!AC.Detector.isChrome() || (AC.Detector.isWin() && !AC.Detector.winAtLeastVersion(6))) {
 		require(['bootstrap.min'], function () {
 			if(location.host !== 'l2p.fmads.dk') {
@@ -45,15 +46,32 @@ require(['jquery', 'browserdetect'], function ($, AC) {
 	$intro	= $('#intro');
 
 	if($intro.length > 0) {
-		$intro.addClass('ready');
-		setTimeout(function () {
-			$intro.remove();
-		}, 2000);
+		wait	= (new Date('2013-07-03 15:47:45 GMT')).getTime() - Date.now() - 1000;
+
+		if(wait > 0) {
+			$intro.addClass('show');
+
+			setTimeout(function () {
+				$intro.addClass('ready');
+
+				l2p.countdown_test();
+				setTimeout(function () {
+					$intro.remove();
+				}, 2000);
+			}, wait);
+		} else {
+			$intro.addClass('ready');
+
+			setTimeout(function () {
+				$intro.remove();
+			}, 2000);
+		}
 	}
 
 	require(['fM', 'l2p'], function (fM, L2P) {
-		//L2P.countdown_test();
-
+		if(wait < 0) {
+			L2P.countdown_test();
+		}
 		l2p	= L2P;
 		fm	= fM;
 		switch(fM.link.fileName()) {
@@ -72,8 +90,8 @@ require(['jquery', 'browserdetect'], function ($, AC) {
 					navigateTo	= $this.attr('data-internal-navigation'),
 					url			= $this.attr('href');
 
-				fM.link.navigate(url, 'Play.now', {
-					title:	'Play.now'
+				fM.link.navigate(url, 'Magic Tune', {
+					title:	'Magic Tune'
 				});
 
 				return false;
@@ -94,57 +112,32 @@ require(['jquery', 'browserdetect'], function ($, AC) {
 			}
 			var	hasFirstPopstate	= true; //false;
 			$(window).on('popstate', function (e, a, b, c) {
+				if(e.originalEvent) {
+					return;
+				}
+				e.preventDefault();
+				e.stopPropagation();
+				DEBUG && console.log('a', e, a, b, c, location.pathname);
 				if(L2P.$modal && L2P.$modal.is(':visible')) {
 					L2P.$modal.modal('hide');
 				}
 				if(hasFirstPopstate) {
 					popstateTitle(e);
 				}
+
 				switch(document.location.pathname) {
 					case '/':
-						L2P.navigate.home(e, false);
+						L2P.navigate.home(e);
 						break;
 					default:
 						if(hasFirstPopstate) {
-							L2P.navigate.url(location.pathname, false);
+							L2P.navigate.url(location.pathname);
 						}
 						break;
 				}
 				hasFirstPopstate	= true;
 			});
-			$(window).trigger('popstate');
-
-			$('#DialogContainer').each(function () {
-				var	$this		= $(this),
-					dialogType	= $this.attr('data-dialog');
-
-				switch(dialogType) {
-					case 'action':
-						var	title		= $this.attr('data-dialog-title'),
-							submitText	= $this.attr('data-dialog-submit-text'),
-							color		= $this.attr('data-dialog-color'),
-							html		= $this.html();
-
-						L2P.dialog[dialogType](false, title, html, color, submitText, true);
-						break;
-					case 'info':
-						var	title	= $this.attr('data-dialog-title'),
-							buttons	= JSON.parse($this.attr('data-dialog-buttons')),
-							color	= $this.attr('data-dialog-color'),
-							script	= $this.attr('data-dialog-script'),
-							html	= $this.html();
-
-						L2P.dialog[dialogType](false, title, html, color, buttons, script);
-						break;
-					case 'game':
-						var	gameData	= JSON.parse($this.attr('data-game-data')),
-							title		= $this.attr('data-game-title'),
-							type		= $this.attr('data-game-type');
-
-						L2P.dialog[dialogType](false, title, gameData, type);
-						break;
-				}
-			});
+			$(window).trigger('popstate', ['main.js']);
 
 			L2P.form.inputValidation.error();
 			$('form:first').each(function () {

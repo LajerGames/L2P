@@ -5,8 +5,12 @@ define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, opt
 			window.history.back();
 		}
 	}
-	function getAjax(urlAjax, callback) {
-		$.get(urlAjax, callback);
+	function getAjax(urlAjax, data, callback) {
+		if(data) {
+			$.post(urlAjax, data, callback);
+		} else {
+			$.get(urlAjax, callback);
+		}
 	}
 
 	var	gameController,
@@ -48,16 +52,10 @@ define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, opt
 			$toggleGame	= $controller.find('td[data-action="toggle-game"]');
 		}
 		if(type === 'play') {
-			//$toggleGame.find('.ContentBoxGameControl-playpause').text(L2P_global.lang.global_play);
-			//$toggleGame.find('img').attr('src', '/img/icons/play-white.svg');
 			$toggleGame.removeClass('can_pause');
 		} else if(type === 'restart') {
-			//$toggleGame.find('.ContentBoxGameControl-playpause').text(L2P_global.lang.global_play_again);
-			//$toggleGame.find('img').attr('src', '/img/icons/play-white.svg');
 			$toggleGame.removeClass('can_pause');
 		} else if(type === 'pause') {
-			//$toggleGame.find('.ContentBoxGameControl-playpause').text(L2P_global.lang.global_pause);
-			//$toggleGame.find('img').attr('src', '/img/icons/pause-white.svg');
 			$toggleGame.addClass('can_pause');
 		}
 	}
@@ -67,120 +65,114 @@ define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, opt
 		gameController:	undefined,
 		dialog:	{
 			action:	function (url, title, html, color, submitText, normalPost, callback) {
-				api.get.lang(function (lang) {
-					require(['fM', 'text!templates/modal.html'], function (fM, modalText) {
-						L2P.$modal	= $(modalText).addClass('modal-action');
-						L2P.$modal.find('.modal-header').css('background-color', color).find(' h2').text(title);
-						L2P.$modal.find('.modal-body').html(html);
-						if(submitText === '') {
-							L2P.$modal.find('.modal-footer button.btn-primary').remove();
-						} else {
-							L2P.$modal.find('.modal-footer button.btn-primary').html(submitText);
-						}
-						L2P.$modal.find('button.btn[data-dismiss]').text(lang.global_button_close);
+				require(['fM', 'text!templates/modal.html'], function (fM, modalText) {
+					L2P.$modal	= $(modalText).addClass('modal-action');
+					L2P.$modal.find('.modal-header').css('background-color', color).find(' h2').text(title);
+					L2P.$modal.find('.modal-body').html(html);
+					if(submitText === '') {
+						L2P.$modal.find('.modal-footer button.btn-primary').remove();
+					} else {
+						L2P.$modal.find('.modal-footer button.btn-primary').html(submitText);
+					}
+					L2P.$modal.find('button.btn[data-dismiss]').text(L2P_global.lang.global_button_close);
 
-						if(normalPost) {
+					if(normalPost) {
 
-							var	action	= url || document.location.pathname;
-							if(location.search.substring(1) !== '')
-							{
-								action += "?" + getQuerlocation.search.substring(1);
-							}
-
-							L2P.$modal.attr('action', action).attr('method', 'post');
+						var	action	= url || document.location.pathname;
+						if(location.search.substring(1) !== '')
+						{
+							action += "?" + location.search.substring(1);
 						}
 
-						function onSubmit(a, b, c) {
-							if(callback) {
-								var	response	= callback.call(this, a, b, c);
-								if(response !== false && typeof(response) !== 'function') {
-									//L2P.$modal.modal('hide');
-								} else if(typeof(response) === 'function') {
-									response(function (shouldHide) {
-										if(shouldHide) {
-											//L2P.$modal.modal('hide');
-										}
-									});
-								}
-							}
-							return normalPost ? true : false;
-						}
+						L2P.$modal.attr('action', action).attr('method', 'post');
+					}
 
-						L2P.$modal.modal('show');
-						L2P.$modal.on('submit', onSubmit);
+					function onSubmit(e) {
+						e.preventDefault();
 
-						var	pathname	= location.pathname;
-						L2P.$modal.on('hide', function () {
-							if(location.pathname === pathname) {
-								fM.link.navigate('/');
-							}
+						var	data	= fM.form.getElements.call(this);
+
+						L2P.$modal.off('hide');
+						fM.link.navigate(L2P.$modal.attr('action'), 'Magic Tune', {
+							title:	'Magic Tune',
+							data:	data
 						});
+					}
 
-						fM.form.autofocus(L2P.$modal);
+					L2P.$modal.modal('show');
+					L2P.$modal.on('submit', onSubmit);
 
-						fM.link.navigated(url, title, {
-							is_dialog:	true
-						});
-						var	parent	= fM.link.getParent();
-						if(parent && parent.is_dialog) {
-							L2P.$modal
-								.find('.modal-header-back-icon')
-									.addClass('modal-header-back-icon--clickable')
-									.on('click', function () {
-										window.history.back();
-									});
+					var	pathname	= location.pathname;
+					L2P.$modal.on('hide', function () {
+						if(location.pathname === pathname) {
+							fM.link.navigate('/');
 						}
 					});
-				}, ['global_button_close']);
+
+					fM.form.autofocus(L2P.$modal);
+
+					fM.link.navigated(url, title, {
+						is_dialog:	true
+					});
+					var	parent	= fM.link.getParent();
+					if(parent && parent.is_dialog) {
+						L2P.$modal
+							.find('.modal-header-back-icon')
+								.addClass('modal-header-back-icon--clickable')
+								.on('click', function () {
+									window.history.back();
+								});
+					}
+
+					L2P.form.inputValidation.error();
+				});
 			},
 			info: function (url, title, html, color, buttons, script) {
-				api.get.lang(function (lang) {
-					var	requireScripts	= ['fM', 'text!templates/info.html'];
-					if(script) {
-						requireScripts.push('dialog/info/'+script);
+				var	requireScripts	= ['fM', 'text!templates/info.html'];
+				if(script) {
+					requireScripts.push('dialog/info/'+script);
+				}
+				require(requireScripts, function (fM, modalText, infoScript) {
+					if(L2P.$modal) {
+						//L2P.$modal.off('hide').modal('hide');
 					}
-					require(requireScripts, function (fM, modalText, infoScript) {
-						if(L2P.$modal) {
-							//L2P.$modal.off('hide').modal('hide');
-						}
-						L2P.$modal	= $(modalText).addClass('modal-info');
-						L2P.$modal.find('.modal-header').css('background-color', color).find(' h2').text(title);
-						L2P.$modal.find('.modal-body').html(html);
-						var	$modalFooter	= L2P.$modal.find('.modal-footer');
-						if(buttons) {
-							buttons.forEach(function (button) {
-								$modalFooter.prepend('<button class="btn">'+button+'</button>');
-							});
-						}
-						L2P.$modal.find('button.btn[data-dismiss]').text(lang.global_button_close);
-
-						var	pathname	= location.pathname;
-						L2P.$modal.on('hide', function () {
-							if(location.pathname === pathname) {
-								fM.link.navigate('/');
-							}
+					L2P.$modal	= $(modalText).addClass('modal-info');
+					L2P.$modal.find('.modal-header').css('background-color', color).find(' h2').text(title);
+					L2P.$modal.find('.modal-body').html(html);
+					var	$modalFooter	= L2P.$modal.find('.modal-footer');
+					if(buttons) {
+						buttons.forEach(function (button) {
+							$modalFooter.prepend('<button class="btn">'+button+'</button>');
 						});
+					}
+					L2P.$modal.find('button.btn[data-dismiss]').text(L2P_global.lang.global_button_close);
 
-						fM.link.navigated(url, title, {
-							is_dialog:	true
-						});
-						var	parent	= fM.link.getParent();
-						if(parent && parent.is_dialog) {
-							L2P.$modal
-								.find('.modal-header-back-icon')
-									.addClass('modal-header-back-icon--clickable')
-									.on('click', function () {
-										window.history.back();
-									});
-						}
-
-						L2P.$modal.modal('show');
-
-						if(infoScript) {
-							infoScript(L2P.$modal);
+					var	pathname	= location.pathname;
+					L2P.$modal.on('hide', function () {
+						if(location.pathname === pathname) {
+							fM.link.navigate('/');
 						}
 					});
-				}, ['global_button_close']);
+
+					fM.link.navigated(url, title, {
+						is_dialog:	true
+					});
+					var	parent	= fM.link.getParent();
+					if(parent && parent.is_dialog) {
+						L2P.$modal
+							.find('.modal-header-back-icon')
+								.addClass('modal-header-back-icon--clickable')
+								.on('click', function () {
+									window.history.back();
+								});
+					}
+
+					L2P.$modal.modal('show');
+
+					if(infoScript) {
+						infoScript(L2P.$modal);
+					}
+				});
 			},
 			game: function (url, title, data, type, octave, callback) {
 				var	$body_container	= $('body'),
@@ -325,7 +317,8 @@ define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, opt
 
 							$(this).popover({
 								trigger:	'focus',
-								placement:	placement
+								placement:	placement,
+								template:	'<div class="popover"><div class="arrow"></div><div class="popover-content"><p></p></div></div>'
 							}).popover('show');
 						} else { // We most sure have a dialog
 							if(inputName === undefined) { // Only do this once
@@ -359,28 +352,39 @@ define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, opt
 					});
 				});
 			},
-			url:	function (url) {
+			url:	function (url, data) {
+				DEBUG && console.log(url);
 				var	that	= this,
 					urlAjax	= '/dialog'+url;
 
-				getAjax(urlAjax, function (data) {
-					switch(data.dialogType) {
-						case 'action':
-							L2P.dialog.action(url, data.title, data.body, data.color, data.submitText, true);
-							break;
-						case 'info':
-							L2P.dialog.info(url, data.title, data.body, data.color, data.buttons, data.script);
-							break;
-						case 'game':
-							if(that && that.nodeName === 'IMG') {
-								L2P.get.playlist(null, function () {
-									playlist.addGame(url, data.title, data.data, data.type);
-								});
-							} else {
-								L2P.dialog.game(url, data.title, data.data, data.type, data.octave);
-							}
-							break;
-					}
+				require(['fM'], function (fM) {
+					var	current	= fM.link.getCurrentNavigate();
+					data	= data || current && current.data;
+
+					DEBUG && console.log('nav', urlAjax, data, current);
+
+					getAjax(urlAjax, data, function (data) {
+						switch(data.dialogType) {
+							case 'action':
+								L2P.dialog.action(url, data.title, data.body, data.color, data.submitText, true);
+								break;
+							case 'info':
+								L2P.dialog.info(url, data.title, data.body, data.color, data.buttons, data.script);
+								break;
+							case 'game':
+								if(that && that.nodeName === 'IMG') {
+									L2P.get.playlist(null, function () {
+										playlist.addGame(url, data.title, data.data, data.type);
+									});
+								} else {
+									L2P.dialog.game(url, data.title, data.data, data.type, data.octave);
+								}
+								break;
+							case 'redirect':
+								fM.link.navigate(data.url, 'Magic Tune');
+								break;
+						}
+					});
 				});
 			}
 		},
@@ -838,8 +842,8 @@ define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, opt
 							playlist.addGame(url, title);
 						});
 					} else {
-						fM.link.navigate(url, 'Play.now', {
-							title:	'Play.now'
+						fM.link.navigate(url, 'Magic Tune', {
+							title:	'Magic Tune'
 						});
 					}
 				});
@@ -926,6 +930,7 @@ define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, opt
 		countdown_test:	 function () {
 			var	start	= new Date(),
 				to		= new Date('2013-07-05 22:00:00 GMT'),
+				to		= new Date('2013-07-03 15:49:00 GMT'),
 				d		= new Date(),
 				secLeft	= Math.ceil((to.getTime() - d.getTime()) / 1000),
 				realDelay,
@@ -933,7 +938,7 @@ define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, opt
 				itemsB	= [],
 				item;
 
-			secLeft	= Math.min(secLeft, 8);
+			//secLeft	= Math.min(secLeft, 8);
 
 			if(Date.now() > to) {
 				DEBUG && console.log('skip countdown');

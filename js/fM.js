@@ -18,7 +18,7 @@ define(['jquery'], function ($) {
 			return location.pathname.substr(1);
 		}
 		that.navigate	= function (url, title, obj) {
-			title		= title || 'Play.now';
+			title		= title || 'Magic Tune';
 			obj			= obj || {};
 			obj.title	= obj.title || title;
 
@@ -31,7 +31,8 @@ define(['jquery'], function ($) {
 			if(url) {
 				window.history.pushState(obj, title, url);
 			}
-			$(window).trigger('popstate');
+
+			$(window).trigger('popstate', ['fM']);
 		}
 		that.navigated	= function (url, title, obj) {
 			document.title	= title;
