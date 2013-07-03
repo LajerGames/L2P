@@ -23,6 +23,11 @@ define('HTTP_PROJECT_ROOT_MODULES', HTTP_PROJECT_ROOT.'modules/');
 
 require_once(SERVER_PROJECT_ROOT_INCLUDE.'conf.php');
 
+# Commit Hash
+$oFile	= new SplFileObject(SERVER_PROJECT_ROOT.'/.git/ORIG_HEAD');
+define('GIT_COMMIT_HASH', $oFile->fgets());
+$oFile	= null;
+
 # Name some constants
 define('DEFAULT_LANGUAGE', 'da-DK');
 
