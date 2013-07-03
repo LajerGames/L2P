@@ -18,6 +18,16 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/include/config.php');
 * thus eneabling access to the data from every file we include
 */
 
+// Find path to load
+$oLoadInfo = FindLoadFile($oSql, true);
+
+// Set oPathUser if needed
+if(is_object($oLoadInfo->oPathUser))
+{
+    // Hack #2
+    $oPathUser = $oLoadInfo->oPathUser;
+}
+
 // Postbag
 switch($_REQUEST['mode']) // Yep it makes sence to use request here!
 {
@@ -94,17 +104,6 @@ switch($_REQUEST['mode']) // Yep it makes sence to use request here!
 
 if(!IS_DIALOG)
 {
-	// We cannot have everything point to frontpage, Google surely hate that
-	// Find path to load
-	$oLoadInfo = FindLoadFile($oSql);
-
-	// Set oPathUser if needed
-	if(is_object($oLoadInfo->oPathUser))
-	{
-		// Hack #2
-		$oPathUser = $oLoadInfo->oPathUser;
-	}
-
 	// Set oStatisticsSearch if needed
 	if(is_object($oLoadInfo->oStatisticsSearch))
 	{
@@ -119,16 +118,6 @@ if(!IS_DIALOG)
 }
 else
 {
-	// Find path to load
-	$oLoadInfo = FindLoadFile($oSql, true);
-
-	// Set oPathUser if needed
-	if(is_object($oLoadInfo->oPathUser))
-	{
-		// Hack #2
-		$oPathUser = $oLoadInfo->oPathUser;
-	}
-
 	// Set oStatisticsSearch if needed
 	if(is_object($oLoadInfo->oStatisticsSearch))
 	{

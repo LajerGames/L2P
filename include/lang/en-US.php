@@ -30,6 +30,8 @@ $this
 
 # Time
 ->SetMenu('time_')
+->Set('day', 'day')
+->Set('days', 'days')
 ->Set('hour', 'hour')
 ->Set('hours', 'hours')
 ->Set('minute', 'minute')
@@ -86,6 +88,7 @@ $this
 ->Set('user_logout', 'Logout')
 ->Set('user_statistics', 'Statistics')
 ->Set('user_settings', 'Settings')
+->Set('user_subscription', 'Subscription')
 
 # Browse
 ->SetMenu('browse_')

@@ -154,7 +154,6 @@ function RenderProperties($arrProperties)
 
 	return $strProperties;
 }
-
 function GetMusic($oSql, $strType = 'song', $iLimit = 0, $strSearch = '')
 {
 	$strType = $strType == 'song' ? 'song' : 'scale';
@@ -197,7 +196,6 @@ function GetMusic($oSql, $strType = 'song', $iLimit = 0, $strSearch = '')
         '.$strLimit.'
     ');
 }
-
 /**
 * Returns a object, contains strLoadFile nomatter what, and may return oPathUser aswell
 *
@@ -335,7 +333,6 @@ function FindLoadFile(MySQLWrapper $oSql, $bReturn404 = false)
 
     return $oLoadInfo;
 }
-
 /**
 * Returns a nice datestring in the correct language
 *
@@ -687,7 +684,6 @@ function reportError($strErrorDescription, $strUniqueErrorID = "", $strFilename 
 
 	return;
 }
-
 function handlePHPError($errno, $errstr, $errfile, $errline)
 {
 	switch ($errno)
@@ -718,11 +714,23 @@ function handlePHPError($errno, $errstr, $errfile, $errline)
 
 	return true;
 }
-
 function handleShutdown ()
 {
 	$arrLastError = error_get_last();
 	handlePHPError($arrLastError['type'], $arrLastError['message'], $arrLastError['file'], $arrLastError['line']);
+}
+function CalculateSubscriptionTimeleft($dSubscriptionEnd)
+{
+    $iDateTodayUnix         = strtotime(date('Y-m-d'));
+    $iSubscriptionEndUnix   = strtotime(date('Y-m-d', strtotime($dSubscriptionEnd)));
+
+    $iTimeLeft              = $iSubscriptionEndUnix - $iDateTodayUnix;
+
+    $iDaysLeft              = ($iTimeLeft / 60 / 60 / 24) - 1; // Today is not included!
+
+    echo $iDaysLeft.'<br>';
+
+    return;
 }
 class AC_LoadFileInfo
 {

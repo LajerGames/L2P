@@ -2,7 +2,7 @@
 require_once($_SERVER['DOCUMENT_ROOT'].'/include/config.php');
 
 // Get userid
-$iUserID = intval($_GET['uid']);
+$iUserID = $oPathUser->iUserID;
 
 // Fetch the typed e-mail adress
 $rUserEmail = $oSql->Select('
@@ -29,7 +29,7 @@ $strBody    = $oConfirmEmail->RenderFields(false);
 // Create the interactive headline with the e-mail adress in it, only if last login ip is equal to the one which user has now
 if($oUserEmail->last_login_ip == $_SERVER['REMOTE_ADDR'])
 {
-    $strHeadline = str_replace('#email#', $oUserEmail->email, $oLang->Get('activate_headline'));
+    $strHeadline = str_replace('#email#', '('.$oUserEmail->email.')', $oLang->Get('activate_headline'));
 }
 else
 {

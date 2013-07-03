@@ -102,7 +102,7 @@ if($oCreateUserForm->Validate($_POST))
         }
         $oUserHandler->SendConfirmationEmail($iUserID, $oLang->Get('create_user_confirmation_mail_headline'), $strMailBody);
 
-        Redirect(HTTP_PROJECT_ROOT.'user/confirm-email/?uid='.$iUserID);
+        Redirect(HTTP_PROJECT_ROOT.'user/'.$strUsername.'/confirm-email/');
     }
 }
 ?>
