@@ -3,7 +3,7 @@
 $iEmailConfirmationAttempts = 5;
 
 // Get userdata
-$iUserID            = intval($_GET['uid']);
+$iUserID            = intval($oPathUser->iUserID);
 $strConfirmationPwd = $_REQUEST['confirmation'];
 
 // Check if user wrote a confirmation password which matches the one connected to this user
@@ -21,7 +21,6 @@ $rCheckConfirmationPassword = $oSql->Select('
      && id                          = '.$iUserID.'
      && email_confirmed             = 0
 ');
-
 if($rCheckConfirmationPassword->num_rows > 0)
 {
     $oCheckConfirmationPassword = $rCheckConfirmationPassword->fetch_object();
@@ -32,8 +31,9 @@ if($rCheckConfirmationPassword->num_rows > 0)
         // Check if the user wrote the right confirmation password
         if(md5($strConfirmationPwd) == $oCheckConfirmationPassword->email_confirmation_password)
         {
+            $dExpireDate = date('Y-m-d', strtotime('+8 DAYS'));
             // Activate the user and log hin/her in
-            $oSql->Update('users', array('email_confirmed' => 1), $oLogin->id, 'Email activated for user '.$oLogin->id);
+            $oSql->Update('users', array('email_confirmed' => 1, 'expire' => $dExpireDate), $iUserID, 'Email activated for user '.$iUserID);
 
             // Set user session
             $oUserHandler->SetUserSession($oCheckConfirmationPassword->id);
