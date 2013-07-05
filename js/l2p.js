@@ -1,4 +1,4 @@
-define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, options) {
+define(['jquery', 'api', 'game/options', 'bootstrap'], function ($, api, options) {
 	function goBack(e, doGoBack) {
 		if(doGoBack !== false) {
 			window.history.back();
@@ -18,7 +18,8 @@ define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, opt
 		playlist,
 		socket,
 		$controller,
-		$toggleGame;
+		$toggleGame,
+		tour;
 
 	function Render($container, loader, render, kill) {
 		this.$container	= $container;
@@ -76,7 +77,6 @@ define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, opt
 					L2P.$modal.find('button.btn[data-dismiss]').text(L2P_global.lang.global_button_close);
 
 					if(normalPost) {
-
 						var	action	= url || document.location.pathname;
 						if(location.search.substring(1) !== '')
 						{
@@ -124,6 +124,9 @@ define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, opt
 					}
 
 					L2P.form.inputValidation.error();
+					if(tour && tour.tour) {
+						tour.tour.next();
+					}
 				});
 			},
 			info: function (url, title, html, color, buttons, script) {
@@ -350,17 +353,25 @@ define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, opt
 						title:	title
 					});
 				});
+
+				if(tour && !tour.callback('/')) {
+					tour.kill();
+				}
+			},
+			guided_tour:	function (e) {
+				L2P.guided_tour();
 			},
 			url:	function (url, data) {
-				DEBUG && console.log(url);
 				var	that	= this,
 					urlAjax	= '/dialog'+url;
+
+				if(tour && !tour.callback(url)) {
+					tour.kill();
+				}
 
 				require(['fM'], function (fM) {
 					var	current	= fM.link.getCurrentNavigate();
 					data	= data || current && current.data;
-
-					DEBUG && console.log('nav', urlAjax, data, current);
 
 					getAjax(urlAjax, data, function (data) {
 						switch(data.dialogType) {
@@ -941,24 +952,28 @@ define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, opt
 			}
 		],
 		countdown_test:	 function () {
-			var	start	= new Date(),
-				to		= new Date('2013-07-05 22:00:00 GMT'),
-				to		= new Date('2013-07-03 15:49:00 GMT'),
-				d		= new Date(),
-				secLeft	= Math.ceil((to.getTime() - d.getTime()) / 1000),
+			var	serverDiff	= new Date(L2P_global.server_time) - new Date(performance.timing.responseStart),
+				start		= new Date(),
+				localDiff	= start.getTime() - performance.timing.responseStart,
+				totalDiff	= serverDiff + localDiff,
+
+				to			= new Date(+(new Date('2013-07-04 22:10:00 GMT')) - serverDiff),
+
+				left		= (to.getTime() - start.getTime()) / 1000,
+				secLeft		= Math.ceil(left),
 				realDelay,
-				items	= [],
-				itemsB	= [],
+				items		= [],
+				itemsB		= [],
 				item;
 
 			//secLeft	= Math.min(secLeft, 8);
-
-			if(Date.now() > to) {
+			DEBUG && console.log(serverDiff);
+			if(secLeft <= 0) {
 				DEBUG && console.log('skip countdown');
 				return;
 			}
 
-			start.setMilliseconds(0);
+			start.setMilliseconds(1000 - (serverDiff % 1000));
 
 			for(var i = secLeft; i > 0; i -= 1) {
 				items.push({
@@ -996,9 +1011,8 @@ define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, opt
 				realDelay	= (Date.now() - start) % 1000;
 
 				if(items.length > 0) {
-
-					if(realDelay > 100) {
-						delay	= Math.floor(realDelay / 100) / 10;
+					if(realDelay > 10) {
+						delay	= Math.floor(realDelay / 10) / 100;
 						items[0].sec	= (items[0].sec || 1) - delay;
 					} else {
 						items[0].sec	= items[0].sec || 1;
@@ -1021,43 +1035,94 @@ define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, opt
 			run();
 		},
 		guided_tour:	function () {
-			/*require(['tour'], function (Tour) {
-				var	tour	= new Tour({
-					useLocalStorage:	true,
-					container:			'body',
-					debug:				true,
-					keyboard:	true,
-					template:	function (i, step) {
-						DEBUG && console.log(i, step);
-						var	$elem	= $("<div><div class='popover tour'><div class='arrow'></div><h3 class='popover-title'></h3><div class='popover-content'></div></div></div>");
-						$elem
-							.find('.popover-title')
-								.text(this.title)
-								.end()
-							.find('.popover-content')
-								.text(this.content)
-								.end();
-						return "<div class='popover tour'><div class='arrow'></div><h3 class='popover-title'></h3><div class='popover-content'><p></p></div></div>";
-					}
-				});
+			require(['tour'], function (Tour) {
+				if(tour && tour.tour) {
+					tour.tour.start();
+					return;
+				}
+				tour	= (function () {
+					var	empty		= function (url) {
+							return url === '/guided_tour/';
+						},
+						controller	= {};
 
-				tour.addStep({
-					element:	'#guide',
-					title:		'test',
-					content:	'blib blob',
-					placement:	'left',
-					backdrop:	true
-				});
+					controller.callback	= empty;
+					controller.kill		= function () {
+						if(controller.tour) {
+							controller.tour.end();
+							controller.tour	= null;
+						}
+					};
+					controller.tour		= new Tour({
+						useLocalStorage:	true,
+						container:			'body',
+						debug:				true,
+						labels:		{
+							next:	'<button class="btn">Got it</button>',
+							prev:	'',
+							end:	''
+						},
+						keyboard:	true,
+						template:	function (i, step) {
+							if(step.labelsOff) {
+								return '<div class="popover tour popover--no-labels"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div>';
+							} else {
+								return '<div class="popover tour"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div>';
+							}
+						},
+						onShow:		function (tour) {
+							controller.callback	= empty;
+						},
+						onNext:		function (tour, a, b, c) {
+							console.log(this, tour, a, b, c);
+						}
+					});
 
-				tour.addStep({
-					element:	'#logo',
-					title:		'test',
-					content:	'blib blob',
-					placement:	'left'
-				});
+					controller.tour.addStep({
+						element:	'a[href="/user/settings/"]',
+						title:		'test',
+						content:	'Welcome to the Magic Tune guided tour, where we will show you some of the games functionallity and how to play.<br><br>Please click on "Settings"',
+						placement:	'left',
+						labelsOff:	true,
+						backdrop:	true,
+						onShow:		function (tour) {
+							controller.callback	= function (url) {
+								if(url === '/user/settings/') {
+									tour.hideStep(tour._current);
 
-				tour.start(true);
-			});*/
+									return true;
+								}
+								return false;
+							}
+						}
+					});
+
+					controller.tour.addStep({
+						element:	'.modal-action.in table.FormTable [name="concert_pitch"]',
+						title:		'test',
+						content:	'Concert pitch: Here you can set your concert pitch, it\'s most common to use 440 or 442',
+						placement:	'right',
+						container:	'.modal-action.in',
+						backdrop:	true
+					});
+
+					controller.tour.addStep({
+						element:	'.modal-action.in table.FormTable [name="color_nodes"]',
+						title:		'test',
+						content:	'Colored notes: By checking this box, we will make the notes different colors when you play. Notes which belong to the G string will be yellow, notes on the A string will be red and so forth',
+						placement:	'right',
+						container:	'.modal-action.in',
+						backdrop:	true
+					});
+
+					controller.tour.setCurrentStep(0);
+					controller.tour.start(true);
+
+					console.log(controller.tour);
+
+					return controller;
+				}());
+			});
 		}
 	};
 	var t;

@@ -109,10 +109,11 @@ require(['jquery', 'browserdetect'], function ($, AC) {
 					document.title	= $CenteringContainer.attr('data-default-title');
 				}
 			}
-			$(window).on('popstate', function (e) {
+			$(window).on('popstate', function (e, from) {
 				if(e.originalEvent && !e.originalEvent.state) {
 					return;
 				}
+				console.log('pop', location.href, e, from);
 				e.preventDefault();
 				e.stopPropagation();
 
@@ -123,10 +124,16 @@ require(['jquery', 'browserdetect'], function ($, AC) {
 
 				popstateTitle(e);
 
+				if(_gaq) {
+					_gaq.push(['_trackPageview', document.location.pathname]);
+				}
+
 				switch(document.location.pathname) {
 					case '/':
 						L2P.navigate.home(e);
 						break;
+					case '/guided_tour/':
+						L2P.navigate.guided_tour(e);
 					default:
 						L2P.navigate.url(location.pathname);
 						break;

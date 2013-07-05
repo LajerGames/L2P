@@ -29,8 +29,11 @@
 	margin: -30vh 0 0 0;
 	border-radius: 0;
 	overflow: hidden;
+	top: 50%;
 }
-.modal.modal-action > * {
+.modal.modal-action > .modal-header,
+.modal.modal-action > .modal-body,
+.modal.modal-action > .modal-footer {
 	display: inline-block !important;
 	padding: 1vh 20vw;
 	width: 60vw !important;
@@ -42,8 +45,10 @@
 
 .modal.modal-info {
 	width: 70vw;
-	margin-left: -35vw;
 	margin-top: -35vh;
+	margin-left: -35vw;
+	top: 50%;
+	overflow: auto;
 }
 .modal.modal-info > .modal-body {
 	max-height: 100%;

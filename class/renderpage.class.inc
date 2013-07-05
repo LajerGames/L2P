@@ -103,7 +103,8 @@ class PageRenderer
 			'lang'			    => $arrPreloadLang,
             'internal_load'     => $bInternalPageLoad,
             'countdown_time'    => intval($_SESSION['UserObject']->countdown_time),
-            'metronome'         => intval($_SESSION['UserObject']->metronome) === 1
+            'metronome'         => intval($_SESSION['UserObject']->metronome) === 1,
+            'server_time'		=> intval(microtime(true) * 1000)
 		);
 
 		return '
@@ -134,7 +135,7 @@ class PageRenderer
                 '.$strIntro.'
                 <div id="overlay" class="show hide"></div>
 				<div id="CenteringContainer" data-default-title="'.$oLang->Get('system_title_welcome').'">
-                    <!--<a href="javascript:void(0);" id="guide"><img src="/img/icons/vidcam.svg" alt="guided tour"/>Guided tour</a>-->
+                    <a href="/guided_tour/" data-internal-navigation="guided_tour" id="guide"><img src="/img/icons/vidcam.svg" alt="guided tour"/>Guided tour</a>
 					<a href="'.HTTP_PROJECT_ROOT.'" id="logo" data-internal-navigation="home" data-title="'.$oLang->Get('system_title_welcome').'"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="480px" height="81px" viewBox="0 0 960 162.058" enable-background="new 0 0 960 162.058" xml:space="preserve">
 						<g>
 							<path fill="#FFF" d="M213.521,38.61v10.726c8.362-8.363,16.181-12.362,23.816-12.362c10.363,0,18.908,5.091,24.363,14.727 c7.09-7.999,15.635-14.727,27.271-14.727c16.545,0,27.09,12.726,27.09,31.997v51.271h-16.181V69.698 c0-12.362-7.637-19.089-16.909-19.089c-5.271-0.182-12.362,4.363-18.181,10.362v59.271H248.61V69.515 c0-13.272-6.728-18.907-14.727-18.907c-8.182,0-13.636,2.545-20.363,10.362v59.271H197.34V38.608h16.182V38.61z"/>
