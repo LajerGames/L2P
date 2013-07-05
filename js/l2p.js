@@ -941,24 +941,28 @@ define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, opt
 			}
 		],
 		countdown_test:	 function () {
-			var	start	= new Date(),
-				to		= new Date('2013-07-05 22:00:00 GMT'),
-				to		= new Date('2013-07-03 15:49:00 GMT'),
-				d		= new Date(),
-				secLeft	= Math.ceil((to.getTime() - d.getTime()) / 1000),
+			var	serverDiff	= new Date(L2P_global.server_time) - new Date(performance.timing.responseStart),
+				start		= new Date(),
+				localDiff	= start.getTime() - performance.timing.responseStart,
+				totalDiff	= serverDiff + localDiff,
+
+				to			= new Date(+(new Date('2013-07-05 22:00:00 GMT')) - serverDiff),
+
+				left		= (to.getTime() - start.getTime()) / 1000,
+				secLeft		= Math.ceil(left),
 				realDelay,
-				items	= [],
-				itemsB	= [],
+				items		= [],
+				itemsB		= [],
 				item;
 
 			//secLeft	= Math.min(secLeft, 8);
-
-			if(Date.now() > to) {
+			DEBUG && console.log(serverDiff);
+			if(secLeft <= 0) {
 				DEBUG && console.log('skip countdown');
 				return;
 			}
 
-			start.setMilliseconds(0);
+			start.setMilliseconds(1000 - (serverDiff % 1000));
 
 			for(var i = secLeft; i > 0; i -= 1) {
 				items.push({
@@ -994,11 +998,14 @@ define(['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, opt
 
 			var	run	= function () {
 				realDelay	= (Date.now() - start) % 1000;
+				if(realDelay < 0) {
+					realDelay	+= 1000;
+				}
+				DEBUG && console.log('delay', realDelay);
 
 				if(items.length > 0) {
-
-					if(realDelay > 100) {
-						delay	= Math.floor(realDelay / 100) / 10;
+					if(realDelay > 10) {
+						delay	= Math.floor(realDelay / 10) / 100;
 						items[0].sec	= (items[0].sec || 1) - delay;
 					} else {
 						items[0].sec	= items[0].sec || 1;
