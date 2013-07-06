@@ -63,7 +63,7 @@ if(isset($_SESSION['UserObject']))
 			<div class="ContentBoxBodyContainer">
 				<div class="ContentBoxBody">
 					'.$oPageRenderer->RenderDialogLink('/user/'.$_SESSION['UserObject']->username.'/statistics/', PageRenderer::DialogType_Info, $oLang->Get('frontpage_user_statistics'), '/img/icons/statistics-white.svg').'
-                    '.$oPageRenderer->RenderDialogLink('/user/subscription/', PageRenderer::DialogType_Action, $oLang->Get('frontpage_user_subscription'), '/img/icons/subscription.svg').'
+                    <!--'.$oPageRenderer->RenderDialogLink('/user/subscription/', PageRenderer::DialogType_Action, $oLang->Get('frontpage_user_subscription'), '/img/icons/subscription.svg').'-->
                     '.$oPageRenderer->RenderDialogLink('/user/settings/', PageRenderer::DialogType_Info, $oLang->Get('frontpage_user_settings'), '/img/icons/settings.svg').'
 	                <!--a href="/user/settings/" title="'.$oLang->Get('frontpage_user_settings').'" data-internal-navigation></a-->
                     <a href="/?mode=logout" class="IconLink"><img src="/img/icons/logout.svg" alt="" /> '.$oLang->Get('frontpage_user_logout').'</a>
