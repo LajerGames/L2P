@@ -544,7 +544,7 @@ define('fM',['jquery'], function ($) {
 			return location.pathname.substr(1);
 		}
 		that.navigate	= function (url, title, obj) {
-			title		= title || 'Play.now';
+			title		= title || 'Magic Tune';
 			obj			= obj || {};
 			obj.title	= obj.title || title;
 
@@ -557,7 +557,8 @@ define('fM',['jquery'], function ($) {
 			if(url) {
 				window.history.pushState(obj, title, url);
 			}
-			$(window).trigger('popstate');
+
+			$(window).trigger('popstate', ['fM']);
 		}
 		that.navigated	= function (url, title, obj) {
 			document.title	= title;
@@ -850,7 +851,10 @@ define('api',['jquery'], function ($) {
 		save:   save
 	};
 });
-define('game/tones',[],function () {
+define('game/options',[],function () {
+	function capitaliseFirstLetter(string) {
+		return string.charAt(0).toUpperCase() + string.slice(1);
+	}
 	var	toneNames	= [
 			[9, 'C', true, true],
 			[7, 'D', true, true],
@@ -863,54 +867,6 @@ define('game/tones',[],function () {
 		tones	= [
 			{name:	'',		hz: 0,			pos: 1000,	octav:	0}
 		];
-
-	var	freq	= L2P_global && L2P_global.concert_pitch || 442;
-	for(var octave = 0; octave <= 8; octave++) {
-		var relOctave	= octave - 4;
-
-		toneNames.forEach(function (toneInfo, toneNo) {
-			var	pos			= toneInfo[0]
-				name		= toneInfo[1],
-				useFlat		= toneInfo[2],
-				useSharp	= toneInfo[3],
-				n			= relOctave * 12 - pos,
-				toneFreq	= freq * Math.pow(2, n / 12);
-
-			if(useFlat) {
-				tones.push({
-					name:	name+'b',
-					hz:		freq * Math.pow(2, (n - 1) / 12),
-					pos:	-relOctave * 7 - toneNo + 6,
-					octav:	octave
-				});
-			}
-
-			tones.push({
-				name:	name,
-				hz:		freq * Math.pow(2, n / 12),
-				pos:	-relOctave * 7 - toneNo + 6,
-				octav:	octave
-			});
-
-			if(useSharp) {
-				tones.push({
-					name:	name+'#',
-					hz:		freq * Math.pow(2, (n + 1) / 12),
-					pos:	-relOctave * 7 - toneNo + 6,
-					octav:	octave
-				});
-			}
-		});
-	}
-
-	tones.push({name:	'',		hz: 8000,		pos: -1000,	octav:	0});
-
-	return tones;
-});
-define('game/options',['game/tones'], function (tones) {
-	function capitaliseFirstLetter(string) {
-		return string.charAt(0).toUpperCase() + string.slice(1);
-	}
 
 	var options = {
 		leftMargin:		180,
@@ -929,25 +885,7 @@ define('game/options',['game/tones'], function (tones) {
 		},
 		svgStartContainerPosSharp: ['F', 'C', 'G', 'D', 'A', 'E'],
 		svgStartContainerPosFlat: ['B', 'E', 'A', 'D', 'G', 'C'],
-		tones:	{
-			all:	tones,
-			names:	{
-				0:	{},
-				1:	{},
-				2:	{},
-				3:	{},
-				4:	{},
-				5:	{},
-				6:	{},
-				7:	{},
-				8:	{}
-			},
-			hertz:	{},
-			pos:	{},
-			rest:	{
-				pos:	3
-			}
-		},
+		tones:	{},
 		tacts:	{
 			types:		{
 				quarter:	{
@@ -1058,6 +996,113 @@ define('game/options',['game/tones'], function (tones) {
 				},
 				rest:	{}
 			}
+		},
+		generateTones:	function () {
+			options.tones	= {
+				all:	[],
+				names:	{
+					0:	{},
+					1:	{},
+					2:	{},
+					3:	{},
+					4:	{},
+					5:	{},
+					6:	{},
+					7:	{},
+					8:	{}
+				},
+				hertz:	{},
+				pos:	{},
+				rest:	{
+					pos:	3
+				}
+
+			};
+
+			options.tones.all.push({
+				name:	'',
+				hz: 	0,
+				pos: 	1000,
+				octav:	0
+			});
+
+			var	freq	= L2P_global.concert_pitch || 442;
+			for(var octave = 0; octave <= 8; octave++) {
+				var relOctave	= octave - 4;
+
+				toneNames.forEach(function (toneInfo, toneNo) {
+					var	pos			= toneInfo[0]
+						name		= toneInfo[1],
+						useFlat		= toneInfo[2],
+						useSharp	= toneInfo[3],
+						n			= relOctave * 12 - pos,
+						toneFreq	= freq * Math.pow(2, n / 12);
+
+					if(useFlat) {
+						options.tones.all.push({
+							name:	name+'b',
+							hz:		freq * Math.pow(2, (n - 1) / 12),
+							pos:	-relOctave * 7 - toneNo + 6,
+							octav:	octave
+						});
+					}
+
+					options.tones.all.push({
+						name:	name,
+						hz:		freq * Math.pow(2, n / 12),
+						pos:	-relOctave * 7 - toneNo + 6,
+						octav:	octave
+					});
+
+					if(useSharp) {
+						options.tones.all.push({
+							name:	name+'#',
+							hz:		freq * Math.pow(2, (n + 1) / 12),
+							pos:	-relOctave * 7 - toneNo + 6,
+							octav:	octave
+						});
+					}
+				});
+			}
+
+			options.tones.all.push({name:	'',		hz: 8000,		pos: -1000,	octav:	0});
+
+			options.tones.all.forEach(function (tone) {
+				options.tones.names[tone.octav][tone.name]	= tone;
+				options.tones.hertz[tone.hz]	= tone;
+
+				options.tones.pos[tone.pos]	= options.tones.pos[tone.pos] || {};
+				options.tones.pos[tone.pos][tone.name.substr(1)]	= tone;
+			});
+
+			function getClosestTone(tone, lower) {
+				var	pos	= options.tones.all.indexOf(tone),
+					t;
+
+				if((pos === 0 && lower) || (pos === (options.tones.all.length - 1) && !lower)) {
+					return null;
+				}
+				if(lower) {
+					t	= options.tones.all[pos - 1];
+					if(t.hz === tone.hz) {
+						t	= options.tones.all[pos - 2]
+					}
+				} else {
+					t	= options.tones.all[pos + 1];
+					if(t.hz === tone.hz) {
+						t	= options.tones.all[pos + 2]
+					}
+				}
+
+				return t;
+			}
+
+			options.tones.all.forEach(function (tone) {
+				tone.close	= {
+					lower:	getClosestTone(tone, true),
+					higher:	getClosestTone(tone, false)
+				};
+			});
 		}
 	};
 
@@ -1076,42 +1121,7 @@ define('game/options',['game/tones'], function (tones) {
 	}
 	makeRestNodes();
 
-	tones.forEach(function (tone) {
-		options.tones.names[tone.octav][tone.name]	= tone;
-		options.tones.hertz[tone.hz]	= tone;
-
-		options.tones.pos[tone.pos]	= options.tones.pos[tone.pos] || {};
-		options.tones.pos[tone.pos][tone.name.substr(1)]	= tone;
-	});
-
-	function getClosestTone(tone, lower) {
-		var	pos	= options.tones.all.indexOf(tone),
-			t;
-
-		if((pos === 0 && lower) || (pos === (options.tones.all.length - 1) && !lower)) {
-			return null;
-		}
-		if(lower) {
-			t	= options.tones.all[pos - 1];
-			if(t.hz === tone.hz) {
-				t	= options.tones.all[pos - 2]
-			}
-		} else {
-			t	= options.tones.all[pos + 1];
-			if(t.hz === tone.hz) {
-				t	= options.tones.all[pos + 2]
-			}
-		}
-
-		return t;
-	}
-
-	tones.forEach(function (tone) {
-		tone.close	= {
-			lower:	getClosestTone(tone, true),
-			higher:	getClosestTone(tone, false)
-		};
-	});
+	options.generateTones();
 
 	return options;
 });
@@ -2132,7 +2142,6 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 		this.useCountdown	= true;
 		this.currentNote;
 		this.currentTact;
-		this.kiddieMode		= L2P_global.kiddie_mode;
 		this.paused			= false;
 		this.lastLeft		= -1;
 
@@ -2280,7 +2289,7 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 			gameController.svgLine.node.classList.remove('pulse');
 		});
 
-		if(L2P_global.metronome && !gameController.kiddieMode) {
+		if(L2P_global.metronome && !L2P_global.kiddie_mode) {
 			var lastPulse	= Date.now(),
 				pulseFunc	= function () {
 					if(gameController.game && gameController.game.running) {
@@ -2304,7 +2313,7 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 		}
 	};
 	GameController.prototype.pauseGame	= function () {
-		if(this.kiddieMode) {
+		if(L2P_global.kiddie_mode) {
 			this.SVGNotes.animateAbs(-this.currentLeft() + 30, -501, 0);
 		} else {
 			this.SVGNotes.animateAbs((-Math.floor(this.currentLeft() / (this.defWidth / 4)) + 0.5) * (this.defWidth / 4) - 20, -501, 0);
@@ -2800,7 +2809,7 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 
 						// If we got to a new note
 						if(that.currentNote !== note) {
-							if(!gameController.kiddieMode && that.currentTact !== note.tact) {
+							if(!L2P_global.kiddie_mode && that.currentTact !== note.tact) {
 								gameController.tactDone();
 							}
 							that.currentNote	= note;
@@ -2820,7 +2829,7 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 						}
 
 						// If we have kiddiemode enabled, we check for the correct tone
-						if(gameController.kiddieMode) {
+						if(L2P_global.kiddie_mode) {
 							if(!note.isRest && (toneDiff.ratioRel > 0.15 || freq === -1) && !note.kiddieModeAccepted) {
 								if(!gameController.paused) {
 									gameController.pauseGame();
@@ -2925,13 +2934,13 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 		return JSON.stringify(data);
 	};
 	GameController.prototype.gameDone	= function () {
-		if(!this.kiddieMode && this.currentTact) {
+		if(!L2P_global.kiddie_mode && this.currentTact) {
 			this.tactDone();
 		}
 
 		this.stopGame();
 
-		if(this.kiddieMode) {
+		if(L2P_global.kiddie_mode) {
 			return;
 		}
 		var	data	= this.generateGameData(),
@@ -5325,6 +5334,63 @@ define('dsp',[],function () {
 		Reverb:				Reverb
 	};
 });
+define('game/tones',[],function () {
+	var	toneNames	= [
+			[9, 'C', true, true],
+			[7, 'D', true, true],
+			[5, 'E', true, true],
+			[4, 'F', false, true],
+			[2, 'G', true, true],
+			[0, 'A', true, true],
+			[-2, 'B', true, false]
+		],
+		tones	= [
+			{name:	'',		hz: 0,			pos: 1000,	octav:	0}
+		];
+
+	var	freq	= L2P_global && L2P_global.concert_pitch || 442;
+	for(var octave = 0; octave <= 8; octave++) {
+		var relOctave	= octave - 4;
+
+		toneNames.forEach(function (toneInfo, toneNo) {
+			var	pos			= toneInfo[0]
+				name		= toneInfo[1],
+				useFlat		= toneInfo[2],
+				useSharp	= toneInfo[3],
+				n			= relOctave * 12 - pos,
+				toneFreq	= freq * Math.pow(2, n / 12);
+
+			if(useFlat) {
+				tones.push({
+					name:	name+'b',
+					hz:		freq * Math.pow(2, (n - 1) / 12),
+					pos:	-relOctave * 7 - toneNo + 6,
+					octav:	octave
+				});
+			}
+
+			tones.push({
+				name:	name,
+				hz:		freq * Math.pow(2, n / 12),
+				pos:	-relOctave * 7 - toneNo + 6,
+				octav:	octave
+			});
+
+			if(useSharp) {
+				tones.push({
+					name:	name+'#',
+					hz:		freq * Math.pow(2, (n + 1) / 12),
+					pos:	-relOctave * 7 - toneNo + 6,
+					octav:	octave
+				});
+			}
+		});
+	}
+
+	tones.push({name:	'',		hz: 8000,		pos: -1000,	octav:	0});
+
+	return tones;
+});
 define('sound-input',['jquery', 'dsp', 'game/tones', 'l2p'], function ($, dsp, tones, L2P) {
 	var	DSP	= dsp.DSP,
 		setupTypedArray		= dsp.setupTypedArray,
@@ -5931,15 +5997,18 @@ define('playlist',['jquery', 'l2p', 'api', 'fM'], function ($, L2P, api, fM) {
 
 	return Playlist;
 });
-var tuner;
 define('l2p',['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, api, options) {
 	function goBack(e, doGoBack) {
 		if(doGoBack !== false) {
 			window.history.back();
 		}
 	}
-	function getAjax(urlAjax, callback) {
-		$.get(urlAjax, callback);
+	function getAjax(urlAjax, data, callback) {
+		if(data) {
+			$.post(urlAjax, data, callback);
+		} else {
+			$.get(urlAjax, callback);
+		}
 	}
 
 	var	gameController,
@@ -5981,16 +6050,10 @@ define('l2p',['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, ap
 			$toggleGame	= $controller.find('td[data-action="toggle-game"]');
 		}
 		if(type === 'play') {
-			//$toggleGame.find('.ContentBoxGameControl-playpause').text(L2P_global.lang.global_play);
-			//$toggleGame.find('img').attr('src', '/img/icons/play-white.svg');
 			$toggleGame.removeClass('can_pause');
 		} else if(type === 'restart') {
-			//$toggleGame.find('.ContentBoxGameControl-playpause').text(L2P_global.lang.global_play_again);
-			//$toggleGame.find('img').attr('src', '/img/icons/play-white.svg');
 			$toggleGame.removeClass('can_pause');
 		} else if(type === 'pause') {
-			//$toggleGame.find('.ContentBoxGameControl-playpause').text(L2P_global.lang.global_pause);
-			//$toggleGame.find('img').attr('src', '/img/icons/pause-white.svg');
 			$toggleGame.addClass('can_pause');
 		}
 	}
@@ -6000,120 +6063,114 @@ define('l2p',['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, ap
 		gameController:	undefined,
 		dialog:	{
 			action:	function (url, title, html, color, submitText, normalPost, callback) {
-				api.get.lang(function (lang) {
-					require(['fM', 'text!templates/modal.html'], function (fM, modalText) {
-						L2P.$modal	= $(modalText).addClass('modal-action');
-						L2P.$modal.find('.modal-header').css('background-color', color).find(' h2').text(title);
-						L2P.$modal.find('.modal-body').html(html);
-						if(submitText === '') {
-							L2P.$modal.find('.modal-footer button.btn-primary').remove();
-						} else {
-							L2P.$modal.find('.modal-footer button.btn-primary').html(submitText);
-						}
-						L2P.$modal.find('button.btn[data-dismiss]').text(lang.global_button_close);
+				require(['fM', 'text!templates/modal.html'], function (fM, modalText) {
+					L2P.$modal	= $(modalText).addClass('modal-action');
+					L2P.$modal.find('.modal-header').css('background-color', color).find(' h2').text(title);
+					L2P.$modal.find('.modal-body').html(html);
+					if(submitText === '') {
+						L2P.$modal.find('.modal-footer button.btn-primary').remove();
+					} else {
+						L2P.$modal.find('.modal-footer button.btn-primary').html(submitText);
+					}
+					L2P.$modal.find('button.btn[data-dismiss]').text(L2P_global.lang.global_button_close);
 
-						if(normalPost) {
+					if(normalPost) {
 
-							var	action	= url || document.location.pathname;
-							if(location.search.substring(1) !== '')
-							{
-								action += "?" + getQuerlocation.search.substring(1);
-							}
-
-							L2P.$modal.attr('action', action).attr('method', 'post');
+						var	action	= url || document.location.pathname;
+						if(location.search.substring(1) !== '')
+						{
+							action += "?" + location.search.substring(1);
 						}
 
-						function onSubmit(a, b, c) {
-							if(callback) {
-								var	response	= callback.call(this, a, b, c);
-								if(response !== false && typeof(response) !== 'function') {
-									//L2P.$modal.modal('hide');
-								} else if(typeof(response) === 'function') {
-									response(function (shouldHide) {
-										if(shouldHide) {
-											//L2P.$modal.modal('hide');
-										}
-									});
-								}
-							}
-							return normalPost ? true : false;
-						}
+						L2P.$modal.attr('action', action).attr('method', 'post');
+					}
 
-						L2P.$modal.modal('show');
-						L2P.$modal.on('submit', onSubmit);
+					function onSubmit(e) {
+						e.preventDefault();
 
-						var	pathname	= location.pathname;
-						L2P.$modal.on('hide', function () {
-							if(location.pathname === pathname) {
-								fM.link.navigate('/');
-							}
+						var	data	= fM.form.getElements.call(this);
+
+						L2P.$modal.off('hide');
+						fM.link.navigate(L2P.$modal.attr('action'), 'Magic Tune', {
+							title:	'Magic Tune',
+							data:	data
 						});
+					}
 
-						fM.form.autofocus(L2P.$modal);
+					L2P.$modal.modal('show');
+					L2P.$modal.on('submit', onSubmit);
 
-						fM.link.navigated(url, title, {
-							is_dialog:	true
-						});
-						var	parent	= fM.link.getParent();
-						if(parent && parent.is_dialog) {
-							L2P.$modal
-								.find('.modal-header-back-icon')
-									.addClass('modal-header-back-icon--clickable')
-									.on('click', function () {
-										window.history.back();
-									});
+					var	pathname	= location.pathname;
+					L2P.$modal.on('hide', function () {
+						if(location.pathname === pathname) {
+							fM.link.navigate('/');
 						}
 					});
-				}, ['global_button_close']);
+
+					fM.form.autofocus(L2P.$modal);
+
+					fM.link.navigated(url, title, {
+						is_dialog:	true
+					});
+					var	parent	= fM.link.getParent();
+					if(parent && parent.is_dialog) {
+						L2P.$modal
+							.find('.modal-header-back-icon')
+								.addClass('modal-header-back-icon--clickable')
+								.on('click', function () {
+									window.history.back();
+								});
+					}
+
+					L2P.form.inputValidation.error();
+				});
 			},
 			info: function (url, title, html, color, buttons, script) {
-				api.get.lang(function (lang) {
-					var	requireScripts	= ['fM', 'text!templates/info.html'];
-					if(script) {
-						requireScripts.push('dialog/info/'+script);
+				var	requireScripts	= ['fM', 'text!templates/info.html'];
+				if(script) {
+					requireScripts.push('dialog/info/'+script);
+				}
+				require(requireScripts, function (fM, modalText, infoScript) {
+					if(L2P.$modal) {
+						//L2P.$modal.off('hide').modal('hide');
 					}
-					require(requireScripts, function (fM, modalText, infoScript) {
-						if(L2P.$modal) {
-							//L2P.$modal.off('hide').modal('hide');
-						}
-						L2P.$modal	= $(modalText).addClass('modal-info');
-						L2P.$modal.find('.modal-header').css('background-color', color).find(' h2').text(title);
-						L2P.$modal.find('.modal-body').html(html);
-						var	$modalFooter	= L2P.$modal.find('.modal-footer');
-						if(buttons) {
-							buttons.forEach(function (button) {
-								$modalFooter.prepend('<button class="btn">'+button+'</button>');
-							});
-						}
-						L2P.$modal.find('button.btn[data-dismiss]').text(lang.global_button_close);
-
-						var	pathname	= location.pathname;
-						L2P.$modal.on('hide', function () {
-							if(location.pathname === pathname) {
-								fM.link.navigate('/');
-							}
+					L2P.$modal	= $(modalText).addClass('modal-info');
+					L2P.$modal.find('.modal-header').css('background-color', color).find(' h2').text(title);
+					L2P.$modal.find('.modal-body').html(html);
+					var	$modalFooter	= L2P.$modal.find('.modal-footer');
+					if(buttons) {
+						buttons.forEach(function (button) {
+							$modalFooter.prepend('<button class="btn">'+button+'</button>');
 						});
+					}
+					L2P.$modal.find('button.btn[data-dismiss]').text(L2P_global.lang.global_button_close);
 
-						fM.link.navigated(url, title, {
-							is_dialog:	true
-						});
-						var	parent	= fM.link.getParent();
-						if(parent && parent.is_dialog) {
-							L2P.$modal
-								.find('.modal-header-back-icon')
-									.addClass('modal-header-back-icon--clickable')
-									.on('click', function () {
-										window.history.back();
-									});
-						}
-
-						L2P.$modal.modal('show');
-
-						if(infoScript) {
-							infoScript(L2P.$modal);
+					var	pathname	= location.pathname;
+					L2P.$modal.on('hide', function () {
+						if(location.pathname === pathname) {
+							fM.link.navigate('/');
 						}
 					});
-				}, ['global_button_close']);
+
+					fM.link.navigated(url, title, {
+						is_dialog:	true
+					});
+					var	parent	= fM.link.getParent();
+					if(parent && parent.is_dialog) {
+						L2P.$modal
+							.find('.modal-header-back-icon')
+								.addClass('modal-header-back-icon--clickable')
+								.on('click', function () {
+									window.history.back();
+								});
+					}
+
+					L2P.$modal.modal('show');
+
+					if(infoScript) {
+						infoScript(L2P.$modal);
+					}
+				});
 			},
 			game: function (url, title, data, type, octave, callback) {
 				var	$body_container	= $('body'),
@@ -6221,7 +6278,7 @@ define('l2p',['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, ap
 					}
 
 					if(generate) {
-						tuner	= new SoundInput(function (e) {
+						var	tuner	= new SoundInput(function (e) {
 							DEBUG && console.log(e);
 						}, $.proxy(L2P.gameController.soundInput, L2P.gameController), $.proxy(L2P.gameController.expectedTone, L2P.gameController));
 						$(tuner).on('tick', $.proxy(L2P.gameController.soundInput, L2P.gameController));
@@ -6258,7 +6315,8 @@ define('l2p',['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, ap
 
 							$(this).popover({
 								trigger:	'focus',
-								placement:	placement
+								placement:	placement,
+								template:	'<div class="popover validation-error"><div class="arrow"></div><div class="popover-content"><p></p></div></div>'
 							}).popover('show');
 						} else { // We most sure have a dialog
 							if(inputName === undefined) { // Only do this once
@@ -6292,28 +6350,53 @@ define('l2p',['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, ap
 					});
 				});
 			},
-			url:	function (url) {
+			url:	function (url, data) {
+				DEBUG && console.log(url);
 				var	that	= this,
 					urlAjax	= '/dialog'+url;
 
-				getAjax(urlAjax, function (data) {
-					switch(data.dialogType) {
-						case 'action':
-							L2P.dialog.action(url, data.title, data.body, data.color, data.submitText, true);
-							break;
-						case 'info':
-							L2P.dialog.info(url, data.title, data.body, data.color, data.buttons, data.script);
-							break;
-						case 'game':
-							if(that && that.nodeName === 'IMG') {
-								L2P.get.playlist(null, function () {
-									playlist.addGame(url, data.title, data.data, data.type);
-								});
-							} else {
-								L2P.dialog.game(url, data.title, data.data, data.type, data.octave);
-							}
-							break;
-					}
+				require(['fM'], function (fM) {
+					var	current	= fM.link.getCurrentNavigate();
+					data	= data || current && current.data;
+
+					DEBUG && console.log('nav', urlAjax, data, current);
+
+					getAjax(urlAjax, data, function (data) {
+						switch(data.dialogType) {
+							case 'action':
+								L2P.dialog.action(url, data.title, data.body, data.color, data.submitText, true);
+								break;
+							case 'info':
+								L2P.dialog.info(url, data.title, data.body, data.color, data.buttons, data.script);
+								break;
+							case 'game':
+								if(that && that.nodeName === 'IMG') {
+									L2P.get.playlist(null, function () {
+										playlist.addGame(url, data.title, data.data, data.type);
+									});
+								} else {
+									L2P.dialog.game(url, data.title, data.data, data.type, data.octave);
+								}
+								break;
+							case 'redirect':
+								if(L2P_global.language_code !== data.user.language_code) {
+									location.href	= data.url;
+									return;
+								} else {
+									var	concert_pitch	= L2P_global.concert_pitch !== data.user.concert_pitch;
+
+									$.each(data.user, function (key, value) {
+										L2P_global[key]	= value;
+									});
+
+									if(concert_pitch) {
+										options.generateTones();
+									}
+								}
+								fM.link.navigate(data.url, 'Magic Tune');
+								break;
+						}
+					});
 				});
 			}
 		},
@@ -6771,8 +6854,8 @@ define('l2p',['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, ap
 							playlist.addGame(url, title);
 						});
 					} else {
-						fM.link.navigate(url, 'Play.now', {
-							title:	'Play.now'
+						fM.link.navigate(url, 'Magic Tune', {
+							title:	'Magic Tune'
 						});
 					}
 				});
@@ -6857,23 +6940,28 @@ define('l2p',['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, ap
 			}
 		],
 		countdown_test:	 function () {
-			var	start	= new Date(),
-				to		= new Date('2013-07-05 22:00:00 GMT'),
-				d		= new Date(),
-				secLeft	= Math.ceil((to.getTime() - d.getTime()) / 1000),
+			var	serverDiff	= new Date(L2P_global.server_time) - new Date(performance.timing.responseStart),
+				start		= new Date(),
+				localDiff	= start.getTime() - performance.timing.responseStart,
+				totalDiff	= serverDiff + localDiff,
+
+				to			= new Date(+(new Date('2013-07-05 22:00:00 GMT')) - serverDiff),
+
+				left		= (to.getTime() - start.getTime()) / 1000,
+				secLeft		= Math.ceil(left),
 				realDelay,
-				items	= [],
-				itemsB	= [],
+				items		= [],
+				itemsB		= [],
 				item;
 
-			secLeft	= Math.min(secLeft, 8);
-
-			if(Date.now() > to) {
+			//secLeft	= Math.min(secLeft, 8);
+			DEBUG && console.log(serverDiff);
+			if(secLeft <= 0) {
 				DEBUG && console.log('skip countdown');
 				return;
 			}
 
-			start.setMilliseconds(0);
+			start.setMilliseconds(1000 - (serverDiff % 1000));
 
 			for(var i = secLeft; i > 0; i -= 1) {
 				items.push({
@@ -6909,11 +6997,14 @@ define('l2p',['jquery', 'api', 'game/options', 'bootstrap.min'], function ($, ap
 
 			var	run	= function () {
 				realDelay	= (Date.now() - start) % 1000;
+				if(realDelay < 0) {
+					realDelay	+= 1000;
+				}
+				DEBUG && console.log('delay', realDelay);
 
 				if(items.length > 0) {
-
-					if(realDelay > 100) {
-						delay	= Math.floor(realDelay / 100) / 10;
+					if(realDelay > 10) {
+						delay	= Math.floor(realDelay / 10) / 100;
 						items[0].sec	= (items[0].sec || 1) - delay;
 					} else {
 						items[0].sec	= items[0].sec || 1;
@@ -7000,7 +7091,7 @@ define('fragments/game',['jquery', 'api', 'game/game-controller', 'game/sound', 
 		$('#startGame').on('click', $.proxy(gameController.startGame, gameController));
 		$('#stopGame').on('click', $.proxy(gameController.stopGame, gameController));
 		$('#exportGame').on('click', function () {
-			console.log(JSON.stringify(gameController.exportGame()));
+			DEBUG && console.log(JSON.stringify(gameController.exportGame()));
 		});
 		$('#speed').on('change', function () {
 			gameController.setGameSpeed(+this.value);
@@ -7032,8 +7123,7 @@ if(typeof DEBUG === 'undefined') {
 	var	DEBUG	= true;
 }
 if(DEBUG) {
-	var	svgController,
-		l2p,
+	var	l2p,
 		fm;
 }
 require.config({
@@ -7051,7 +7141,8 @@ require.config({
 	}
 });
 require(['jquery', 'browserdetect'], function ($, AC) {
-	var	$intro;
+	var	$intro,
+		wait	= 0;
 	if(!AC.Detector.isChrome() || (AC.Detector.isWin() && !AC.Detector.winAtLeastVersion(6))) {
 		require(['bootstrap.min'], function () {
 			if(location.host !== 'l2p.fmads.dk') {
@@ -7075,17 +7166,36 @@ require(['jquery', 'browserdetect'], function ($, AC) {
 	$intro	= $('#intro');
 
 	if($intro.length > 0) {
-		$intro.addClass('ready');
-		setTimeout(function () {
-			$intro.remove();
-		}, 2000);
+		var	serverDiff	= new Date(L2P_global.server_time) - new Date(performance.timing.responseStart);
+
+		wait	= (new Date('2013-07-05 18:00:00 GMT')).getTime() - Date.now() - 1000 - serverDiff;
+
+		if(wait > 0) {
+			$intro.addClass('show');
+
+			setTimeout(function () {
+				$intro.addClass('ready');
+
+				l2p.countdown_test();
+				setTimeout(function () {
+					$intro.remove();
+				}, 2000);
+			}, wait);
+		} else {
+			$intro.addClass('ready');
+
+			setTimeout(function () {
+				$intro.remove();
+			}, 2000);
+		}
 	}
 
 	require(['fM', 'l2p'], function (fM, L2P) {
-		//L2P.countdown_test();
-
-		l2p	= L2P;
-		fm	= fM;
+		if(wait < 0) {
+			L2P.countdown_test();
+		}
+		DEBUG && (l2p	= L2P);
+		DEBUG && (fm	= fM);
 		switch(fM.link.fileName()) {
 			case 'game.php':
 				require(['fragments/game']);
@@ -7102,8 +7212,8 @@ require(['jquery', 'browserdetect'], function ($, AC) {
 					navigateTo	= $this.attr('data-internal-navigation'),
 					url			= $this.attr('href');
 
-				fM.link.navigate(url, 'Play.now', {
-					title:	'Play.now'
+				fM.link.navigate(url, 'Magic Tune', {
+					title:	'Magic Tune'
 				});
 
 				return false;
@@ -7122,59 +7232,34 @@ require(['jquery', 'browserdetect'], function ($, AC) {
 					document.title	= $CenteringContainer.attr('data-default-title');
 				}
 			}
-			var	hasFirstPopstate	= true; //false;
-			$(window).on('popstate', function (e, a, b, c) {
+			$(window).on('popstate', function (e) {
+				if(e.originalEvent && !e.originalEvent.state) {
+					return;
+				}
+				e.preventDefault();
+				e.stopPropagation();
+
 				if(L2P.$modal && L2P.$modal.is(':visible')) {
 					L2P.$modal.modal('hide');
 				}
-				if(hasFirstPopstate) {
-					popstateTitle(e);
+				$('.popover.validation-error:visible').remove();
+
+				popstateTitle(e);
+
+				if(_gaq) {
+					_gaq.push(['_trackPageview', document.location.pathname]);
 				}
+
 				switch(document.location.pathname) {
 					case '/':
-						L2P.navigate.home(e, false);
+						L2P.navigate.home(e);
 						break;
 					default:
-						if(hasFirstPopstate) {
-							L2P.navigate.url(location.pathname, false);
-						}
-						break;
-				}
-				hasFirstPopstate	= true;
-			});
-			$(window).trigger('popstate');
-
-			$('#DialogContainer').each(function () {
-				var	$this		= $(this),
-					dialogType	= $this.attr('data-dialog');
-
-				switch(dialogType) {
-					case 'action':
-						var	title		= $this.attr('data-dialog-title'),
-							submitText	= $this.attr('data-dialog-submit-text'),
-							color		= $this.attr('data-dialog-color'),
-							html		= $this.html();
-
-						L2P.dialog[dialogType](false, title, html, color, submitText, true);
-						break;
-					case 'info':
-						var	title	= $this.attr('data-dialog-title'),
-							buttons	= JSON.parse($this.attr('data-dialog-buttons')),
-							color	= $this.attr('data-dialog-color'),
-							script	= $this.attr('data-dialog-script'),
-							html	= $this.html();
-
-						L2P.dialog[dialogType](false, title, html, color, buttons, script);
-						break;
-					case 'game':
-						var	gameData	= JSON.parse($this.attr('data-game-data')),
-							title		= $this.attr('data-game-title'),
-							type		= $this.attr('data-game-type');
-
-						L2P.dialog[dialogType](false, title, gameData, type);
+						L2P.navigate.url(location.pathname);
 						break;
 				}
 			});
+			$(window).trigger('popstate', ['main.js']);
 
 			L2P.form.inputValidation.error();
 			$('form:first').each(function () {
