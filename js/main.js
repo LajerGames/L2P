@@ -45,7 +45,9 @@ require(['jquery', 'browserdetect'], function ($, AC) {
 	$intro	= $('#intro');
 
 	if($intro.length > 0) {
-		wait	= (new Date('2013-07-03 15:47:45 GMT')).getTime() - Date.now() - 1000;
+		var	serverDiff	= new Date(L2P_global.server_time) - new Date(performance.timing.responseStart);
+
+		wait	= (new Date('2013-07-05 18:00:00 GMT')).getTime() - Date.now() - 1000 - serverDiff;
 
 		if(wait > 0) {
 			$intro.addClass('show');

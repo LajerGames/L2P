@@ -957,7 +957,7 @@ define(['jquery', 'api', 'game/options', 'bootstrap'], function ($, api, options
 				localDiff	= start.getTime() - performance.timing.responseStart,
 				totalDiff	= serverDiff + localDiff,
 
-				to			= new Date(+(new Date('2013-07-04 22:10:00 GMT')) - serverDiff),
+				to			= new Date(+(new Date('2013-07-05 22:00:00 GMT')) - serverDiff),
 
 				left		= (to.getTime() - start.getTime()) / 1000,
 				secLeft		= Math.ceil(left),
@@ -1009,6 +1009,10 @@ define(['jquery', 'api', 'game/options', 'bootstrap'], function ($, api, options
 
 			var	run	= function () {
 				realDelay	= (Date.now() - start) % 1000;
+				if(realDelay < 0) {
+					realDelay	+= 1000;
+				}
+				DEBUG && console.log('delay', realDelay);
 
 				if(items.length > 0) {
 					if(realDelay > 10) {
