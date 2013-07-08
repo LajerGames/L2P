@@ -19,7 +19,7 @@ define(['jquery', 'api', 'game/game-controller', 'game/sound', 'sound-input'], f
 		$('#startGame').on('click', $.proxy(gameController.startGame, gameController));
 		$('#stopGame').on('click', $.proxy(gameController.stopGame, gameController));
 		$('#exportGame').on('click', function () {
-			DEBUG && console.log(JSON.stringify(gameController.exportGame()));
+			// console.log(JSON.stringify(gameController.exportGame()));
 		});
 		$('#speed').on('change', function () {
 			gameController.setGameSpeed(+this.value);

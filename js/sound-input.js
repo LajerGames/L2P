@@ -107,7 +107,7 @@ define(['jquery', 'dsp', 'game/tones', 'l2p'], function ($, dsp, tones, L2P) {
 			tuner.tickDone(-1);
 		};
 		error = function(e) {
-			DEBUG && console.log(e);
+			// console.log(e);
 
 			if(countdown) {
 				countdown.kill();
