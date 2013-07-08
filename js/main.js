@@ -7,8 +7,9 @@ if(DEBUG) {
 }
 require.config({
 	paths:	{
-		'jquery':	'jquery-2.0.2.min',
-		'tour':		'bootstrap-tour'
+		'jquery':	'jquery-2.0.3.min',
+		'tour':		'bootstrap-tour',
+		'json':		'requirejs/json'
 	},
 	shim:	{
 		highcharts:	{
@@ -115,7 +116,7 @@ require(['jquery', 'browserdetect'], function ($, AC) {
 				if(e.originalEvent && !e.originalEvent.state) {
 					return;
 				}
-				console.log('pop', location.href, e, from);
+				//console.log('pop', location.href, e, from);
 				e.preventDefault();
 				e.stopPropagation();
 

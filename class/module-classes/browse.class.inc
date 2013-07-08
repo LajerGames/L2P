@@ -28,10 +28,9 @@ class browse
 				$oMusicOctave->octave	= $iOctave;
 
 				$strMusic	.= $oTemplate->RenderContent('
-					<div class="clear--left"></div>
-					{{availability}}
-					<a href="/game/{{permlink}}/{{octave}}" data-dialog="game" title="{{info}}"  class="OpenGame" data-title="{{title}}">
-						<span class="octave">('.$oLang->Get('global_octave').' {{octave}})</span> {{title}}
+					<a class="browse-item" href="/game/{{permlink}}/{{octave}}" data-dialog="game" title="{{info}}" data-title="{{title}}">
+						<span class="browse-item-octave">('.$oLang->Get('global_octave').' {{octave}})</span> <span class="browse-item-title">{{title}}</span>
+						<img src="'.HTTP_PROJECT_ROOT_IMG.'icons/plus_black.svg" class="browse-item-add" data-action="add-to-playlist" alt="'.$oLang->Get('frontpage_add_to_playlist').'" title="'.$oLang->Get('frontpage_add_to_playlist').'" />
 					</a>
 				', $oMusicOctave);
 			}

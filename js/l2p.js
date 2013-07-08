@@ -102,9 +102,11 @@ define(['jquery', 'api', 'game/options', 'bootstrap'], function ($, api, options
 					L2P.$modal.on('submit', onSubmit);
 
 					var	pathname	= location.pathname;
-					L2P.$modal.on('hide', function () {
-						if(location.pathname === pathname) {
-							fM.link.navigate('/');
+					L2P.$modal.on('hide', function (e) {
+						if(!$(e.target).hasClass('tour-step-backdrop')) {
+							if(location.pathname === pathname) {
+								fM.link.navigate('/');
+							}
 						}
 					});
 
@@ -173,6 +175,9 @@ define(['jquery', 'api', 'game/options', 'bootstrap'], function ($, api, options
 
 					if(infoScript) {
 						infoScript(L2P.$modal);
+					}
+					if(tour && tour.tour) {
+						tour.tour.next();
 					}
 				});
 			},
@@ -356,6 +361,8 @@ define(['jquery', 'api', 'game/options', 'bootstrap'], function ($, api, options
 
 				if(tour && !tour.callback('/')) {
 					tour.kill();
+				} else if(tour && tour.tour) {
+					tour.tour.next();
 				}
 			},
 			guided_tour:	function (e) {
@@ -365,10 +372,6 @@ define(['jquery', 'api', 'game/options', 'bootstrap'], function ($, api, options
 				var	that	= this,
 					urlAjax	= '/dialog'+url;
 
-				if(tour && !tour.callback(url)) {
-					tour.kill();
-				}
-
 				require(['fM'], function (fM) {
 					var	current	= fM.link.getCurrentNavigate();
 					data	= data || current && current.data;
@@ -376,12 +379,24 @@ define(['jquery', 'api', 'game/options', 'bootstrap'], function ($, api, options
 					getAjax(urlAjax, data, function (data) {
 						switch(data.dialogType) {
 							case 'action':
+								if(tour && !tour.callback(url)) {
+									tour.kill();
+								}
+
 								L2P.dialog.action(url, data.title, data.body, data.color, data.submitText, true);
 								break;
 							case 'info':
+								if(tour && !tour.callback(url)) {
+									tour.kill();
+								}
+
 								L2P.dialog.info(url, data.title, data.body, data.color, data.buttons, data.script);
 								break;
 							case 'game':
+								if(tour && !tour.callback(url)) {
+									tour.kill();
+								}
+
 								if(that && that.nodeName === 'IMG') {
 									L2P.get.playlist(null, function () {
 										playlist.addGame(url, data.title, data.data, data.type);
@@ -854,26 +869,29 @@ define(['jquery', 'api', 'game/options', 'bootstrap'], function ($, api, options
 		click:	{
 			on:		function (e) {
 				e.preventDefault();
-				var	that		= this,
-					$this		= that.nodeName === 'IMG' ? $(this).next() : $(this),
-					urlRaw		= $this.attr('href'),
-					url			= urlRaw+(urlRaw.indexOf('?') === -1 ? (urlRaw.substr(urlRaw.length - 1, 1) === '/' ? '' : '/') : ''),
-					title		= $this.attr('data-title');
+				e.stopPropagation();
+				var	$elem	= $(this),
+					$item	= $elem.is('a') ? $elem : $elem.parents('a').first(),
+					data	= $item.data(),
+					is_add	= $elem.is('[data-action="add-to-playlist"]'),
+					urlRaw	= $item.attr('href'),
+					url		= urlRaw+(urlRaw.indexOf('?') === -1 ? (urlRaw.substr(urlRaw.length - 1, 1) === '/' ? '' : '/') : ''),
+					title	= data.title;
 
-				require(['fM'], function (fM) {
-					if(that && that.nodeName === 'IMG') {
-						L2P.get.playlist(null, function () {
-							playlist.addGame(url, title);
-						});
-					} else {
+				if(is_add) {
+					L2P.get.playlist(null, function () {
+						playlist.addGame(url, title);
+					});
+				} else {
+					require(['fM'], function (fM) {
 						fM.link.navigate(url, 'Magic Tune', {
 							title:	'Magic Tune'
 						});
-					}
-				});
+					});
+				}
 			},
 			set:	function ($container) {
-				$container.on('click', 'a[data-dialog], img.addToPlaylist', L2P.click.on);
+				$container.on('click', 'a[data-dialog], [data-action="add-to-playlist"]', L2P.click.on);
 			}
 		},
 		get:	{
@@ -1039,7 +1057,8 @@ define(['jquery', 'api', 'game/options', 'bootstrap'], function ($, api, options
 			run();
 		},
 		guided_tour:	function () {
-			require(['tour'], function (Tour) {
+			require(['fM', 'tour', 'json!lang/guided_tour.php'], function (fM, Tour, lang) {
+				console.log(lang);
 				if(tour && tour.tour) {
 					tour.tour.start();
 					return;
@@ -1062,9 +1081,9 @@ define(['jquery', 'api', 'game/options', 'bootstrap'], function ($, api, options
 						container:			'body',
 						debug:				true,
 						labels:		{
-							next:	'<button class="btn">Got it</button>',
+							next:	'<button class="btn">'+lang.tour_button_got_it+'</button>',
 							prev:	'',
-							end:	''
+							end:	'<button class="btn">'+lang.tour_button_end_tour+'</button>',
 						},
 						keyboard:	true,
 						template:	function (i, step) {
@@ -1077,18 +1096,28 @@ define(['jquery', 'api', 'game/options', 'bootstrap'], function ($, api, options
 						onShow:		function (tour) {
 							controller.callback	= empty;
 						},
-						onNext:		function (tour, a, b, c) {
-							console.log(this, tour, a, b, c);
+						onEnd:		function (tour) {
+							if(empty(location.pathname)) {
+								fM.link.navigate('/');
+							}
 						}
 					});
 
 					controller.tour.addStep({
-						element:	'a[href="/user/settings/"]',
-						title:		'test',
-						content:	'Welcome to the Magic Tune guided tour, where we will show you some of the games functionallity and how to play.<br><br>Please click on "Settings"',
+						element:	'#guide',
+						title:		lang.tour_0_0_title,
+						content:	lang.tour_0_0,
 						placement:	'left',
-						labelsOff:	true,
+						backdrop:	true
+					});
+
+					controller.tour.addStep({
+						element:	'a[href="/user/settings/"]',
+						title:		lang.tour_1_0_title,
+						content:	lang.tour_1_0,
+						placement:	'left',
 						backdrop:	true,
+						labelsOff:	true,
 						onShow:		function (tour) {
 							controller.callback	= function (url) {
 								if(url === '/user/settings/') {
@@ -1101,22 +1130,74 @@ define(['jquery', 'api', 'game/options', 'bootstrap'], function ($, api, options
 						}
 					});
 
+					(function (tour) {
+						[null, 'concert_pitch', 'color_nodes', 'language', 'kiddie_mode', 'countdown_time', 'metronome'].forEach(function (name, i) {
+							tour.addStep({
+								element:	'.modal-action.in table.FormTable [name="'+name+'"]',
+								title:		lang['tour_1_'+i+'_title'],
+								content:	lang['tour_1_'+i],
+								placement:	'right',
+								container:	'.modal-action.in',
+								backdrop:	true
+							});
+						});
+					}(controller.tour));
+
 					controller.tour.addStep({
-						element:	'.modal-action.in table.FormTable [name="concert_pitch"]',
-						title:		'test',
-						content:	'Concert pitch: Here you can set your concert pitch, it\'s most common to use 440 or 442',
-						placement:	'right',
+						element:	'.modal-action.in .modal-footer .btn.btn-primary',
+						title:		lang.tour_1_7_title,
+						content:	lang.tour_1_7,
+						placement:	'left',
 						container:	'.modal-action.in',
-						backdrop:	true
+						backdrop:	true,
+						labelsOff:	true,
+						onShow:		function (tour) {
+							controller.callback	= function (url) {
+								console.log('callback test', url, url === '/');
+								if(url === '/') {
+									return true;
+								}
+								return false;
+							}
+						}
 					});
 
 					controller.tour.addStep({
-						element:	'.modal-action.in table.FormTable [name="color_nodes"]',
-						title:		'test',
-						content:	'Colored notes: By checking this box, we will make the notes different colors when you play. Notes which belong to the G string will be yellow, notes on the A string will be red and so forth',
+						element:	'a[href="/browse/scales/"]',
+						title:		lang.tour_2_0_title,
+						content:	lang.tour_2_0,
+						placement:	'left',
+						backdrop:	true,
+						labelsOff:	true,
+						onShow:		function (tour) {
+							controller.callback	= function (url) {
+								if(url === '/browse/scales/') {
+									tour.hideStep(tour._current);
+
+									return true;
+								}
+								return false;
+							}
+						}
+					});
+
+					controller.tour.addStep({
+						element:	'.modal-info.in #list a[href="/game/a-major/4"]',
+						title:		lang['tour_2_1_title'],
+						content:	lang['tour_2_1'],
 						placement:	'right',
-						container:	'.modal-action.in',
-						backdrop:	true
+						container:	'.modal-info.in',
+						backdrop:	true,
+						onShow:		function (tour) {
+							controller.callback	= empty;
+
+							console.log('test white');
+							$('.modal-info.in #list a[href="/game/a-major/4"] img').attr('src', '/img/icons/plus_white.svg');
+						},
+						onHide:		function (tour) {
+							console.log('test black');
+							$('.modal-info.in #list a[href="/game/a-major/4"] img').attr('src', '/img/icons/plus_black.svg');
+						}
 					});
 
 					controller.tour.setCurrentStep(0);

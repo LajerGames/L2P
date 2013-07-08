@@ -463,11 +463,16 @@ div.countdown.microphone-permission .next {
     right: 3px;
     bottom: 3px;
 }
+.popover.tour .end {
+    position: absolute;
+    left: 3px;
+    bottom: 3px;
+}
 .popover.tour .popover-content p {}
 .popover.tour .popover-content p {
     height: 25px;
     color: #FFF;
 }
-.popover.tour.popover--no-labels .popover-content p {
+.popover.tour.popover--no-labels .popover-content .next {
     display: none;
 }

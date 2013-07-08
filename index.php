@@ -27,7 +27,6 @@ if(is_object($oLoadInfo->oPathUser))
     // Hack #2
     $oPathUser = $oLoadInfo->oPathUser;
 }
-
 // Postbag
 switch($_REQUEST['mode']) // Yep it makes sence to use request here!
 {
