@@ -41,7 +41,7 @@ define(['jquery', 'fM', 'l2p', 'api', 'highcharts'], function ($, fM, L2P, api, 
             }, fM.form.getElements.call($formSearch[0]));
         });
 
-        DEBUG && console.log(data);
+        // console.log(data);
         data.forEach(function (graphData, i) {
 			if(graphData.type === 'GamePrecision') {
 				precision	= new Highcharts.Chart({

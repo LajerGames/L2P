@@ -9,7 +9,8 @@ require.config({
 	paths:	{
 		'jquery':	'jquery-2.0.3.min',
 		'tour':		'bootstrap-tour',
-		'json':		'requirejs/json'
+		'json':		'requirejs/json',
+		'facebook':	'//connect.facebook.net/en_US/all'
 	},
 	shim:	{
 		highcharts:	{
@@ -17,6 +18,9 @@ require.config({
 		},
 		tour:		{
 			exports:	'Tour'
+		},
+		facebook:	{
+			exports:	'FB'
 		}
 	}
 });

@@ -145,12 +145,12 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		this.pointCon	= $('#pointContainer');
 		this.currentNote	= undefined;
 
-		DEBUG && console.log(this.game);
+		// console.log(this.game);
 		this.game.reset();
 
 		this.SVGNotes.animateAbs(0, -501, 0);
 
-		DEBUG && console.log('reset-pos', this.SVGNotes.node.style.webkitTransition, this.SVGNotes.node.style.webkitTransform);
+		// console.log('reset-pos', this.SVGNotes.node.style.webkitTransition, this.SVGNotes.node.style.webkitTransform);
 		this.initView();
 
 		this.$this.trigger('gameLoadSpeedChange', this.game.speed);
@@ -854,7 +854,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 			data[2].push(JSON.stringify(tactData));
 		});
 
-		DEBUG && console.log(data);
+		// console.log(data);
 
 		return JSON.stringify(data);
 	};

@@ -101,11 +101,11 @@ define(['jquery', 'l2p', 'api', 'fM'], function ($, L2P, api, fM) {
 		if(!this.gameController) {
 			linkObject.onstart	= 'gameStart-'+Date.now();
 			$(L2P).on(linkObject.onstart, function (e, gameController) {
-				DEBUG && console.log(that, 'got new gameController');
+				// console.log(that, 'got new gameController');
 				that.gameController	= gameController;
 
 				$(that.gameController).on('gameEnd', function (e, gameInfo) {
-					DEBUG && console.log('gameEnd', gameInfo.points, gameInfo);
+					// console.log('gameEnd', gameInfo.points, gameInfo);
 					that.game_history_ids.push(gameInfo.game_history_id);
 					that.nextGame();
 				});
@@ -116,7 +116,7 @@ define(['jquery', 'l2p', 'api', 'fM'], function ($, L2P, api, fM) {
 	Playlist.prototype.nextGame		= function () {
 		this.playNow	+= 1;
 		var	game	= this.games[this.playNow];
-		DEBUG && console.log('nextGame', game, this.playNow, this.games);
+		// console.log('nextGame', game, this.playNow, this.games);
 		if(game) {
 			this.startGame(game);
 			this.firstPlay	= false;
@@ -129,7 +129,7 @@ define(['jquery', 'l2p', 'api', 'fM'], function ($, L2P, api, fM) {
 				this.firstPlay	= false;
 				this.restart();
 			} else {
-				DEBUG && console.log('playlist done', this.game_history_ids, this);
+				// console.log('playlist done', this.game_history_ids, this);
 				api.get.statistic_uuid(function (data) {
 					fM.link.navigate('/user/'+L2P_global.username+'/statistics/'+data.uuid+'/');
 				}, {
