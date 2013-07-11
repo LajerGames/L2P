@@ -50,34 +50,14 @@ require(['jquery', 'browserdetect'], function ($, AC) {
 	$intro	= $('#intro');
 
 	if($intro.length > 0) {
-		var	serverDiff	= new Date(L2P_global.server_time) - new Date(performance.timing.responseStart);
+		$intro.addClass('ready');
 
-		wait	= (new Date('2013-07-05 18:00:00 GMT')).getTime() - Date.now() - 1000 - serverDiff;
-
-		if(wait > 0) {
-			$intro.addClass('show');
-
-			setTimeout(function () {
-				$intro.addClass('ready');
-
-				l2p.countdown_test();
-				setTimeout(function () {
-					$intro.remove();
-				}, 2000);
-			}, wait);
-		} else {
-			$intro.addClass('ready');
-
-			setTimeout(function () {
-				$intro.remove();
-			}, 2000);
-		}
+		setTimeout(function () {
+			$intro.remove();
+		}, 2000);
 	}
 
 	require(['fM', 'l2p'], function (fM, L2P) {
-		if(wait < 0) {
-			L2P.countdown_test();
-		}
 		DEBUG && (l2p	= L2P);
 		DEBUG && (fm	= fM);
 		switch(fM.link.fileName()) {

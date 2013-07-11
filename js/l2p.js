@@ -1,4 +1,4 @@
-define(['jquery', 'api', 'game/options', 'bootstrap'], function ($, api, options) {
+define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, api, options) {
 	function goBack(e, doGoBack) {
 		if(doGoBack !== false) {
 			window.history.back();
@@ -12,6 +12,30 @@ define(['jquery', 'api', 'game/options', 'bootstrap'], function ($, api, options
 		}
 	}
 
+	FB.init({
+    	appId      : '178214939022167',
+    	channelUrl : '//magic-tune.com/channel.php',
+    	status:		true,
+    	cookie:		true
+  	});
+  	FB.getLoginStatus(function(response) {
+  		console.log('auto-login', response);
+    	fbUser	= response;
+  	});
+  	FB.Event.subscribe('auth.authResponseChange', function(response) {
+  		console.log('auth update', response);
+		if(response.status === 'connected') {
+			FB.api('/me', function (response) {
+				console.log('me', response);
+			});
+			return;
+			fM.link.navigate('/user/create/', 'Magic Tune', {
+				title:	'Magic Tune',
+				data:	data
+			});
+		}
+	});
+
 	var	gameController,
 		svgContainer,
 		sound,
@@ -19,7 +43,8 @@ define(['jquery', 'api', 'game/options', 'bootstrap'], function ($, api, options
 		socket,
 		$controller,
 		$toggleGame,
-		tour;
+		tour,
+		fbUser	= {};
 
 	function Render($container, loader, render, kill) {
 		this.$container	= $container;
@@ -64,8 +89,12 @@ define(['jquery', 'api', 'game/options', 'bootstrap'], function ($, api, options
 		$modal:	undefined,
 		gameController:	undefined,
 		dialog:	{
-			action:	function (url, title, html, color, submitText, normalPost, callback) {
-				require(['fM', 'text!templates/modal.html'], function (fM, modalText) {
+			action:	function (url, title, html, color, submitText, script) {
+				var	requireScripts	= ['fM', 'text!templates/modal.html'];
+				if(script) {
+					requireScripts.push('dialog/action/'+script);
+				}
+				require(requireScripts, function (fM, modalText, infoScript) {
 					L2P.$modal	= $(modalText).addClass('modal-action');
 					L2P.$modal.find('.modal-header').css('background-color', color).find(' h2').text(title);
 					L2P.$modal.find('.modal-body').html(html);
@@ -76,15 +105,15 @@ define(['jquery', 'api', 'game/options', 'bootstrap'], function ($, api, options
 					}
 					L2P.$modal.find('button.btn[data-dismiss]').text(L2P_global.lang.global_button_close);
 
-					if(normalPost) {
-						var	action	= url || document.location.pathname;
-						if(location.search.substring(1) !== '')
-						{
-							action += "?" + location.search.substring(1);
-						}
+					FB.XFBML.parse(L2P.$modal.find('.modal-body')[0]);
 
-						L2P.$modal.attr('action', action).attr('method', 'post');
+					var	action	= url || document.location.pathname;
+					if(location.search.substring(1) !== '')
+					{
+						action += "?" + location.search.substring(1);
 					}
+
+					L2P.$modal.attr('action', action).attr('method', 'post');
 
 					function onSubmit(e) {
 						e.preventDefault();
@@ -126,6 +155,10 @@ define(['jquery', 'api', 'game/options', 'bootstrap'], function ($, api, options
 					}
 
 					L2P.form.inputValidation.error();
+					if(infoScript) {
+						infoScript(L2P.$modal);
+					}
+
 					if(tour && tour.tour) {
 						tour.tour.next();
 					}
@@ -137,9 +170,6 @@ define(['jquery', 'api', 'game/options', 'bootstrap'], function ($, api, options
 					requireScripts.push('dialog/info/'+script);
 				}
 				require(requireScripts, function (fM, modalText, infoScript) {
-					if(L2P.$modal) {
-						//L2P.$modal.off('hide').modal('hide');
-					}
 					L2P.$modal	= $(modalText).addClass('modal-info');
 					L2P.$modal.find('.modal-header').css('background-color', color).find(' h2').text(title);
 					L2P.$modal.find('.modal-body').html(html);
@@ -312,6 +342,15 @@ define(['jquery', 'api', 'game/options', 'bootstrap'], function ($, api, options
 				});
 			}
 		},
+		facebook:	{
+			login:	function (callback) {
+				FB.login(function (response) {
+					fbUser	= response;
+					callback(fbUser);
+				}, {scope: 'email'});
+			},
+			api:	FB.api
+		},
 		form:	{
 			inputValidation:	{
 				error:	function (inputName) {
@@ -383,7 +422,7 @@ define(['jquery', 'api', 'game/options', 'bootstrap'], function ($, api, options
 									tour.kill();
 								}
 
-								L2P.dialog.action(url, data.title, data.body, data.color, data.submitText, true);
+								L2P.dialog.action(url, data.title, data.body, data.color, data.submitText, data.script);
 								break;
 							case 'info':
 								if(tour && !tour.callback(url)) {

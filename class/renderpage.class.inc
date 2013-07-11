@@ -200,14 +200,15 @@ class PageRenderer
 		return '<a '.RenderProperties($arrProperties).' class="IconLink">'.$strIcon.' '.$strInnerHTML.'</a>';
 	}
 
-	public function RenderDialogAction(Template $oTemplate, $strTitle, $strBody, $strColor, $strSubmitText)
+	public function RenderDialogAction(Template $oTemplate, $strTitle, $strBody, $strColor, $strSubmitText ,$strScript = '')
 	{
 		$arrDialog	= array(
 			'dialogType'	=> 'action',
 			'title'			=> $strTitle,
 			'body'			=> $strBody,
 			'color'			=> $strColor,
-			'submitText'	=> $strSubmitText
+			'submitText'	=> $strSubmitText,
+			'script'		=> $strScript
 		);
 
 		return json_encode($arrDialog);

@@ -13,9 +13,17 @@ if(!isset($oCreateUserForm))
     $oCreateUserForm->TextField('password_repeat', '', $oLang->Get('create_user_repeat_password'), new FormFieldValidation(true, PATTERN_PASSWORD, $oLang->Get('validation_password')), 'password', false, array('autocomplete' => 'off'));
 }
 
-$strBody    = $oCreateUserForm->RenderFields(false);
+$strBody    = '
+	<div class="float--left">
+		'.$oCreateUserForm->RenderFields(false).'
+	</div>
+	<div class="float--right">
+		<button name="facebook_button">Facebook</button>
+	</div>
+	<div class="clear"></div>
+';
 
-$strDialog	= $oPageRenderer->RenderDialogAction($oTemplate, $oLang->Get('create_user_headline'), $strBody, '#8D32B7', $oLang->Get('create_user_submit'));
+$strDialog	= $oPageRenderer->RenderDialogAction($oTemplate, $oLang->Get('create_user_headline'), $strBody, '#8D32B7', $oLang->Get('create_user_submit'), 'user_create');
 
 
 /*$strBody	= 'PREVIEW';

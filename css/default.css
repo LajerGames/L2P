@@ -20,6 +20,12 @@ a {
 .opacity0 {
 	opacity: 0;
 }
+.float--left {
+	float: left;
+}
+.float--right {
+	float: right;
+}
 .clear {
 	float: none;
 	clear: both;
