@@ -29,7 +29,7 @@ require(['jquery', 'browserdetect'], function ($, AC) {
 		wait	= 0;
 	if(!AC.Detector.isChrome() || (AC.Detector.isWin() && !AC.Detector.winAtLeastVersion(6))) {
 		require(['bootstrap.min'], function () {
-			if(location.host !== 'l2p.fmads.dk') {
+			if(['l2p.fmads.dk','l3p.fmads.dk','l2p.magic-tune.com','l3p.magic-tune.com'].indexOf(location.host) === -1) {
 				$([
 					'<div id="system_requirements">',
 						'<h1>System Requirements</h1>',

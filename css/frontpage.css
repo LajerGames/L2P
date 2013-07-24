@@ -1,9 +1,11 @@
 body {
 	height: 100%;
 	background-image: url(../img/layout/background-front.jpg);
-	background-size: 100% auto;
-	-o-background-size: 100% auto;
 	-webkit-background-size: 100% auto;
+	-moz-background-size: 100% auto;
+	-ms-background-size: 100% auto;
+	-o-background-size: 100% auto;
+	background-size: 100% auto;
 	background-repeat: no-repeat;
 	background-position: 0 11vh;
 	background-color: #004959;
@@ -60,11 +62,11 @@ div.ContentBoxBody {
 	height: 30vh;
 	min-width: 160px;
 	overflow: hidden;
-	transition-duration: 1s;
-	-o-transition-duration: 1s;
-	-ms-transition-duration: 1s;
-	-moz-transition-duration: 1s;
 	-webkit-transition-duration: 1s;
+	-moz-transition-duration: 1s;
+	-ms-transition-duration: 1s;
+	-o-transition-duration: 1s;
+	transition-duration: 1s;
 	width: 100%;
 	z-index: 10;
 }
@@ -80,6 +82,10 @@ a.IconLink img {
 }
 body.ShowGame div:not(.ContentBoxBlue) div.ContentBoxBody {
 	-webkit-transform: translate3d(0, -100%, 0);
+	-moz-transform: translate3d(0, -100%, 0);
+	-ms-transform: translate3d(0, -100%, 0);
+	-o-transform: translate3d(0, -100%, 0);
+	transform: translate3d(0, -100%, 0);
 	position: absolute;
 }
 body .ContentBoxBodyContainer {
@@ -87,6 +93,10 @@ body .ContentBoxBodyContainer {
     width: 100%;
     overflow: hidden;
     -webkit-transition: 1s;
+    -moz-transition: 1s;
+    -ms-transition: 1s;
+    -o-transition: 1s;
+    transition: 1s;
     height: 30vh;
 }
 body.ShowGame .ContentBox .ContentBoxBodyContainer {
@@ -97,6 +107,10 @@ body.ShowGame .ContentBox:hover div:not(.ContentBoxBlue) .ContentBoxBodyContaine
 }
 body.ShowGame div.ContentBox:hover div:not(.ContentBoxBlue) div.ContentBoxBody {
 	-webkit-transform: translate3d(0, 0, 0);
+	-moz-transform: translate3d(0, 0, 0);
+	-ms-transform: translate3d(0, 0, 0);
+	-o-transform: translate3d(0, 0, 0);
+	transform: translate3d(0, 0, 0);
 }
 div.ContentBoxBody.upper {
 	margin-top: 2px;
@@ -116,11 +130,11 @@ a.ContentBoxBody.lower {
 	line-height: 8vh;
 	min-width: 160px;
 	display: block;
-	transition-duration: 1s;
-	-o-transition-duration: 1s;
-	-ms-transition-duration: 1s;
-	-moz-transition-duration: 1s;
 	-webkit-transition-duration: 1s;
+	-moz-transition-duration: 1s;
+	-ms-transition-duration: 1s;
+	-o-transition-duration: 1s;
+	transition-duration: 1s;
 	height: 8vh;
 	overflow: hidden;
 }
@@ -149,11 +163,11 @@ div.ContentBoxHeadline h2 {
 div.ContentBox > div > div.ContentBoxHeadline {
 	height: 7.5vh;
 	overflow: hidden;
-	transition-duration: 1s;
-	-o-transition-duration: 1s;
-	-ms-transition-duration: 1s;
-	-moz-transition-duration: 1s;
 	-webkit-transition-duration: 1s;
+	-moz-transition-duration: 1s;
+	-ms-transition-duration: 1s;
+	-o-transition-duration: 1s;
+	transition-duration: 1s;
 }
 div.ContentBoxGreen div:not(.ContentBoxBodyContainer) {
 	background-color: #71C211;
@@ -210,6 +224,10 @@ div.ContentBoxGameCompass div.ContentBoxGameCompass-line {
 	background: #000;
 	width: 2px;
 	-webkit-transition: 0.2s;
+	-moz-transition: 0.2s;
+	-ms-transition: 0.2s;
+	-o-transition: 0.2s;
+	transition: 0.2s;
 }
 
 div.ContentBoxBlue input {
@@ -236,11 +254,11 @@ div.ContentBoxGameControl div {
 
 body div.ContentBoxGameControl div table td:nth-child(odd) {
     padding: 2px;
-	transition-duration: 1s;
-	-o-transition-duration: 1s;
-	-ms-transition-duration: 1s;
-	-moz-transition-duration: 1s;
 	-webkit-transition-duration: 1s;
+	-moz-transition-duration: 1s;
+	-ms-transition-duration: 1s;
+	-o-transition-duration: 1s;
+	transition-duration: 1s;
 }
 body.song div.ContentBoxGameControl div table td:nth-child(odd) {
     background-color: #71C211;
@@ -307,11 +325,11 @@ div.ContentBoxPoint,
 div.ContentBoxGameControl {
     height: 0;
     overflow: hidden;
-    transition-duration: 1s;
-    -o-transition-duration: 1s;
-    -ms-transition-duration: 1s;
-    -moz-transition-duration: 1s;
     -webkit-transition-duration: 1s;
+    -moz-transition-duration: 1s;
+    -ms-transition-duration: 1s;
+    -o-transition-duration: 1s;
+    transition-duration: 1s;
 }
 body.ShowGame div.ContentBoxGameCompass,
 body.ShowGame div.ContentBoxPoint,
@@ -322,11 +340,11 @@ body.ShowGame div.ContentBoxGameControl {
 div#game_container {
 	height: 0;
 	overflow: hidden;
-	transition-duration: 1s;
-	-o-transition-duration: 1s;
-	-ms-transition-duration: 1s;
-	-moz-transition-duration: 1s;
 	-webkit-transition-duration: 1s;
+	-moz-transition-duration: 1s;
+	-ms-transition-duration: 1s;
+	-o-transition-duration: 1s;
+	transition-duration: 1s;
 }
 body.ShowGame div#game_container {
 	height: 531px;
@@ -341,11 +359,11 @@ a.edit {
 	}
 	div.ContentBoxBody {
 		height: 0;
-		transition: 1s;
 		-webkit-transition: 1s;
 		-moz-transition: 1s;
 		-ms-transition: 1s;
 		-o-transition: 1s;
+		transition: 1s;
 		overflow: hidden;
 	}
 	div.ContentBox:hover div.ContentBoxBody {
@@ -358,14 +376,30 @@ td[data-action="toggle-game"] > div {
     top: 1vh;
     width: 100%;
     -webkit-transition: 1s;
+    -moz-transition: 1s;
+    -ms-transition: 1s;
+    -o-transition: 1s;
+    transition: 1s;
 }
 .ContentBoxGameControl-playpause-pause {
     -webkit-transform: rotateX(-90deg) translate3d(0, -28px, 0);
+    -moz-transform: rotateX(-90deg) translate3d(0, -28px, 0);
+    -ms-transform: rotateX(-90deg) translate3d(0, -28px, 0);
+    -o-transform: rotateX(-90deg) translate3d(0, -28px, 0);
+    transform: rotateX(-90deg) translate3d(0, -28px, 0);
 }
 
 td[data-action="toggle-game"].can_pause .ContentBoxGameControl-playpause-play {
     -webkit-transform: rotateX(90deg) translate3d(0, 28px, 0);
+    -moz-transform: rotateX(90deg) translate3d(0, 28px, 0);
+    -ms-transform: rotateX(90deg) translate3d(0, 28px, 0);
+    -o-transform: rotateX(90deg) translate3d(0, 28px, 0);
+    transform: rotateX(90deg) translate3d(0, 28px, 0);
 }
 td[data-action="toggle-game"].can_pause .ContentBoxGameControl-playpause-pause {
     -webkit-transform: initial;
+    -moz-transform: initial;
+    -ms-transform: initial;
+    -o-transform: initial;
+    transform: initial;
 }

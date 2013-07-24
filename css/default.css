@@ -44,7 +44,11 @@ select, textarea, input[type="text"], input[type="password"], input[type="dateti
 input[type="checkbox"], input[type="radio"] {
 	margin: 1vh 2vw 2vh 2vw;
 }
-input.std::-webkit-input-placeholder {
+input.std::-webkit-input-placeholder,
+input.std::-moz-input-placeholder,
+input.std::-ms-input-placeholder,
+input.std::-o-input-placeholder,
+input.std::input-placeholder {
 	color: #1DBAE7;
 }
 div.inputContainer {
@@ -100,6 +104,10 @@ div#CenteringContainer {
     margin-right: 1vw;
     opacity: 0.5;
     -webkit-transition: 0.3s;
+    -moz-transition: 0.3s;
+    -ms-transition: 0.3s;
+    -o-transition: 0.3s;
+    transition: 0.3s;
 }
 #guide:hover {
     text-decoration: none;
@@ -146,7 +154,15 @@ div#languages img {
 	padding-left: 0.6vw;
 	opacity:0.5;
 	-webkit-transform: translateZ(0);
+	-moz-transform: translateZ(0);
+	-ms-transform: translateZ(0);
+	-o-transform: translateZ(0);
+	transform: translateZ(0);
 	-webkit-transition: 0.5s;
+	-moz-transition: 0.5s;
+	-ms-transition: 0.5s;
+	-o-transition: 0.5s;
+	transition: 0.5s;
 }
 div#languages img:hover {
 	opacity:1;
@@ -162,6 +178,10 @@ body > div.countdown {
 	background-color: rgba(0,0,0,0.5);
 	z-index: 100;
 	-webkit-transition-duration: 0.5s;
+	-moz-transition-duration: 0.5s;
+	-ms-transition-duration: 0.5s;
+	-o-transition-duration: 0.5s;
+	transition-duration: 0.5s;
 }
 body > div.countdown > div.countdown-number {
 	margin-top: 25%;
@@ -177,13 +197,45 @@ body > div.countdown > div.countdown-next {
 body > div.countdown > div.animateCountdown {
 	font-size: 75vmin;
 	-webkit-animation-name: countdown;
+	-moz-animation-name: countdown;
+	-ms-animation-name: countdown;
+	-o-animation-name: countdown;
+	animation-name: countdown;
 	-webkit-animation-duration: 1s;
+	-moz-animation-duration: 1s;
+	-ms-animation-duration: 1s;
+	-o-animation-duration: 1s;
+	animation-duration: 1s;
 	-webkit-animation-iteration-count: infinite;
+	-moz-animation-iteration-count: infinite;
+	-ms-animation-iteration-count: infinite;
+	-o-animation-iteration-count: infinite;
+	animation-iteration-count: infinite;
 }
 @-webkit-keyframes countdown {
 	0% { -webkit-transform: scale(1); opacity: 1;}
 	95% { -webkit-transform: scale(0.3); opacity: 0.5;}
 	100% { -webkit-transform: scale(1); opacity: 1;}
+}
+@-moz-keyframes countdown {
+	0% { -moz-transform: scale(1); opacity: 1;}
+	95% { -moz-transform: scale(0.3); opacity: 0.5;}
+	100% { -moz-transform: scale(1); opacity: 1;}
+}
+@-ms-keyframes countdown {
+	0% { -ms-transform: scale(1); opacity: 1;}
+	95% { -ms-transform: scale(0.3); opacity: 0.5;}
+	100% { -ms-transform: scale(1); opacity: 1;}
+}
+@-o-keyframes countdown {
+	0% { -o-transform: scale(1); opacity: 1;}
+	95% { -o-transform: scale(0.3); opacity: 0.5;}
+	100% { -o-transform: scale(1); opacity: 1;}
+}
+@keyframes countdown {
+	0% { transform: scale(1); opacity: 1;}
+	95% { transform: scale(0.3); opacity: 0.5;}
+	100% { transform: scale(1); opacity: 1;}
 }
 
 body > div.countdown > div.countdown-illustration {
@@ -204,6 +256,10 @@ body > div.countdown > div.countdown-illustration div#ViolinFingerBoard {
 	text-align: center;
 	overflow: hidden;
 	background-image: -webkit-linear-gradient(left , rgb(153,0,0) 0%, rgb(153,153,0) 48%, rgb(0,153,0) 50%, rgb(153,153,27) 52%, rgb(153,0,0) 100%);
+	background-image: -moz-linear-gradient(left , rgb(153,0,0) 0%, rgb(153,153,0) 48%, rgb(0,153,0) 50%, rgb(153,153,27) 52%, rgb(153,0,0) 100%);
+	background-image: -ms-linear-gradient(left , rgb(153,0,0) 0%, rgb(153,153,0) 48%, rgb(0,153,0) 50%, rgb(153,153,27) 52%, rgb(153,0,0) 100%);
+	background-image: -o-linear-gradient(left , rgb(153,0,0) 0%, rgb(153,153,0) 48%, rgb(0,153,0) 50%, rgb(153,153,27) 52%, rgb(153,0,0) 100%);
+	background-image: linear-gradient(left , rgb(153,0,0) 0%, rgb(153,153,0) 48%, rgb(0,153,0) 50%, rgb(153,153,27) 52%, rgb(153,0,0) 100%);
 }
 .Compass > * {
 	line-height: 7.5vh;
@@ -250,7 +306,7 @@ table#ViolinFingerBoard span.TopNote {
 	width: 44px;
 	color: #000;
 	line-height: 44px;
-	-webkit-border-radius: 22px;
+	border-radius: 22px;
 	display: block;
 }
 table#ViolinFingerBoard td div {
@@ -286,6 +342,10 @@ table#ViolinFingerBoard td div {
 	opacity: 1;
 	background-color: #71C211;
 	-webkit-transition: 1s;
+	-moz-transition: 1s;
+	-ms-transition: 1s;
+	-o-transition: 1s;
+	transition: 1s;
 	vertical-align: middle;
 }
 #intro svg {
@@ -303,13 +363,41 @@ table#ViolinFingerBoard td div {
 #intro.ready {
 	opacity: 0;
 	-webkit-animation-name: intro;
+	-moz-animation-name: intro;
+	-ms-animation-name: intro;
+	-o-animation-name: intro;
+	animation-name: intro;
 	-webkit-animation-duration: 2s;
+	-moz-animation-duration: 2s;
+	-ms-animation-duration: 2s;
+	-o-animation-duration: 2s;
+	animation-duration: 2s;
 }
 #intro.show svg,
 #intro.ready svg {
 	opacity: 1;
 }
 @-webkit-keyframes intro {
+	0% { opacity: 1;}
+	50% { opacity: 1;}
+	100% { opacity: 0;}
+}
+@-moz-keyframes intro {
+	0% { opacity: 1;}
+	50% { opacity: 1;}
+	100% { opacity: 0;}
+}
+@-ms-keyframes intro {
+	0% { opacity: 1;}
+	50% { opacity: 1;}
+	100% { opacity: 0;}
+}
+@-o-keyframes intro {
+	0% { opacity: 1;}
+	50% { opacity: 1;}
+	100% { opacity: 0;}
+}
+@keyframes intro {
 	0% { opacity: 1;}
 	50% { opacity: 1;}
 	100% { opacity: 0;}
@@ -324,13 +412,41 @@ body.ShowGame.scale #logo svg path {
 
 g#start line.pulse {
     -webkit-animation-name: game_pulse;
+    -moz-animation-name: game_pulse;
+    -ms-animation-name: game_pulse;
+    -o-animation-name: game_pulse;
+    animation-name: game_pulse;
     -webkit-animation-duration: 0.25s;
+    -moz-animation-duration: 0.25s;
+    -ms-animation-duration: 0.25s;
+    -o-animation-duration: 0.25s;
+    animation-duration: 0.25s;
 }
 
 @-webkit-keyframes game_pulse{
 	0% { -webkit-transform: scaleY(1) translateY(0);}
 	20% { -webkit-transform: scaleY(1.5) translateY(-18.75px);}
 	100% { -webkit-transform: scaleY(1) translateY(0);}
+}
+@-moz-keyframes game_pulse{
+	0% { -moz-transform: scaleY(1) translateY(0);}
+	20% { -moz-transform: scaleY(1.5) translateY(-18.75px);}
+	100% { -moz-transform: scaleY(1) translateY(0);}
+}
+@-ms-keyframes game_pulse{
+	0% { -ms-transform: scaleY(1) translateY(0);}
+	20% { -ms-transform: scaleY(1.5) translateY(-18.75px);}
+	100% { -ms-transform: scaleY(1) translateY(0);}
+}
+@-o-keyframes game_pulse{
+	0% { -o-transform: scaleY(1) translateY(0);}
+	20% { -o-transform: scaleY(1.5) translateY(-18.75px);}
+	100% { -o-transform: scaleY(1) translateY(0);}
+}
+@keyframes game_pulse{
+	0% { transform: scaleY(1) translateY(0);}
+	20% { transform: scaleY(1.5) translateY(-18.75px);}
+	100% { transform: scaleY(1) translateY(0);}
 }
 
 #overlay {
@@ -341,25 +457,69 @@ g#start line.pulse {
 	height: 100%;
 	opacity: 0;
 	-webkit-transform: translate3d(0,-100%,0);
+	-moz-transform: translate3d(0,-100%,0);
+	-ms-transform: translate3d(0,-100%,0);
+	-o-transform: translate3d(0,-100%,0);
+	transform: translate3d(0,-100%,0);
 
 	-webkit-transition: opacity 0.3s, background-color 1s;
+	-moz-transition: opacity 0.3s, background-color 1s;
+	-ms-transition: opacity 0.3s, background-color 1s;
+	-o-transition: opacity 0.3s, background-color 1s;
+	transition: opacity 0.3s, background-color 1s;
 	background-color: rgba(0,0,0,0.5);
 	z-index: 100;
 }
 #overlay.show {
 	-webkit-transform: translate3d(0,0,0);
+	-moz-transform: translate3d(0,0,0);
+	-ms-transform: translate3d(0,0,0);
+	-o-transform: translate3d(0,0,0);
+	transform: translate3d(0,0,0);
 	opacity: 1;
 }
 #overlay.hide {
 	-webkit-animation-name: overlay;
+	-moz-animation-name: overlay;
+	-ms-animation-name: overlay;
+	-o-animation-name: overlay;
+	animation-name: overlay;
 	-webkit-animation-duration: 0.3s;
+	-moz-animation-duration: 0.3s;
+	-ms-animation-duration: 0.3s;
+	-o-animation-duration: 0.3s;
+	animation-duration: 0.3s;
 	-webkit-transform: translate3d(0,-100%,0);
+	-moz-transform: translate3d(0,-100%,0);
+	-ms-transform: translate3d(0,-100%,0);
+	-o-transform: translate3d(0,-100%,0);
+	transform: translate3d(0,-100%,0);
 	opacity: 0;
 }
 @-webkit-keyframes overlay {
 	0% {-webkit-transform: translate3d(0,0,0);}
 	99% {-webkit-transform: translate3d(0,0,0);}
 	100% {-webkit-transform: translate3d(0,-100%,0);}
+}
+@-moz-keyframes overlay {
+	0% {-moz-transform: translate3d(0,0,0);}
+	99% {-moz-transform: translate3d(0,0,0);}
+	100% {-moz-transform: translate3d(0,-100%,0);}
+}
+@-ms-keyframes overlay {
+	0% {-ms-transform: translate3d(0,0,0);}
+	99% {-ms-transform: translate3d(0,0,0);}
+	100% {-ms-transform: translate3d(0,-100%,0);}
+}
+@-o-keyframes overlay {
+	0% {-o-transform: translate3d(0,0,0);}
+	99% {-o-transform: translate3d(0,0,0);}
+	100% {-o-transform: translate3d(0,-100%,0);}
+}
+@keyframes overlay {
+	0% {transform: translate3d(0,0,0);}
+	99% {transform: translate3d(0,0,0);}
+	100% {transform: translate3d(0,-100%,0);}
 }
 
 #overlay div.countdown {
@@ -385,15 +545,31 @@ g#start line.pulse {
 }
 #overlay div.countdown div.number.run {
 	-webkit-animation-name: countdown_number;
+	-moz-animation-name: countdown_number;
+	-ms-animation-name: countdown_number;
+	-o-animation-name: countdown_number;
+	animation-name: countdown_number;
 }
 #overlay div.countdown div.number.run.countdown-type--long {
 	-webkit-animation-name: countdown_number_long;
+	-moz-animation-name: countdown_number_long;
+	-ms-animation-name: countdown_number_long;
+	-o-animation-name: countdown_number_long;
+	animation-name: countdown_number_long;
 }
 #overlay div.countdown div.number.run.countdown-type--long_rebounce {
 	-webkit-animation-name: countdown_number_long_rebounce;
+	-moz-animation-name: countdown_number_long_rebounce;
+	-ms-animation-name: countdown_number_long_rebounce;
+	-o-animation-name: countdown_number_long_rebounce;
+	animation-name: countdown_number_long_rebounce;
 }
 #overlay div.countdown div.number.run.countdown-type--none {
 	-webkit-animation-name: none;
+	-moz-animation-name: none;
+	-ms-animation-name: none;
+	-o-animation-name: none;
+	animation-name: none;
 	opacity: 1;
 }
 div.countdown .next {
@@ -430,6 +606,78 @@ div.countdown .illustration table#ViolinFingerBoard {
 	5% { -webkit-transform: scale(1); opacity: 1;}
 	85% { -webkit-transform: scale(0.9); opacity: 1;}
 	98% { -webkit-transform: scale(0.2); opacity: 0.5;}
+}
+
+@-moz-keyframes countdown_number {
+	0% { -moz-transform: scale(0.2); opacity: 0.5;}
+	5% { -moz-transform: scale(1); opacity: 1;}
+	100% { -moz-transform: scale(0.2); opacity: 0.5;}
+}
+@-moz-keyframes countdown_number_long {
+	0% { -moz-transform: scale(0.2); opacity: 0.5;}
+	5% { -moz-transform: scale(1); opacity: 1;}
+	85% { -moz-transform: scale(0.9); opacity: 1;}
+	100% { -moz-transform: scale(0.2); opacity: 0.5;}
+}
+@-moz-keyframes countdown_number_long_rebounce {
+	0% { -moz-transform: scale(0.2); opacity: 0.5;}
+	5% { -moz-transform: scale(1); opacity: 1;}
+	85% { -moz-transform: scale(0.9); opacity: 1;}
+	98% { -moz-transform: scale(0.2); opacity: 0.5;}
+}
+
+@-ms-keyframes countdown_number {
+	0% { -ms-transform: scale(0.2); opacity: 0.5;}
+	5% { -ms-transform: scale(1); opacity: 1;}
+	100% { -ms-transform: scale(0.2); opacity: 0.5;}
+}
+@-ms-keyframes countdown_number_long {
+	0% { -ms-transform: scale(0.2); opacity: 0.5;}
+	5% { -ms-transform: scale(1); opacity: 1;}
+	85% { -ms-transform: scale(0.9); opacity: 1;}
+	100% { -ms-transform: scale(0.2); opacity: 0.5;}
+}
+@-ms-keyframes countdown_number_long_rebounce {
+	0% { -ms-transform: scale(0.2); opacity: 0.5;}
+	5% { -ms-transform: scale(1); opacity: 1;}
+	85% { -ms-transform: scale(0.9); opacity: 1;}
+	98% { -ms-transform: scale(0.2); opacity: 0.5;}
+}
+
+@-o-keyframes countdown_number {
+	0% { -o-transform: scale(0.2); opacity: 0.5;}
+	5% { -o-transform: scale(1); opacity: 1;}
+	100% { -o-transform: scale(0.2); opacity: 0.5;}
+}
+@-o-keyframes countdown_number_long {
+	0% { -o-transform: scale(0.2); opacity: 0.5;}
+	5% { -o-transform: scale(1); opacity: 1;}
+	85% { -o-transform: scale(0.9); opacity: 1;}
+	100% { -o-transform: scale(0.2); opacity: 0.5;}
+}
+@-o-keyframes countdown_number_long_rebounce {
+	0% { -o-transform: scale(0.2); opacity: 0.5;}
+	5% { -o-transform: scale(1); opacity: 1;}
+	85% { -o-transform: scale(0.9); opacity: 1;}
+	98% { -o-transform: scale(0.2); opacity: 0.5;}
+}
+
+@keyframes countdown_number {
+	0% { transform: scale(0.2); opacity: 0.5;}
+	5% { transform: scale(1); opacity: 1;}
+	100% { transform: scale(0.2); opacity: 0.5;}
+}
+@keyframes countdown_number_long {
+	0% { transform: scale(0.2); opacity: 0.5;}
+	5% { transform: scale(1); opacity: 1;}
+	85% { transform: scale(0.9); opacity: 1;}
+	100% { transform: scale(0.2); opacity: 0.5;}
+}
+@keyframes countdown_number_long_rebounce {
+	0% { transform: scale(0.2); opacity: 0.5;}
+	5% { transform: scale(1); opacity: 1;}
+	85% { transform: scale(0.9); opacity: 1;}
+	98% { transform: scale(0.2); opacity: 0.5;}
 }
 
 div.countdown.microphone-permission .next {
