@@ -1,4 +1,4 @@
-define(['jquery', 'dsp', 'game/tones', 'l2p'], function ($, dsp, tones, L2P) {
+define(['jquery', 'dsp', 'game/options', 'l2p'], function ($, dsp, options, L2P) {
 	var	DSP	= dsp.DSP,
 		setupTypedArray		= dsp.setupTypedArray,
 		FourierTransform	= dsp.FourierTransform,
@@ -25,7 +25,7 @@ define(['jquery', 'dsp', 'game/tones', 'l2p'], function ($, dsp, tones, L2P) {
 		__hasProp = {}.hasOwnProperty;
 
 		frequencies	= [];
-	tones.forEach(function (tone) {
+	options.tones.all.forEach(function (tone) {
 		frequencies[tone.name+tone.octav]	= tone;
 	});
 
