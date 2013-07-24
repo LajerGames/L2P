@@ -82,5 +82,39 @@ class UserHandler
 
 		return;
 	}
+    /**
+    * Gives your an available username
+    *
+    * @param string $strUsername
+    * @param int $iAttemptNo - Should just be left blank
+    */
+    public function GiefUsername($strUsername, $iAttemptNo = 0)
+    {
+        global $oSql;
+        // Make sure there are no spaces in the username
+        $strUsername = str_replace(' ', '', $strUsername);
+
+        // Append attempt no.
+        $strUsernameBid = $iAttemptNo > 0 ? $strUsername.$iAttemptNo : $strUsername;
+
+        // Check DB for this username
+        $rExistingUsername = $oSql->Select('
+            SELECT
+                users.id
+            FROM
+                users
+            WHERE
+                users.deleted   = 0
+             && users.username  = "'.$strUsernameBid.'"
+        ');
+
+        if($rExistingUsername->num_rows > 0)
+        {
+            $iAttemptNo++;
+            $strUsernameBid = $this->GiefUsername($strUsername, $iAttemptNo);
+        }
+
+        return $strUsernameBid;
+    }
 }
 ?>
