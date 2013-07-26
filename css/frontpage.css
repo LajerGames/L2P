@@ -229,6 +229,11 @@ div.ContentBoxGameCompass div.ContentBoxGameCompass-line {
 	-o-transition: 0.2s;
 	transition: 0.2s;
 }
+body.ShowGame div.ContentBoxGameCompass.tour-step-backdrop div.ContentBoxGameCompass-tone-before,
+body.ShowGame div.ContentBoxGameCompass.tour-step-backdrop div.ContentBoxGameCompass-tone-current,
+body.ShowGame div.ContentBoxGameCompass.tour-step-backdrop div.ContentBoxGameCompass-tone-after {
+	color: #FFF;
+}
 
 div.ContentBoxBlue input {
 	color: #000;

@@ -1,7 +1,6 @@
 <?php
 require_once($_SERVER['DOCUMENT_ROOT'].'/include/config.php');
 
-
 #Hack 1
 if(!isset($oCreateUserForm))
 {

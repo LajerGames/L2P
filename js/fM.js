@@ -32,6 +32,8 @@ define(['jquery'], function ($) {
 				window.history.pushState(obj, title, url);
 			}
 
+			console.log('fm-nav', url, obj);
+
 			$(window).trigger('popstate', ['fM']);
 		}
 		that.navigated	= function (url, title, obj) {
@@ -40,11 +42,15 @@ define(['jquery'], function ($) {
 			obj			= $.extend(history.state, obj);
 			obj.title	= title;
 
-			his[obj._id]	= obj;
-			window.history.replaceState(obj, title, document.location.pathname);
-			lastState	= obj;
+			if(obj._id !== undefined) {
+				his[obj._id]	= obj;
+				window.history.replaceState(obj, title, document.location.pathname);
+				lastState	= obj;
 
-			$that.trigger('navigate-done', [lastState]);
+				$that.trigger('navigate-done', [lastState]);
+			} else {
+				console.log('no nav id', obj);
+			}
 		}
 		that.getHistory	= function () {
 			return his;
@@ -53,14 +59,14 @@ define(['jquery'], function ($) {
 			return his.slice(0, lastState._id);
 		}
 		that.getParent	= function () {
-			return his[lastState._id - 1];
-		}
+			return lastState && lastState._id ? his[lastState._id - 1] : undefined;
+		};
 		that.getCurrent	= function () {
 			return lastState ? his[lastState._id] : undefined;
-		}
+		};
 		that.getCurrentNavigate	= function () {
-			return lastState ? his[lastState._id + 1] : undefined;
-		}
+			return lastState ? his[lastState._id + 1] : (his.length === 1 ? his[0] : undefined);
+		};
 
 		return that;
 	}());

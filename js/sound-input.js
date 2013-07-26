@@ -29,7 +29,9 @@ define(['jquery', 'dsp', 'game/options', 'l2p'], function ($, dsp, options, L2P)
 		frequencies[tone.name+tone.octav]	= tone;
 	});
 
-	var	requestAnimationFrame	= requestAnimationFrame || webkitRequestAnimationFrame || msRequestAnimationFrame || mozRequestAnimationFrame || oRequestAnimationFrame || function () {};
+	window.requestAnimationFrame	= (function () {
+		return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || function () {};
+	}());
 
 	function Tuner(err, toneChange, expectedTone) {
 		var	tuner	= this,
@@ -374,7 +376,9 @@ define(['jquery', 'dsp', 'game/options', 'l2p'], function ($, dsp, options, L2P)
 							'font-size':	L2P_global.lang.game_measuring_done.length <= 15 ? '12vw' : '7.5vw'
 						}
 					}
-				], '', '');
+				], '', '', function () {
+					tuner.$tuner.trigger('noise_ok', []);
+				});
 			});
 		})
 	};

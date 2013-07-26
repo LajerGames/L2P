@@ -16,6 +16,7 @@ class UserHandler
 				users.id,
 				users.username,
 				users.email,
+				users.fb_id,
 				users.first_name,
 				users.last_name,
 				users.points,

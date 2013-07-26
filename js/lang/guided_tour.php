@@ -10,7 +10,7 @@ $arrItems	= array(
 	8,
 	5,
 	1,
-	1,
+	2,
 	1
 );
 foreach($arrItems as $iItemNo => $iItemCount)

@@ -12,32 +12,53 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 		}
 	}
 
+	function FBAuth(response) {
+		console.log('fbAuth', response);
+		fbUser	= response;
+		if(response.status === 'connected') {
+			if(+response.authResponse.userID !== L2P_global.fb_id) {
+				var hasTriedAutologin	= sessionStorage.getItem('l2p_fb_autologin');
+				if(hasTriedAutologin !== 'true') {
+					require(['fM'], function (fM) {
+						FB.api('/me', function (user) {
+							console.log('tryLogin', user);
+							fM.link.navigate('/user/create/', 'Magic-Tune', {
+								title:	'Magic-Tune',
+								data:	{
+									mode:			'login',
+									type:			'fb',
+									user:			user,
+									accessToken:	fbUser.authResponse.accessToken
+								}
+							});
+						});
+					});
+				} else {
+					console.log('skipped autologin');
+				}
+
+				sessionStorage.setItem('l2p_fb_autologin', 'true');
+			} else {
+				FB.api('/me', function (user) {
+					console.log('logged in', user);
+				});
+			}
+		}
+
+		FB.Event.subscribe('auth.authResponseChange', FBAuth);
+	}
+
 	FB.init({
     	appId      : '178214939022167',
     	channelUrl : '//magic-tune.com/channel.php',
     	status:		true,
     	cookie:		true
   	});
-  	FB.getLoginStatus(function(response) {
-  		console.log('auto-login', response);
-    	fbUser	= response;
-  	});
-  	FB.Event.subscribe('auth.authResponseChange', function(response) {
-  		console.log('auth update', response);
-		if(response.status === 'connected') {
-			FB.api('/me', function (response) {
-				console.log('me', response);
-			});
-			return;
-			fM.link.navigate('/user/create/', 'Magic Tune', {
-				title:	'Magic Tune',
-				data:	data
-			});
-		}
-	});
+  	FB.getLoginStatus(FBAuth);
 
 	var	gameController,
 		svgContainer,
+		tuner,
 		sound,
 		playlist,
 		socket,
@@ -182,9 +203,11 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					L2P.$modal.find('button.btn[data-dismiss]').text(L2P_global.lang.global_button_close);
 
 					var	pathname	= location.pathname;
-					L2P.$modal.on('hide', function () {
-						if(location.pathname === pathname) {
-							fM.link.navigate('/');
+					L2P.$modal.on('hide', function (e) {
+						if(!$(e.target).hasClass('tour-step-backdrop')) {
+							if(location.pathname === pathname) {
+								fM.link.navigate('/');
+							}
 						}
 					});
 
@@ -317,10 +340,12 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					}
 
 					if(generate) {
-						var	tuner	= new SoundInput(function (e) {
+						tuner	= new SoundInput(function (e) {
 							// console.log(e);
 						}, $.proxy(L2P.gameController.soundInput, L2P.gameController), $.proxy(L2P.gameController.expectedTone, L2P.gameController));
 						$(tuner).on('tick', $.proxy(L2P.gameController.soundInput, L2P.gameController));
+
+						$(L2P).trigger('got_tuner', [tuner]);
 					}
 
 					state.is_game	= true;
@@ -405,6 +430,14 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 				}
 			},
 			guided_tour:	function (e) {
+				var	$body_container		= $('body');
+
+				L2P.resetBoxText($('#song_title'));
+				L2P.resetBoxText($('#scale_title'));
+				$body_container.removeClass('ShowGame');
+				$body_container.removeClass('song');
+				$body_container.removeClass('scale');
+
 				L2P.guided_tour();
 			},
 			url:	function (url, data) {
@@ -415,7 +448,10 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					var	current	= fM.link.getCurrentNavigate();
 					data	= data || current && current.data;
 
+					console.log('nav', urlAjax, data);
+
 					getAjax(urlAjax, data, function (data) {
+						console.log(data);
 						switch(data.dialogType) {
 							case 'action':
 								if(tour && !tour.callback(url)) {
@@ -445,7 +481,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 								}
 								break;
 							case 'redirect':
-								if(L2P_global.language_code !== data.user.language_code) {
+								if(L2P_global.language_code !== data.user.language_code || data.force_reload) {
 									location.href	= data.url;
 									return;
 								} else {
@@ -1021,6 +1057,19 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						},
 						controller	= {};
 
+					function tourGame(tuner) {
+						tuner.$tuner.one('noise_ok', function () {
+							controller.tour.start(true);
+						});
+					}
+					function tourGameTick(e, freq) {
+						if(freq !== -1) {
+							$(tuner).off('tick', tourGameTick);
+
+							controller.tour.next();
+						}
+					}
+
 					controller.callback	= empty;
 					controller.kill		= function () {
 						if(controller.tour) {
@@ -1037,7 +1086,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 							prev:	'',
 							end:	'<button class="btn">'+lang.tour_button_end_tour+'</button>',
 						},
-						keyboard:	true,
+						keyboard:	false,
 						template:	function (i, step) {
 							if(step.labelsOff) {
 								return '<div class="popover tour popover--no-labels"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div>';
@@ -1084,14 +1133,16 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 
 					(function (tour) {
 						[null, 'concert_pitch', 'color_nodes', 'language', 'kiddie_mode', 'countdown_time', 'metronome'].forEach(function (name, i) {
-							tour.addStep({
-								element:	'.modal-action.in table.FormTable [name="'+name+'"]',
-								title:		lang['tour_1_'+i+'_title'],
-								content:	lang['tour_1_'+i],
-								placement:	'right',
-								container:	'.modal-action.in',
-								backdrop:	true
-							});
+							if(name) {
+								tour.addStep({
+									element:	'.modal-action.in table.FormTable [name="'+name+'"]',
+									title:		lang['tour_1_'+i+'_title'],
+									content:	lang['tour_1_'+i],
+									placement:	'right',
+									container:	'.modal-action.in',
+									backdrop:	true
+								});
+							}
 						});
 					}(controller.tour));
 
@@ -1125,6 +1176,9 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 							controller.callback	= function (url) {
 								if(url === '/browse/scales/') {
 									tour.hideStep(tour._current);
+									L2P.get.playlist('new', function (playlist) {
+										console.log(playlist);
+									}, lang.tour_0_0_title);
 
 									return true;
 								}
@@ -1140,16 +1194,107 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						placement:	'right',
 						container:	'.modal-info.in',
 						backdrop:	true,
+						labelsOff:	true,
 						onShow:		function (tour) {
-							controller.callback	= empty;
-
-							console.log('test white');
-							$('.modal-info.in #list a[href="/game/a-major/4"] img').attr('src', '/img/icons/plus_white.svg');
-						},
-						onHide:		function (tour) {
-							console.log('test black');
-							$('.modal-info.in #list a[href="/game/a-major/4"] img').attr('src', '/img/icons/plus_black.svg');
+							L2P.get.playlist(null, function (playlist) {
+								playlist.$this.one('addgame', function () {
+									controller.tour.next();
+								});
+							});
 						}
+					});
+
+					controller.tour.addStep({
+						element:	'.modal-info.in #info div[data-content="illustration"]',
+						title:		lang.tour_2_2_title,
+						content:	lang.tour_2_2,
+						placement:	'right',
+						container:	'.modal-info.in',
+						backdrop:	true
+					});
+
+					controller.tour.addStep({
+						element:	'.modal-info.in #list a[href="/game/b-major/4"]',
+						title:		lang['tour_2_3_title'],
+						content:	lang['tour_2_3'],
+						placement:	'right',
+						container:	'.modal-info.in',
+						backdrop:	true,
+						labelsOff:	true,
+						onShow:		function (tour) {
+							L2P.get.playlist(null, function (playlist) {
+								playlist.$this.one('addgame', function () {
+									controller.tour.next();
+								});
+							});
+						}
+					});
+
+					controller.tour.addStep({
+						element:	'.modal-info.in #PlaylistContainer img.playPlaylist',
+						title:		lang.tour_2_4_title,
+						content:	lang.tour_2_4,
+						placement:	'left',
+						container:	'.modal-info.in',
+						backdrop:	true,
+						labelsOff:	true,
+						onShow:		function (tour) {
+							controller.callback = function (url) {
+								if(url === '/game/a-major/4/') {
+									if(tuner) {
+										controller.tour.next();
+									} else {
+										controller.tour.end();
+
+										$(L2P).one('got_tuner', function (e, tuner) {
+											tourGame(tuner);
+										});
+									}
+
+									return true;
+								}
+								return false;
+							};
+						}
+					});
+
+					controller.tour.addStep({
+						element:	'div.ContentBoxGameCompass',
+						title:		lang.tour_4_0_title,
+						content:	lang.tour_4_0,
+						placement:	'right',
+						backdrop:	true,
+						labelsOff:	true,
+						onShow:		function (tour) {
+							var	current		= tour.current;
+							setTimeout(function () {
+								if(tour.current === current) {
+									$('div.ContentBoxGameCompass')
+										.data('popover')
+											.$tip
+												.find('.popover-content span')
+													.show();
+								}
+							}, 4000);
+
+							$(tuner).on('tick', tourGameTick);
+						}
+					});
+
+					controller.tour.addStep({
+						element:	'div.ContentBoxGameCompass',
+						title:		lang.tour_4_1_title,
+						content:	lang.tour_4_1,
+						placement:	'right',
+						backdrop:	true
+					});
+
+					controller.tour.addStep({
+						element:	'div.ContentBoxGameCompass',
+						title:		lang.tour_5_0_title,
+						content:	lang.tour_5_0,
+						placement:	'right',
+						backdrop:	true
 					});
 
 					controller.tour.setCurrentStep(0);

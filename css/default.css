@@ -131,14 +131,16 @@ div#CenteringContainer {
 .popover .popover-title {
 	/*display: none;*/
 }
-.popover .popover-content {
+.popover .popover-content,
+.popover.tour .popover-content strong {
 	color: black;
 	font-size: 2vmin;
 }
 .popover.tour .popover-title {
 	font-size: 1.8vmin;
 }
-.popover.tour .popover-content {
+.popover.tour .popover-content,
+.popover.tour .popover-content strong {
 	font-size: 1.4vmin;
 }
 .tour-backdrop {
@@ -729,4 +731,16 @@ div.countdown.microphone-permission .next {
 }
 .popover.tour.popover--no-labels .popover-content .next {
     display: none;
+}
+.IconLink.tour-step-backdrop {
+	background-color: #1DBAE7;
+}
+.ViewAllGames.tour-step-backdrop {
+	background-color: #E2A30C;
+}
+.browse-item.tour-step-backdrop {
+	background-color: #FFF;
+}
+.playPlaylist.tour-step-backdrop {
+	background-color: #FFF;
 }

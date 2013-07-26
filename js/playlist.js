@@ -67,6 +67,7 @@ define(['jquery', 'l2p', 'api', 'fM'], function ($, L2P, api, fM) {
 
 		this.save();
 		this.$this.trigger('add game', [game, i]);
+		this.$this.trigger('addgame', [game, i]);
 	};
 	Playlist.prototype.removeGame	= function (game) {
 		var	i	= this.games.indexOf(game),

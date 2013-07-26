@@ -12,7 +12,7 @@ function printr($arr)
 *
 * @param string $strLocation
 */
-function Redirect($strLocation)
+function Redirect($strLocation, $bForceReload = false)
 {
 	if(IS_DIALOG)
 	{
@@ -20,7 +20,7 @@ function Redirect($strLocation)
 				$oTemplate;
 
 		header('Content-type: application/json');
-		echo $oPageRenderer->RenderDialogRedirect($oTemplate, $strLocation);
+		echo $oPageRenderer->RenderDialogRedirect($oTemplate, $strLocation, $bForceReload);
 	}
 	else
 	{
@@ -236,15 +236,14 @@ function FindLoadFile(MySQLWrapper $oSql, $bReturn404 = false)
     }
     else
     {
-
         // If we wind up in here, there is a chance we're looking at a username in the permlink... Find out which part of the url we know, and see if we can identify the a username afterwards
         // Explode the URI
         $arrURI = explode('/', REQUEST_URI, 4);
 
         // Initialize readable variables
-        $strFolder          = $arrURI[1];
-        $strUsername        = $arrURI[2];
-        $strRemainingPath   = $arrURI[3];
+        $strFolder          = urldecode($arrURI[1]);
+        $strUsername        = urldecode($arrURI[2]);
+        $strRemainingPath   = urldecode($arrURI[3]);
 
         // Set two booleans, a path and a recognized username - both is false as default. If both is true once we're done checking we've got ourselves a custom permlink
         $bRecognizedPath    = false;

@@ -41,7 +41,7 @@ switch($_REQUEST['mode']) // Yep it makes sence to use request here!
 	case 'logout' :
 		unset($_SESSION['UserObject']);
 
-		Redirect('/');
+		Redirect('/', true);
 		break;
 	case 'create' :
 		#Hack 1
