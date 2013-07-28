@@ -40,7 +40,7 @@ $this
 ->Set('seconds', 'sekunder')
 ->Set('less_than_minute', 'Mindre end et minut siden')
 ->Set('few_minutes', 'Et par minutter siden')
-->Set('about_an_hour', 'Onkring en time siden')
+->Set('about_an_hour', 'Omkring en time siden')
 ->Set('yesterday', 'I går')
 ->Set('more_than_a_year', 'Mere end et år siden')
 ->Set('ago', 'siden')
@@ -158,16 +158,16 @@ $this
 ->Set('validation_newkeysent', 'En ny aktiveringsnøgle er blevet sendt til din e-mail adresse da aktiveringskoden er skrevet forkert for mange gange')
 ->Set('reconfirmation_mail_headline', 'Din nye aktiveringsnøgle')
 ->Set('reconfirmation_mail', '
-    Hej #username#, <br /><br />
-    Du har indtastet en forkert aktiveringsnøgle for mange gange.<br /><br />
-    Vi har sendt denne nye aktiveringsnøgle, for at beskytte din konto.<br /><br />
-    Første gang du logger ind #system# vil du blive bedt om at udfylde en aktiveringsnøgle.<br />
+	Hej #username#, <br /><br />
+	Du har indtastet en forkert aktiveringsnøgle for mange gange.<br /><br />
+	Vi har sendt denne nye aktiveringsnøgle, for at beskytte din konto.<br /><br />
+	Første gang du logger ind #system# vil du blive bedt om at udfylde en aktiveringsnøgle.<br />
 	Du kan også bekræfte din mail direkte via dette link:<br />
-    #confirmation_anchortag#<br /><br />
-    Aktiveringsnøgle: #activationkey#<br />
-    Brugernavn: #username# <br /><br />
-    Hav det sjovt og udvid din awesomeness på #system# ;)<br /><br />
-    #system# Team
+	#confirmation_anchortag#<br /><br />
+	Aktiveringsnøgle: #activationkey#<br />
+	Brugernavn: #username# <br /><br />
+	Hav det sjovt og udvid din awesomeness på #system# ;)<br /><br />
+	#system# Team
 ')
 
 # User already logged in
@@ -196,6 +196,18 @@ $this
 ->Set('grade_poor', 'Svagt')
 ->Set('grade_rubbish', 'Dårligt')
 ->Set('grade_miserable', 'Frygteligt')
+->Set('create_window_title', 'Gem sang')
+->Set('create_dktitle', 'DK Titel')
+->Set('create_entitle', 'EN Titel')
+->Set('create_permlink', 'Permlink')
+->Set('create_type', 'Type')
+->Set('create_octave', 'Oktav')
+->Set('create_status', 'Status')
+->Set('create_genre', 'Genre')
+->Set('create_author', 'Author')
+->Set('create_release_date', 'Released')
+->Set('create_validation_title', 'Titlen skal være mellem 2 og 30 karaktere')
+->Set('create_validation_permlink', 'Permlink skal være mellem 2 og 30 karaktere og må kun indeholde a-z')
 
 # User statistics
 ->SetMenu('statistics_')
@@ -245,9 +257,10 @@ $this
 ->Set('1_7', 'Klik på "Gem" for at fortsætte til den næste del.')
 ->Set('2_0', 'Klik på "Vis alle" på skalaerne.')
 ->Set('2_1', 'Tilføj denne A-Dur skala til din playlist ved at klikke på plus ikonet.')
-->Set('2_2', 'Her kan du se hvilken fingerposition der er den først anvendte i denne skala. <br /><br /> Klik på "Videre" for at fortsætte.')
-->Set('2_3', 'Tilføj denne B-Dur skala til din playlist ved at klikke på plus ikonet.')
-->Set('2_4', 'Du har nu lavet din egen playlist. Klik på "afspil" ikonet for at fortsætte til spillet.')
+->Set('2_2', 'Skalaen er nu tilføjet til din playliste. <br /><br /> Klik på "Videre for at fortsætte')
+->Set('2_3', 'Her kan du se hvilken fingerposition der er den først anvendte i denne skala. <br /><br /> Klik på "Videre" for at fortsætte.')
+->Set('2_4', 'Tilføj denne B-Dur skala til din playlist ved at klikke på plus ikonet.')
+->Set('2_5', 'Du har nu lavet din egen playlist. Klik på "afspil" ikonet for at fortsætte til spillet.')
 ->Set('3_0', 'Vi skal bruge din mikrofon til at høre den musik du spiller, venligst klik på tillad for at lade Magic Tune bruge din mikrofon.')
 ->Set('4_0', 'Snak lidt til din mikrofon, så vi lige kan teste om vi har adgang til den.')
 ->Set('4_0a', '<br /><br />  <strong>Vi har endnu ikke hørt dig snakke, kontroller venligst at din mikrofon virker som den skal.</strong>')

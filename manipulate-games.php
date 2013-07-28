@@ -2,6 +2,28 @@
 // Always have access to config file
 require_once($_SERVER['DOCUMENT_ROOT'].'/include/config.php');
 
+// Now put game titles into the new language table
+$rGameTitles = $oSql->Select('
+    SELECT
+        games_titles.*
+    FROM
+        games_titles
+    WHERE
+        games_titles.deleted   = 0
+');
+
+while($oGameTitles = mysqli_fetch_object($rGameTitles))
+{
+    $arrLanguage = array(
+        'type'      => 'game_title',
+        'lang'      => $oGameTitles->lang,
+        'parent_id' => $oGameTitles->game_id,
+        'name'      => $oGameTitles->title
+    );
+
+    $oSql->Insert('languages', $arrLanguage);
+}
+exit;
 $rGames = $oSql->Select('
     SELECT
         user_id             AS iUserID,
@@ -122,7 +144,7 @@ while($oGames = mysqli_fetch_object($rGames))
                                         }
                                         else
                                         {
-                                            $arrNotePlays[$arrNoteInfoEntry[3]]++;   
+                                            $arrNotePlays[$arrNoteInfoEntry[3]]++;
                                         }
 
                                         // Some statistics for this perticular note
@@ -295,7 +317,7 @@ function SaveTitle($strLang, $iGameID, $strTitle)
 {
     global $oSql;
 
-    $oSql->Insert('games_titles', array('lang' => $strLang, 'game_id' => $iGameID, 'title' => $strTitle));   
+    $oSql->Insert('games_titles', array('lang' => $strLang, 'game_id' => $iGameID, 'title' => $strTitle));
 }
 
 if(!empty($_POST))

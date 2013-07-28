@@ -184,23 +184,24 @@ function GetMusic($oSql, $strType = 'song', $iLimit = 0, $strSearch = '')
 	return $rMusic = $oSql->Select('
         SELECT
             games.id,
-            games_titles.title,
+            languages.name  AS title,
             games.permlink,
             games.availability,
             games.octave
         FROM
             games
         RIGHT JOIN
-            games_titles ON
-                games_titles.deleted = 0
-             && games_titles.game_id = games.id
-             && games_titles.lang    = "'.$strLang.'"
+            languages ON
+                languages.deleted   = 0
+             && languages.type      = "game_title"
+             && languages.parent_id = games.id
+             && languages.lang      = "'.$strLang.'"
         WHERE
-            games.deleted    = 0
-         && games.type       = "'.$strType.'"
+            games.deleted           = 0
+         && games.type              = "'.$strType.'"
          '.$strWhereCondition.'
         GROUP BY
-            games_titles.title
+            languages.name
         ORDER BY
             games.availability ASC,
             games.title ASC
