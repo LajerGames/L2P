@@ -359,16 +359,17 @@ class statistics
                     // Find information about this song
                     $oSongInfo = $this->oSql->SelectSingleObject('
                         SELECT
-                            games.id            AS iSongID,
-                            games_titles.title  AS strSongTitle,
-                            games.permlink      AS strPermlink
+                            games.id                AS iSongID,
+                            languages.name          AS strSongTitle,
+                            games.permlink          AS strPermlink
                         FROM
                             games
                         RIGHT JOIN
-                            games_titles ON
-                                games_titles.deleted = 0
-                             && games_titles.game_id = games.id
-                             && games_titles.lang    = "'.$this->strLangCode.'"
+                            languages ON
+                                languages.deleted   = 0
+                             && languages.type      = "game_title"
+                             && languages.parent_id = games.id
+                             && languages.lang      = "'.$this->strLangCode.'"
                         WHERE
                             games.id = '.$oGameData->iGameID.'
                     ');
@@ -480,7 +481,7 @@ class statistics
                         foreach($arrTactInfo['notes'] as $strNotename => $fNoteAccuracy)
                         {
                             $arrAverageTactData[$iLoopNo]['notes'][$strNotename] += $fNoteAccuracy;
-                        }   
+                        }
                     }
                 }
             }

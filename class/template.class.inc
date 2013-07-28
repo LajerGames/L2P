@@ -70,7 +70,7 @@ class Template
                         if($bShowAddToPlaylist)
                         {
                             $strPlusIcon = substr($_SERVER['REQUEST_URI'], 0, 8) == '/browse/' || true ? 'plus_black' : 'plus_white';
-                            $strValue = '<img src="'.HTTP_PROJECT_ROOT_IMG.'icons/'.$strPlusIcon.'.svg" class="addToPlaylist" alt="'.$oLang->Get('frontpage_add_to_playlist').'" title="'.$oLang->Get('frontpage_add_to_playlist').'" />';   
+                            $strValue = '<img src="'.HTTP_PROJECT_ROOT_IMG.'icons/'.$strPlusIcon.'.svg" class="addToPlaylist" alt="'.$oLang->Get('frontpage_add_to_playlist').'" title="'.$oLang->Get('frontpage_add_to_playlist').'" />';
                         }
                         else
                         {

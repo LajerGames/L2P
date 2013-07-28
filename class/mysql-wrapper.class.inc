@@ -338,18 +338,18 @@ class MySQLWrapper
 
 	private function PrefixObject($oObject)
 	{
-        if(is_object($oObject))
-        {
-		    foreach($oObject as $strName => $strValue)
-		    {
-		    	$strKey	= $strName;
+		if(is_object($oObject))
+		{
+			foreach($oObject as $strName => $strValue)
+			{
+				$strKey	= $strName;
 				if(substr($strName, -8) === 'FromJSON')
 				{
 					$strKey	= substr($strName, 0, -8);
 				}
-		    	$oObject->$strKey	= $this->PrefixKeyValue($strName, $strValue);
-		    }
-        }
+				$oObject->$strKey	= $this->PrefixKeyValue($strName, $strValue);
+			}
+		}
 
 		return $oObject;
 	}
@@ -368,24 +368,24 @@ class MySQLWrapper
 		{
 			$mValue	= $mValue == 1;
 		}
-        elseif(substr($strKey, 0, 1) === 't')
-        {
-            $mValue    = date('Y-m-d H:i:s', strtotime($mValue));
-            if($mValue === '1970-01-01 00:00:00')
-            {
-               $mValue = null;
-            }
-        }
-        elseif(substr($strKey, 0, 1) === 'd')
-        {
-            $mValue    = date('Y-m-d', strtotime($mValue));
-            if($mValue === '1970-01-01' || $mValue === '-0001-11-30')
-            {
-                $mValue = null;
-            }
-        }
-        elseif(substr($strKey, 0, 3) === 'arr')
-        {
+		elseif(substr($strKey, 0, 1) === 't')
+		{
+			$mValue    = date('Y-m-d H:i:s', strtotime($mValue));
+			if($mValue === '1970-01-01 00:00:00')
+			{
+			   $mValue = null;
+			}
+		}
+		elseif(substr($strKey, 0, 1) === 'd')
+		{
+			$mValue    = date('Y-m-d', strtotime($mValue));
+			if($mValue === '1970-01-01' || $mValue === '-0001-11-30')
+			{
+				$mValue = null;
+			}
+		}
+		elseif(substr($strKey, 0, 3) === 'arr')
+		{
 			if(substr($strKey, -8) === 'FromJSON')
 			{
 				$mValue	= json_decode($mValue, true);
@@ -394,9 +394,9 @@ class MySQLWrapper
 			{
 				$mValue	= empty($mValue) ? array () : explode(',', $mValue);
 			}
-        }
+		}
 
-        return $mValue;
+		return $mValue;
 	}
 
 	/**

@@ -16,25 +16,27 @@ if(!isset($oLoginForm))
 	$oLoginForm->TextField('username', '', $oLang->Get('login_username'), new FormFieldValidation(true, PATTERN_USERNAME, $oLang->Get('validation_username')), null, false, array('autocomplete' => 'off'));
 	$oLoginForm->TextField('password', '', $oLang->Get('login_password'), new FormFieldValidation(true, PATTERN_PASSWORD, $oLang->Get('validation_password')), 'password', true);
 }
-
+/*
+$oGameData = new GameData($oSql);
+$oGameData->GetEndgameAchievement(23, 4, 37, 18000);*/
 $strDialog	= '';
 // We may have a deep link
 if(REQUEST_URI !== '/')
 {
 	// NOTICE! $oLoadInfo is already set in index.php
 
-    if(!empty($oLoadInfo->strLoadfile))
-    {
-        // Set oPathUser if needed
-        if(is_object($oLoadInfo->oPathUser))
-        {
-            // Hack #2
-            $oPathUser = $oLoadInfo->oPathUser;
-        }
+	if(!empty($oLoadInfo->strLoadfile))
+	{
+		// Set oPathUser if needed
+		if(is_object($oLoadInfo->oPathUser))
+		{
+			// Hack #2
+			$oPathUser = $oLoadInfo->oPathUser;
+		}
 
-        // Include
-        include($oLoadInfo->strLoadfile);
-    }
+		// Include
+		include($oLoadInfo->strLoadfile);
+	}
 }
 
 // Get the games
@@ -50,8 +52,8 @@ if(isset($_SESSION['UserObject']))
 	$strHeadline = str_replace('#username#', $_SESSION['UserObject']->username, $oLang->Get('userarea_headline'));
 	$strPointBoxText	= $_SESSION['UserObject']->kiddie_mode ? '<span data-standard-text="'.$oLang->Get('user_settings_kiddie_mode').'">'.$oLang->Get('user_settings_kiddie_mode').' :)</span>' : '<span data-standard-text="'.$oLang->Get('global_points').'"><span id="pointContainer">0</span> '.$oLang->Get('global_points').'</span>';
 
-    // Calculate subscription
-    CalculateSubscriptionTimeleft($_SESSION['UserObject']->expire);
+	// Calculate subscription
+	CalculateSubscriptionTimeleft($_SESSION['UserObject']->expire);
 	$strUserarea = '
 		<div class="ContentBoxBlue">
 			<div class="ContentBoxHeadline">
@@ -63,17 +65,18 @@ if(isset($_SESSION['UserObject']))
 			<div class="ContentBoxBodyContainer">
 				<div class="ContentBoxBody">
 					'.$oPageRenderer->RenderDialogLink('/user/'.$_SESSION['UserObject']->username.'/statistics/', PageRenderer::DialogType_Info, $oLang->Get('frontpage_user_statistics'), '/img/icons/statistics-white.svg').'
-                    <!--'.$oPageRenderer->RenderDialogLink('/user/subscription/', PageRenderer::DialogType_Action, $oLang->Get('frontpage_user_subscription'), '/img/icons/subscription.svg').'-->
+					<!--'.$oPageRenderer->RenderDialogLink('/user/subscription/', PageRenderer::DialogType_Action, $oLang->Get('frontpage_user_subscription'), '/img/icons/subscription.svg').'-->
                     '.$oPageRenderer->RenderDialogLink('/user/settings/', PageRenderer::DialogType_Info, $oLang->Get('frontpage_user_settings'), '/img/icons/settings.svg').'
-	                <!--a href="/user/settings/" title="'.$oLang->Get('frontpage_user_settings').'" data-internal-navigation></a-->
-                    <a href="/?mode=logout" class="IconLink"><img src="/img/icons/logout.svg" alt="" /> '.$oLang->Get('frontpage_user_logout').'</a>
+					'.$oPageRenderer->RenderDialogLink('/game/create/', PageRenderer::DialogType_Action, "nub", '/img/icons/settings.svg').'
+					<!--a href="/user/settings/" title="'.$oLang->Get('frontpage_user_settings').'" data-internal-navigation></a-->
+					<a href="/?mode=logout" class="IconLink"><img src="/img/icons/logout.svg" alt="" /> '.$oLang->Get('frontpage_user_logout').'</a>
 				</div>
 			</div>
 		</div>
 		<div class="ContentBoxPoint">
 			<div class="ContentBoxHeadline">
 				<div>
-                    <img src="'.HTTP_PROJECT_ROOT_IMG.'icons/user.svg" alt="" />
+					<img src="'.HTTP_PROJECT_ROOT_IMG.'icons/user.svg" alt="" />
 					'.$strPointBoxText.'
 				</div>
 			</div>
@@ -81,24 +84,24 @@ if(isset($_SESSION['UserObject']))
 				&nbsp;
 			</div>
 		</div>
-        <div class="ContentBoxGameControl">
-            <div>
-                <table border="0" cellspacing="100" cellpadding="0">
-                    <tr>
-                        <td><input type="text" name="bpm" value="80" /><div class="ContentBoxGameControl-bpm">bpm</div></td>
-                        <td>&nbsp;</td>
-                        <td data-action="toggle-game">
-                        	<div class="ContentBoxGameControl-playpause-play">
-                        		<span class="ContentBoxGameControl-playpause">'.$oLang->Get('global_play').'</span><img src="/img/icons/play-white.svg" class="ContentBoxGameControl-icon" />
-                        	</div>
-                        	<div class="ContentBoxGameControl-playpause-pause">
-                        		<span class="ContentBoxGameControl-playpause">'.$oLang->Get('global_pause').'</span><img src="/img/icons/pause-white.svg" class="ContentBoxGameControl-icon" />
-                        	</div>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        </div>
+		<div class="ContentBoxGameControl">
+			<div>
+				<table border="0" cellspacing="100" cellpadding="0">
+					<tr>
+						<td><input type="text" name="bpm" value="80" /><div class="ContentBoxGameControl-bpm">bpm</div></td>
+						<td>&nbsp;</td>
+						<td data-action="toggle-game">
+							<div class="ContentBoxGameControl-playpause-play">
+								<span class="ContentBoxGameControl-playpause">'.$oLang->Get('global_play').'</span><img src="/img/icons/play-white.svg" class="ContentBoxGameControl-icon" />
+							</div>
+							<div class="ContentBoxGameControl-playpause-pause">
+								<span class="ContentBoxGameControl-playpause">'.$oLang->Get('global_pause').'</span><img src="/img/icons/pause-white.svg" class="ContentBoxGameControl-icon" />
+							</div>
+						</td>
+					</tr>
+				</table>
+			</div>
+		</div>
 	';
 }
 else
@@ -163,16 +166,16 @@ echo $oPageRenderer->Renderpage($oLang, '
 				</div>
 			</div>
 		</div>
-        <div class="ContentBoxGameCompass">
-            <div>
+		<div class="ContentBoxGameCompass">
+			<div>
 				<img src="/img/game/compas-left.svg" />
 				<img src="/img/game/compas-left.svg" style="-webkit-transform: scaleX(-1);" />
 				<div class="ContentBoxGameCompass-tone-before">&nbsp;</div>
 				<div class="ContentBoxGameCompass-tone-current">&nbsp;</div>
 				<div class="ContentBoxGameCompass-tone-after">&nbsp;</div>
 				<div class="ContentBoxGameCompass-line">&nbsp;</div>
-            </div>
-        </div>
+			</div>
+		</div>
 	</div>
 	<div  class="ContentBox">
 		<div class="ContentBoxOrange">

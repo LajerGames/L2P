@@ -118,17 +118,17 @@ $this
 ->Set('validation_passwords_mismatch', 'The passwords does not match')
 ->Set('confirmation_mail_headline', 'Welcome to')
 ->Set('confirmation_mail', '
-    Hello #username#, <br /><br />
-    Welcome to #system# :) <br /><br />
-    In order to login, you will have to confirm this e-mail address. <br /><br />
-    First time you login to #system# you will be asked for a activation-key.<br />
-    You can confirm your mail directly via this link:<br />
-    #confirmation_anchortag#<br /><br />
-    Activationkey: #activationkey#<br />
-    Username: #username# <br />
-    Password: #password# <br /><br />
-    Hav fun being awesome on #system# ;)<br /><br />
-    #system# Team
+	Hello #username#, <br /><br />
+	Welcome to #system# :) <br /><br />
+	In order to login, you will have to confirm this e-mail address. <br /><br />
+	First time you login to #system# you will be asked for a activation-key.<br />
+	You can confirm your mail directly via this link:<br />
+	#confirmation_anchortag#<br /><br />
+	Activationkey: #activationkey#<br />
+	Username: #username# <br />
+	Password: #password# <br /><br />
+	Hav fun being awesome on #system# ;)<br /><br />
+	#system# Team
 ')
 
 # Handle user
@@ -158,16 +158,16 @@ $this
 ->Set('validation_newkeysent', 'You\'ve typed in an incorrect activationkey too many times, therefor we\'ve sent a new activationkey to your account')
 ->Set('reconfirmation_mail_headline', 'Your new activation key')
 ->Set('reconfirmation_mail', '
-    Hello #username#, <br /><br />
+	Hello #username#, <br /><br />
 	You\'ve typed in an incorrect activation key too many times.<br /><br />
 	We\'ve sent you this e-mail, containing a new activation key, in order to protect your account.<br /><br />
 	When you login to #system# you will be asked for a activation-key.<br />
-    You can confirm your mail directly via this link:<br />
-    #confirmation_anchortag#<br /><br />
-    Activationkey: #activationkey#<br />
-    Username: #username# <br /><br />
-    Hav fun being awesome on #system# ;)<br /><br />
-    #system# Team
+	You can confirm your mail directly via this link:<br />
+	#confirmation_anchortag#<br /><br />
+	Activationkey: #activationkey#<br />
+	Username: #username# <br /><br />
+	Hav fun being awesome on #system# ;)<br /><br />
+	#system# Team
 ')
 
 # User already logged in
@@ -196,6 +196,18 @@ $this
 ->Set('grade_poor', 'Poor')
 ->Set('grade_rubbish', 'Rubbish')
 ->Set('grade_miserable', 'Miserable')
+->Set('create_window_title', 'Save song')
+->Set('create_dktitle', 'DK Title')
+->Set('create_entitle', 'EN Title')
+->Set('create_permlink', 'Permlink')
+->Set('create_type', 'Type')
+->Set('create_octave', 'Octave')
+->Set('create_status', 'Status')
+->Set('create_genre', 'Genre')
+->Set('create_author', 'Author')
+->Set('create_release_date', 'Released')
+->Set('create_validation_title', 'Please make sure title is more than 2 characters and less than 30')
+->Set('create_validation_permlink', 'Please make sure permlink is more than 2 characters and less than 30 - also it may only contain a-z')
 
 # User statistics
 ->SetMenu('statistics_')
@@ -256,12 +268,14 @@ $this
 ->Set('2_0', 'Click "View all" on the scales.')
 ->Set('2_1_title', 'A-Major')
 ->Set('2_1', 'Add this A-Major scale to your playlist by clicking the plus sign.')
-->Set('2_2_title', 'First note position')
-->Set('2_2', 'Here you can see which fingerposition will be the first one used in this scale. <br /><br /> Click "Got it" to proceed.')
-->Set('2_3_title', 'B-Major')
-->Set('2_3', 'Add this B-Major scale to your playlist by clicking the plus sign.')
-->Set('2_4_title', 'Play')
-->Set('2_4', 'You have now succesfully created a playlist. Click the play icon to continue to the game.')
+->Set('2_2_title', 'Playlist')
+->Set('2_2', 'The scale is now added to your playlist.<br /><br /> Click "Got it" to proceed.')
+->Set('2_3_title', 'First note position')
+->Set('2_3', 'Here you can see which fingerposition will be the first one used in this scale. <br /><br /> Click "Got it" to proceed.')
+->Set('2_4_title', 'B-Major')
+->Set('2_4', 'Add this B-Major scale to your playlist by clicking the plus sign.')
+->Set('2_5_title', 'Play')
+->Set('2_5', 'You have now succesfully created a playlist. Click the play icon to continue to the game.')
 ->Set('3_0_title', 'Microphone')
 ->Set('3_0', 'We need to use your microphone in order to hear the music you are playing, please click allow in order to let Magic Tune use your microphone.')
 ->Set('4_0_title', 'Make noise')
