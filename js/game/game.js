@@ -28,10 +28,10 @@ define(['game/options', 'fM'], function (options, fM) {
 		this.setSpeed(speed);
 	}
 	Game.prototype.setSharp = function (toneName, isTrue) {
-		this.sharps[toneName]	= isTrue === false ? false : true;
+		this.sharps[toneName]	= isTrue === 'toggle' ? (this.sharps[toneName] ? false : true) : (isTrue === false ? false : true);
 	};
 	Game.prototype.setFlat = function (toneName, isTrue) {
-		this.flats[toneName]	= isTrue === false ? false : true;
+		this.flats[toneName]	= isTrue === 'toggle' ? (this.flats[toneName] ? false : true) : (isTrue === false ? false : true);
 	};
 	Game.prototype.setSpeed = function (speed) {
 		if(!this.running) {
@@ -44,6 +44,7 @@ define(['game/options', 'fM'], function (options, fM) {
 		tact.setKeys(this.sharps, this.flats);
 		this.tacts.push(tact);
 		this.length	+= tact.type.length;
+		this.width	= -1;
 	};
 	Game.prototype.reset = function () {
 		this.tacts.forEach(function (tact) {

@@ -63,6 +63,7 @@ define(function() {
 			this.stepFactor;
 			this.points			= 0;
 			this.kiddieModeAccepted	= false;
+			this.isFocus		= false;
 		}
 		Note.prototype.calculatePoints	= function (gameController) {
 			var	that			= this,

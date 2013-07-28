@@ -1305,9 +1305,298 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					return controller;
 				}());
 			});
+		},
+		create: function () {
+			require(['game/game', 'game/tact', 'game/note', 'game/options'], function (Game, Tact, Note, options) {
+				var gameController	= L2P.gameController,
+					octave			= 4,
+					game			= new Game(80);
+
+				function createNote(type, octave, nodeName, isRemoveKey, isSlur) {
+					return new Note(options.nodes.types[type], options.tones.names[octave][nodeName], isRemoveKey ? true : false, isSlur ? true : false);
+				}
+				function createRest(type) {
+					return new Note(options.nodes.types.rest[type], options.tones.rest);
+				}
+				function addTact(notes) {
+					var	tact	= new Tact(options.tacts.types.quarter);
+					notes.forEach(function (note) {
+						tact.addNode(note);
+					});
+					tact.fill();
+
+					game.addTact(tact);
+				}
+
+				addTact([]);
+
+				var	currentTact	= game.tacts[0],
+					currentNote	= currentTact.nodes[0],
+					currentInfo	= [
+						octave + 0,
+						'A'
+					];
+
+				currentNote.isFocus	= true;
+
+				function updateNote(relPos) {
+					var	toneI	= options.tones.all.indexOf(currentNote.tone),
+						newTone	= options.tones.all[toneI - relPos],
+						newNote	= createNote(currentNote.type.name, newTone.octav, newTone.name, currentNote.isRemoveKey, currentNote.isSlur);
+
+					replaceNote(newNote);
+				}
+				function replaceNote(newNote) {
+					var	newTact		= new Tact(currentTact.type),
+						hasReplaced	= false,
+						restNotes	= [],
+						resetFocus	= false;
+
+					currentTact.nodes.forEach(function (note, i) {
+						var	thisReplace	= false,
+							added;
+						if(note === currentNote) {
+							note		= newNote;
+							hasReplaced	= true;
+							thisReplace	= true;
+						}
+
+						if(!thisReplace && hasReplaced && note.isRest) {
+							restNotes.push(note);
+						} else {
+							if(hasReplaced) {
+								restNotes.forEach(function (note) {
+									newTact.addNode(note);
+								});
+								restNotes	= [];
+							}
+							added	= newTact.addNode(note);
+						}
+
+						if(thisReplace && !added) {
+							resetFocus	= true;
+						}
+					});
+
+					newTact.fill();
+
+					game.tacts.splice(game.tacts.indexOf(currentTact), 1, newTact);
+
+					newNote.isFocus	= true;
+					currentNote	= newNote;
+					currentTact	= newTact;
+
+					if(!currentNote.isRest) {
+						currentInfo	= [currentNote.tone.octav, currentNote.tone.name];
+					}
+
+					if(resetFocus) {
+						setFocus(currentTact.nodes[currentTact.nodes.length - 1]);
+					}
+
+					gameController.initView(true);
+				}
+				function updateNoteSize(bigger) {
+					var	noteI			= currentTact.nodes.indexOf(currentNote),
+						newTact			= new Tact(currentTact.type),
+						newNote,
+						types			= [
+							'whole',
+							'halfPeriod',
+							'half',
+							'quarterPeriod',
+							'quarter',
+							'eighthPeriod',
+							'eighth',
+							//'sixteenthPeriod',
+							'sixteenth'
+						],
+						typesRest		= [
+							'restQuarter',
+							'restEighth',
+							'restSixteenth'
+						],
+						typesRestConverted	= [
+							'quarter',
+							'eighth',
+							'sixteenth'
+						],
+						currentTypeI	= currentNote.isRest ? typesRest.indexOf(currentNote.type.name) : types.indexOf(currentNote.type.name),
+						lastNote		= true;
+
+					if(bigger) {
+						if(currentTypeI > 0) {
+							if(currentNote.isRest) {
+								newNote	= createRest(typesRestConverted[currentTypeI - 1]);
+							} else {
+								newNote	= createNote(types[currentTypeI - 1], currentNote.tone.octav, currentNote.tone.name, currentNote.isRemoveKey, currentNote.isSlur);
+							}
+						}
+					} else {
+						if(currentNote.isRest) {
+							if(currentTypeI < (typesRest.length - 1)) {
+								newNote	= createRest(typesRestConverted[currentTypeI + 1]);
+							}
+						} else {
+							if(currentTypeI < (types.length - 1)) {
+								newNote	= createNote(types[currentTypeI + 1], currentNote.tone.octav, currentNote.tone.name, currentNote.isRemoveKey, currentNote.isSlur);
+							}
+						}
+					}
+
+					if(newNote) {
+						replaceNote(newNote);
+					}
+				}
+				function setRest() {
+					var	name;
+
+					if(!currentNote.isRest) {
+						replaceNote(createRest(currentNote.type.name));
+					} else {
+						name	= currentNote.type.name.substr(4).split('').map(function (s, i) {
+							if(i === 0) {
+								s	= s.toLowerCase();
+							}
+							return s;
+						}).join('');
+						replaceNote(createNote(name, currentInfo[0], currentInfo[1], false, false));
+					}
+				}
+				function setFocus(note) {
+					if(currentNote) {
+						currentNote.isFocus	= false;
+					}
+					note.isFocus	= true;
+					currentNote		= note;
+
+					if(!note.isRest) {
+						currentInfo	= [note.tone.octav, note.tone.name];
+					}
+
+					gameController.initView(true);
+				}
+				function moveFocus(right) {
+					var	noteI	= currentTact.nodes.indexOf(currentNote),
+						tactI,
+						focusNote,
+						tactUpdate	= false;
+					if(right) {
+						if(noteI >= (currentTact.nodes.length - 1)) {
+							tactI	= game.tacts.indexOf(currentTact);
+							if(tactI >= (game.tacts.length - 1)) {
+								addTact([]);
+							}
+							currentTact	= game.tacts[tactI + 1];
+							tactUpdate	= true;
+
+							noteI		= -1;
+						}
+						focusNote	= currentTact.nodes[noteI + 1];
+					} else {
+						if(noteI === 0) {
+							tactI	= game.tacts.indexOf(currentTact);
+							if(tactI > 0) {
+								currentTact	= game.tacts[tactI - 1];
+								tactUpdate	= true;
+								noteI		= currentTact.nodes.length;
+							}
+						}
+						focusNote	= currentTact.nodes[noteI - 1];
+					}
+
+					if(focusNote) {
+						setFocus(focusNote);
+					}
+					if(tactUpdate) {
+						gameController.moveToTact(currentTact);
+					}
+				}
+				function setSlur() {
+					if(!currentNote.isRest) {
+						replaceNote(createNote(currentNote.type.name, currentNote.tone.octav, currentNote.tone.name, currentNote.isRemoveKey, !currentNote.isSlur));
+					}
+				}
+				function setSharp() {
+					if(!currentNote.isRest) {
+						var	toneName	= currentNote.tone.name.substr(0, 1);
+
+						game.setSharp(toneName, 'toggle');
+
+						gameController.initView(true);
+					}
+				}
+				function setFlat() {
+					if(!currentNote.isRest) {
+						var	toneName	= currentNote.tone.name.substr(0, 1);
+
+						game.setFlat(toneName, 'toggle');
+
+						gameController.initView(true);
+					}
+				}
+
+				$(window).on({
+					keydown:	function (e) {
+						switch(e.which) {
+						case 37:	// ArrowLeft
+							e.preventDefault();
+							moveFocus(false);
+							break;
+						case 38:	// ArrowUp
+							e.preventDefault();
+							updateNote(-1);
+							break;
+						case 39:	// ArrowRight
+							e.preventDefault();
+							moveFocus(true);
+							break;
+						case 40:	// ArrowDown
+							e.preventDefault();
+							updateNote(1);
+							break;
+						case 107:	// NumPad+
+						case 187:	// +
+							e.preventDefault();
+							updateNoteSize(true);
+							break;
+						case 109:	// NumPad-
+						case 189:	// -
+							e.preventDefault();
+							updateNoteSize(false);
+							break;
+						case 70:	// f
+							e.preventDefault();
+							setFlat();
+							break;
+						case 76:	// l
+							e.preventDefault();
+							setSlur();
+							break;
+						case 82:	// r
+							e.preventDefault();
+							setRest();
+							break;
+						case 83:	// s
+							e.preventDefault();
+							setSharp();
+							break;
+						case 88:	// x
+							e.preventDefault();
+							console.log(JSON.stringify(gameController.exportGame()));
+							break;
+						default:
+							console.log(e.which);
+							break;
+						}
+					}
+				})
+
+				gameController.setGame(game);
+				gameController.moveToTact(0);
+			});
 		}
 	};
-	var t;
 
 	return L2P;
 });

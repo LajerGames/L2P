@@ -1,7 +1,8 @@
 define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], function ($, SVGElement, options, fM, api, L2P, Tick) {
-	function getImagePath(note, connect, coloredNotes) {
-		var	path		= options.gameImagePath,
-			colorName	= '';
+	function getImagePath(note, connect, coloredNotes, colorName) {
+		var	path		= options.gameImagePath;
+
+		colorName		= colorName	|| '';
 		coloredNotes	= coloredNotes || [];
 
 		if(note.isRest) {
@@ -16,7 +17,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 			}
 		}
 
-		if(!note.isRest) {
+		if(!note.isRest && colorName === '') {
 			for(var colorNo = 0; colorNo < coloredNotes.length; colorNo += 1) {
 				if(coloredNotes[colorNo].pos <= note.tone.pos) {
 					colorName	= coloredNotes[colorNo].color;
@@ -274,7 +275,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 			slur.node.style.webkitTransform			= 'scaleY(-1)';
 		}
 	};
-	GameController.prototype.initView	= function () {
+	GameController.prototype.initView	= function (dontResetPos) {
 		var	that		= this,
 			game		= this.game,
 			tactLeftPos	= 0,
@@ -304,7 +305,9 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 			}
 		});
 
-		this.SVGNotes.animateAbs(0, -501, 0);
+		if(dontResetPos !== true) {
+			this.SVGNotes.animateAbs(0, -501, 0);
+		}
 		this.SVGNotes.removeChildNodes();
 
 		var	coloredNotes	= [];
@@ -363,7 +366,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 
 						note.svgElement	= new SVGElement(options.gameImageNodeType)
 											.setRef(note)
-											.setLink('/'+getImagePath(note, connect, coloredNotes))
+											.setLink('/'+getImagePath(note, connect, coloredNotes, note.isFocus ? '-green' : ''))
 											.setPos(notePos, tonePos)
 											.setDimensions(50, 100)
 											.appendTo(tact.svgElement.node);
@@ -435,7 +438,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 									flip	= first.svgElement.options.flip;
 
 								connections.forEach(function (note) {
-									note.svgElement.setLink('/'+getImagePath(note, true, coloredNotes));
+									note.svgElement.setLink('/'+getImagePath(note, true, coloredNotes, note.isFocus ? '-green' : ''));
 									if(note !== first) {
 										if(flip && !note.svgElement.options.flip) {
 											flipNote(note);
@@ -504,6 +507,11 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 				});
 			});
 		}
+
+		var	gameController		= this,
+			totalWidth			= gameController.game.getWidth() - gameController.defWidth / 4;
+
+		gameController.SVGNotes.node.style.width	= (totalWidth + gameController.defWidth / 4)+'px';
 	};
 	GameController.prototype.playNote	= function (note) {
 		note.hasPlayed	= true;
@@ -612,6 +620,58 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		});
 
 		return ex;
+	};
+	GameController.prototype.getTactX	= function (tact, callback) {
+		var	gameController	= this,
+			tacts			= gameController.game.tacts;
+
+		require(['game/tact', 'game/options'], function (Tact, options) {
+			var	i	= tact instanceof Tact ? tacts.indexOf(tact) : tact,
+				x	= gameController.defWidth;
+
+			x	-= options.markerPos;
+
+			for(var j = 0; j < i; j += 1) {
+				x	+= gameController.defWidth * tacts[j].length;
+			}
+
+			callback(x);
+		});
+	};
+	GameController.prototype.getNoteX	= function (note, callback) {
+		var	gameController	= this,
+			tact			= note.tact;
+
+		require(['game/note', 'game/options'], function (Note, options) {
+			var	i	= tact.nodes.indexOf(note),
+				x	= 0;
+
+			for(var j = 0; j < i; j += 1) {
+				x	+= gameController.defWidth * tact.nodes[j].length;
+			}
+
+			callback(x);
+		});
+	};
+	GameController.prototype.moveToTact	= function (tact) {
+		var	gameController	= this;
+
+		if(tact === -1) {
+			gameController.SVGNotes.animateAbs(0, -501, 0);
+		} else {
+			gameController.getTactX(tact, function (x) {
+				gameController.SVGNotes.animateAbs(-x, -501, 0);
+			});
+		}
+	};
+	GameController.prototype.moveToNote	= function (note) {
+		var	gameController	= this;
+
+		gameController.getNoteX(note, function (noteX) {
+			gameController.getTactX(note.tact, function (tactX) {
+				gameController.SVGNotes.animateAbs(-(noteX + tactX), -501, 0);
+			});
+		});
 	};
 	GameController.prototype.isRunning	= function () {
 		return this.game && this.game.running;
