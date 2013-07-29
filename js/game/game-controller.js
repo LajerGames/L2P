@@ -70,6 +70,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		this.currentTact;
 		this.paused			= false;
 		this.lastLeft		= -1;
+		this.isEdit			= false;
 
 		$(fM.visibility).on('change', function (e, visibility) {
 			if(visibility.hidden) {
@@ -277,6 +278,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 	};
 	GameController.prototype.initView	= function (dontResetPos) {
 		var	that		= this,
+			gameController	= this,
 			game		= this.game,
 			tactLeftPos	= 0,
 			firstSlur,
@@ -311,7 +313,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		this.SVGNotes.removeChildNodes();
 
 		var	coloredNotes	= [];
-		if(L2P_global.colored_notes) {
+		if(L2P_global.colored_notes && !gameController.isEdit) {
 			coloredNotes.push({
 				pos:	options.tones.names[4]['C#'].pos,
 				color:	'-yellow'
@@ -589,16 +591,17 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 	GameController.prototype.exportGame	= function () {
 		var ex = [
 			this.game.speed,
+			[this.game.startOctave],
 			[],
 			[],
 			[]
 		];
 
 		for(var toneName in this.game.sharps) {
-			ex[2].push(toneName);
+			ex[3].push(toneName);
 		}
 		for(var toneName in this.game.flats) {
-			ex[3].push(toneName);
+			ex[4].push(toneName);
 		}
 
 		this.game.tacts.forEach(function (tact) {
@@ -610,13 +613,13 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 				var exNode  = [
 					node.type.id,
 					node.tone.name,
-					node.tone.octav,
+					node.tone.octav - ex[1][0],
 					node.isRemoveKey ? 1 : 0,
 					node.isSlur ? 1: 0
 				];
 				exTact[1].push(exNode);
 			});
-			ex[1].push(exTact);
+			ex[2].push(exTact);
 		});
 
 		return ex;

@@ -239,15 +239,12 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					$game_container	= $('#game_container'),
 					then;
 
-				if(L2P.$modal && L2P.$modal.is(':visible')) {
-					//L2P.$modal.trigger('hide-no-back');
-				}
-
 				require(['fM', 'text!templates/game.html', 'game/game-controller', 'game/sound', 'sound-input', 'compass', 'underscore-min'], function (fM, gameText, GameController, Sound, SoundInput, Compass) {
 					var	generate	= !L2P.gameController,
 						$compassBox	= $('div.ContentBoxGameCompass'),
 						compass		= new Compass($compassBox),
-						state		= fM.link.getCurrentNavigate() || {};
+						state		= fM.link.getCurrentNavigate() || {},
+						urlItems	= (url || location.href).split('/');
 
 					L2P.resetBoxText($('#song_title'));
 					L2P.resetBoxText($('#scale_title'));
@@ -284,6 +281,8 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						L2P.gameController			= new GameController(svgContainer);
 						L2P.gameController.sound	= sound;
 					}
+
+					L2P.gameController.isEdit	= false;
 
 					compass.setTone(options.tones.names[4]['A']);
 					compass.show();
@@ -359,6 +358,10 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						if(state.onstart) {
 							$(L2P).trigger(state.onstart, [L2P.gameController]);
 						}
+					}
+
+					if(urlItems[3] === 'edit') {
+						L2P.create();
 					}
 
 					if(callback) {
@@ -1080,7 +1083,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					controller.tour		= new Tour({
 						useLocalStorage:	true,
 						container:			'body',
-						debug:				true,
+						debug:				false,
 						labels:		{
 							next:	'<button class="btn">'+lang.tour_button_got_it+'</button>',
 							prev:	'',
@@ -1205,9 +1208,24 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					});
 
 					controller.tour.addStep({
-						element:	'.modal-info.in #info div[data-content="illustration"]',
+						element:	'.modal-info.in #PlaylistContainer #PlaylistItems > div',
 						title:		lang.tour_2_2_title,
 						content:	lang.tour_2_2,
+						placement:	'left',
+						container:	'.modal-info.in',
+						backdrop:	true,
+						onShow:		function () {
+							$('.modal-info.in #PlaylistContainer #PlaylistInfoContainerInner').addClass('tour-step-backdrop');
+						},
+						onHide:		function () {
+							$('.modal-info.in #PlaylistContainer #PlaylistInfoContainerInner').removeClass('tour-step-backdrop');
+						}
+					});
+
+					controller.tour.addStep({
+						element:	'.modal-info.in #info div[data-content="illustration"]',
+						title:		lang.tour_2_3_title,
+						content:	lang.tour_2_3,
 						placement:	'right',
 						container:	'.modal-info.in',
 						backdrop:	true
@@ -1215,8 +1233,8 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 
 					controller.tour.addStep({
 						element:	'.modal-info.in #list a[href="/game/b-major/4"]',
-						title:		lang['tour_2_3_title'],
-						content:	lang['tour_2_3'],
+						title:		lang['tour_2_4_title'],
+						content:	lang['tour_2_4'],
 						placement:	'right',
 						container:	'.modal-info.in',
 						backdrop:	true,
@@ -1232,8 +1250,8 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 
 					controller.tour.addStep({
 						element:	'.modal-info.in #PlaylistContainer img.playPlaylist',
-						title:		lang.tour_2_4_title,
-						content:	lang.tour_2_4,
+						title:		lang.tour_2_5_title,
+						content:	lang.tour_2_5,
 						placement:	'left',
 						container:	'.modal-info.in',
 						backdrop:	true,
@@ -1300,8 +1318,6 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					controller.tour.setCurrentStep(0);
 					controller.tour.start(true);
 
-					console.log(controller.tour);
-
 					return controller;
 				}());
 			});
@@ -1309,8 +1325,10 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 		create: function () {
 			require(['game/game', 'game/tact', 'game/note', 'game/options'], function (Game, Tact, Note, options) {
 				var gameController	= L2P.gameController,
-					octave			= 4,
-					game			= new Game(80);
+					game			= gameController.game,
+					octave			= game.startOctave;
+
+				gameController.isEdit	= true;
 
 				function createNote(type, octave, nodeName, isRemoveKey, isSlur) {
 					return new Note(options.nodes.types[type], options.tones.names[octave][nodeName], isRemoveKey ? true : false, isSlur ? true : false);
@@ -1328,16 +1346,12 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					game.addTact(tact);
 				}
 
-				addTact([]);
-
 				var	currentTact	= game.tacts[0],
-					currentNote	= currentTact.nodes[0],
+					currentNote,
 					currentInfo	= [
 						octave + 0,
 						'A'
 					];
-
-				currentNote.isFocus	= true;
 
 				function updateNote(relPos) {
 					var	toneI	= options.tones.all.indexOf(currentNote.tone),
@@ -1536,67 +1550,95 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					}
 				}
 
-				$(window).on({
-					keydown:	function (e) {
-						switch(e.which) {
-						case 37:	// ArrowLeft
-							e.preventDefault();
-							moveFocus(false);
-							break;
-						case 38:	// ArrowUp
-							e.preventDefault();
-							updateNote(-1);
-							break;
-						case 39:	// ArrowRight
-							e.preventDefault();
-							moveFocus(true);
-							break;
-						case 40:	// ArrowDown
-							e.preventDefault();
-							updateNote(1);
-							break;
-						case 107:	// NumPad+
-						case 187:	// +
-							e.preventDefault();
-							updateNoteSize(true);
-							break;
-						case 109:	// NumPad-
-						case 189:	// -
-							e.preventDefault();
-							updateNoteSize(false);
-							break;
-						case 70:	// f
-							e.preventDefault();
-							setFlat();
-							break;
-						case 76:	// l
-							e.preventDefault();
-							setSlur();
-							break;
-						case 82:	// r
-							e.preventDefault();
-							setRest();
-							break;
-						case 83:	// s
-							e.preventDefault();
-							setSharp();
-							break;
-						case 88:	// x
-							e.preventDefault();
-							console.log(JSON.stringify(gameController.exportGame()));
-							break;
-						default:
-							console.log(e.which);
-							break;
-						}
-					}
-				})
+				setFocus(currentTact.nodes[0]);
 
-				gameController.setGame(game);
+				function onKeydown(e) {
+					switch(e.which) {
+					case 37:	// ArrowLeft
+						e.preventDefault();
+						moveFocus(false);
+						break;
+					case 38:	// ArrowUp
+						e.preventDefault();
+						updateNote(-1);
+						break;
+					case 39:	// ArrowRight
+						e.preventDefault();
+						moveFocus(true);
+						break;
+					case 40:	// ArrowDown
+						e.preventDefault();
+						updateNote(1);
+						break;
+					case 107:	// NumPad+
+					case 187:	// +
+						e.preventDefault();
+						updateNoteSize(true);
+						break;
+					case 109:	// NumPad-
+					case 189:	// -
+						e.preventDefault();
+						updateNoteSize(false);
+						break;
+					case 70:	// f
+						e.preventDefault();
+						setFlat();
+						break;
+					case 76:	// l
+						e.preventDefault();
+						setSlur();
+						break;
+					case 82:	// r
+						e.preventDefault();
+						setRest();
+						break;
+					case 83:	// s
+						e.preventDefault();
+						setSharp();
+						break;
+					case 88:	// x
+						e.preventDefault();
+
+						require(['fM'], function (fM) {
+							$(window).off('keydown', onKeydown);
+							fM.link.navigate('/game/'+gameController.permlink+'/save/', 'Magic Tune', {
+								title:	'Magic Tune',
+								data:	{
+									data:	JSON.stringify(gameController.exportGame())
+								}
+							});
+						});
+						console.log(JSON.stringify(gameController.exportGame()));
+						break;
+					default:
+						console.log(e.which);
+						break;
+					}
+				}
+
+				$(window).on('keydown', onKeydown);
+
 				gameController.moveToTact(0);
 			});
 		}
 	};
+
+	function login(e) {
+		e.preventDefault();
+
+		sessionStorage.removeItem('l2p_fb_autologin');
+
+		L2P.facebook.login(function (user) {
+			L2P.$modal.off('hide');
+		});
+	}
+	$('#frontpage_container [name="facebook_login"]').on('click', function (e) {
+		e.preventDefault();
+
+		sessionStorage.removeItem('l2p_fb_autologin');
+
+		L2P.facebook.login(function () {});
+	});
 
 	return L2P;
 });

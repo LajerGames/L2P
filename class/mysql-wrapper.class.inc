@@ -84,6 +84,7 @@ class MySQLWrapper
 	* @param string $strTable
 	* @param array $arrData
 	* @param string $strComment
+	* @return int
 	*/
 	public function Insert($strTable, $arrData, $strDescription = '')
 	{

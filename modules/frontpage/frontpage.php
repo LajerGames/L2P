@@ -67,8 +67,7 @@ if(isset($_SESSION['UserObject']))
 					'.$oPageRenderer->RenderDialogLink('/user/'.$_SESSION['UserObject']->username.'/statistics/', PageRenderer::DialogType_Info, $oLang->Get('frontpage_user_statistics'), '/img/icons/statistics-white.svg').'
 					<!--'.$oPageRenderer->RenderDialogLink('/user/subscription/', PageRenderer::DialogType_Action, $oLang->Get('frontpage_user_subscription'), '/img/icons/subscription.svg').'-->
                     '.$oPageRenderer->RenderDialogLink('/user/settings/', PageRenderer::DialogType_Info, $oLang->Get('frontpage_user_settings'), '/img/icons/settings.svg').'
-					'.$oPageRenderer->RenderDialogLink('/game/create/', PageRenderer::DialogType_Action, "nub", '/img/icons/settings.svg').'
-					<!--a href="/user/settings/" title="'.$oLang->Get('frontpage_user_settings').'" data-internal-navigation></a-->
+					'.($_SESSION['UserObject']->is_god == 1 ? $oPageRenderer->RenderDialogLink('/game/create/edit/', PageRenderer::DialogType_Action, 'nub', '/img/icons/settings.svg') : '').'
 					<a href="/?mode=logout" class="IconLink"><img src="/img/icons/logout.svg" alt="" /> '.$oLang->Get('frontpage_user_logout').'</a>
 				</div>
 			</div>
@@ -116,6 +115,7 @@ else
 			<div class="ContentBoxBodyContainer">
 				<div class="ContentBoxBody upper">
 					'.$oLoginForm->RenderFields(false).'
+					<button name="facebook_login"><img src="/img/icons/facebook.svg" /></button>
 				</div>
 				'.$oPageRenderer->RenderDialogLink('/user/create/', PageRenderer::DialogType_Action, '
 					<span>'.$oLang->Get('frontpage_create_user').'</span>

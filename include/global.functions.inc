@@ -11,6 +11,7 @@ function printr($arr)
 * Redirects to another location
 *
 * @param string $strLocation
+* @param bool $bForceReload
 */
 function Redirect($strLocation, $bForceReload = false)
 {
@@ -231,7 +232,7 @@ function FindLoadFile(MySQLWrapper $oSql, $bReturn404 = false)
     {
         $oLoadInfo->strLoadfile = SERVER_PROJECT_ROOT_MODULES.REQUEST_URI.'/index.php';
     }
-    elseif(substr(REQUEST_URI, 0, 6) === '/game/')
+    elseif(substr(REQUEST_URI, 0, 6) === '/game/' && substr(REQUEST_URI, -6) !== '/save/')
     {
         $oLoadInfo->strLoadfile = SERVER_PROJECT_ROOT_MODULES.'game/game.php';
     }
@@ -253,79 +254,117 @@ function FindLoadFile(MySQLWrapper $oSql, $bReturn404 = false)
         // Do we know this path
         switch($strFolder)
         {
+            case 'game':
             case 'user':
                 $bRecognizedPath = true;
                 break;
         }
 
-        // Do we recognize the user?
-        $oPathUser = $oSql->SelectSingleObject('
-            SELECT
-                users.id        AS iUserID,
-                users.username  AS strUsername
-            FROM
-                users
-            WHERE
-                users.username = "'.$oSql->RealEscape($strUsername).'"
-        ');
-
-        // Did we find a user?
-        if($oPathUser->iUserID > 0)
+        if($strFolder === 'user')
         {
-            $bRecognizedUser = true;
-        }
+	        // Do we recognize the user?
+	        $oPathUser = $oSql->SelectSingleObject('
+	            SELECT
+	                users.id        AS iUserID,
+	                users.username  AS strUsername
+	            FROM
+	                users
+	            WHERE
+	                users.username = "'.$oSql->RealEscape($strUsername).'"
+	        ');
 
-        // Did our last desperate attempt of finding a page to load pay off?
-        $bPageLoaded = false;
-        if($bRecognizedPath && $bRecognizedUser)
-        {
-            $oLoadInfo->oPathUser = $oPathUser;
-            // Now check if we recognize the destination without the username
-            if(is_file(SERVER_PROJECT_ROOT_MODULES.$strFolder.'/'.substr($strRemainingPath, 0, -1).'.php'))
-            {
-                # Hack 2 (oPathUser is already set)
-                $bPageLoaded = true;
+	        // Did we find a user?
+	        if($oPathUser->iUserID > 0)
+	        {
+	            $bRecognizedUser = true;
+	        }
 
-                $oLoadInfo->strLoadfile = SERVER_PROJECT_ROOT_MODULES.$strFolder.'/'.substr($strRemainingPath, 0, -1).'.php';
-            }
-            elseif(is_file(SERVER_PROJECT_ROOT_MODULES.$strFolder.$strRemainingPath.'/index.php'))
-            {
-                # Hack 2 (oPathUser is already set)
-                $bPageLoaded = true;
+	        // Did our last desperate attempt of finding a page to load pay off?
+	        $bPageLoaded = false;
+	        if($bRecognizedPath && $bRecognizedUser)
+	        {
+	            $oLoadInfo->oPathUser = $oPathUser;
+	            // Now check if we recognize the destination without the username
+	            if(is_file(SERVER_PROJECT_ROOT_MODULES.$strFolder.'/'.substr($strRemainingPath, 0, -1).'.php'))
+	            {
+	                # Hack 2 (oPathUser is already set)
+	                $bPageLoaded = true;
 
-                $oLoadInfo->strLoadfile = SERVER_PROJECT_ROOT_MODULES.$strFolder.$strRemainingPath.'/index.php';
-            }
-            elseif(substr($strRemainingPath, 0, 11) === 'statistics/')
-            {
-            	// We might have an UUID for a search here
-				$arrRemainingURI	= explode('/', $strRemainingPath);
+	                $oLoadInfo->strLoadfile = SERVER_PROJECT_ROOT_MODULES.$strFolder.'/'.substr($strRemainingPath, 0, -1).'.php';
+	            }
+	            elseif(is_file(SERVER_PROJECT_ROOT_MODULES.$strFolder.$strRemainingPath.'/index.php'))
+	            {
+	                # Hack 2 (oPathUser is already set)
+	                $bPageLoaded = true;
 
-				// Test weither this looks like an UUID
-				if(!empty($arrRemainingURI[1]) && strlen($arrRemainingURI[1]) === 6)
-				{
-					$strUUID	= $arrRemainingURI[1];
+	                $oLoadInfo->strLoadfile = SERVER_PROJECT_ROOT_MODULES.$strFolder.$strRemainingPath.'/index.php';
+	            }
+	            elseif(substr($strRemainingPath, 0, 11) === 'statistics/')
+	            {
+            		// We might have an UUID for a search here
+					$arrRemainingURI	= explode('/', $strRemainingPath);
 
-					$oStatisticsSearch	= $oSql->SelectSingleObject('
-						SELECT
-							users_statistics_search.id		AS iUserStatisticsSearchID,
-							users_statistics_search.search	AS arrSearchFromJSON
-						FROM
-							users_statistics_search
-						WHERE
-							users_statistics_search.uuid	= "'.$strUUID.'"
-					');
-					if(!empty($oStatisticsSearch))
+					// Test weither this looks like an UUID
+					if(!empty($arrRemainingURI[1]) && strlen($arrRemainingURI[1]) === 6)
 					{
-						$bPageLoaded = true;
+						$strUUID	= $arrRemainingURI[1];
 
-						$oLoadInfo->oStatisticsSearch	= $oStatisticsSearch;
-						$oLoadInfo->strLoadfile 		= SERVER_PROJECT_ROOT_MODULES.$strFolder.'/statistics.php';
+						$oStatisticsSearch	= $oSql->SelectSingleObject('
+							SELECT
+								users_statistics_search.id		AS iUserStatisticsSearchID,
+								users_statistics_search.search	AS arrSearchFromJSON
+							FROM
+								users_statistics_search
+							WHERE
+								users_statistics_search.uuid	= "'.$strUUID.'"
+						');
+						if(!empty($oStatisticsSearch))
+						{
+							$bPageLoaded = true;
 
-						$oSql->Touch('users_statistics_search', $oStatisticsSearch->iUserStatisticsSearchID);
+							$oLoadInfo->oStatisticsSearch	= $oStatisticsSearch;
+							$oLoadInfo->strLoadfile 		= SERVER_PROJECT_ROOT_MODULES.$strFolder.'/statistics.php';
+
+							$oSql->Touch('users_statistics_search', $oStatisticsSearch->iUserStatisticsSearchID);
+						}
 					}
-				}
-            }
-        }
+	            }
+	        }
+		}
+		elseif($strFolder === 'game')
+		{
+			if($strUsername === 'create')
+			{
+				$oPathGame	= new stdClass();
+				$oPathGame->iGameID	= 0;
+			}
+			else
+			{
+				$oPathGame	= $oSql->SelectSingleObject('
+					SELECT
+						game.id		AS iGameID
+					FROM
+						games
+					WHERE
+						games.deleted	= 0
+					 &&	games.permlink	= "'.$oSql->RealEscape($strUsername).'"
+				');
+			}
+			$bPageLoaded = false;
+			if(!empty($oPathGame))
+			{
+	            $oLoadInfo->oPathGame = $oPathGame;
+
+	            // Now check if we recognize the destination without the username
+	            if(is_file(SERVER_PROJECT_ROOT_MODULES.$strFolder.'/'.substr($strRemainingPath, 0, -1).'.php'))
+	            {
+	                # Hack 2 (oPathUser is already set)
+	                $bPageLoaded = true;
+
+	                $oLoadInfo->strLoadfile = SERVER_PROJECT_ROOT_MODULES.$strFolder.'/'.substr($strRemainingPath, 0, -1).'.php';
+	            }
+			}
+		}
 
         if(!$bPageLoaded)
         {
@@ -745,6 +784,7 @@ class AC_LoadFileInfo
 {
     public $strLoadfile;
     public $oPathUser;
+    public $oPathGame;
     public $oStatisticsSearch;
 }
 ?>

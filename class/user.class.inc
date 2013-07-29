@@ -24,6 +24,7 @@ class UserHandler
 				users.games_finished,
                 users.game_time,
 				users.expire,
+				users.is_god,
 				users_settings.concert_pitch,
 				users_settings.colored_notes,
                 users_settings.kiddie_mode,

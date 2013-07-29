@@ -4,6 +4,9 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/include/config.php');
 #Hack 1
 if(!isset($oGameCreateForm))
 {
+	$strGameData	= $_POST['data'];
+	$arrGameData	= json_decode($strGameData, true);
+
     $arrOctaves = array(
         1 => 1,
         2 => 2,
@@ -45,10 +48,11 @@ if(!isset($oGameCreateForm))
     }
 
     $oGameCreateForm = new Form('game_create');
-    $oGameCreateForm->TextField('dk_title', '', $oLang->Get('game_create_dktitle'), new FormFieldValidation(true, 'PATTERN_TITLE', $oLang->Get('game_create_validation_title'), false), null, false, array('maxlength' => 30));
-    $oGameCreateForm->TextField('en_title', '', $oLang->Get('game_create_entitle'), new FormFieldValidation(true, 'PATTERN_TITLE', $oLang->Get('game_create_validation_title'), false), null, false, array('maxlength' => 30));
-    $oGameCreateForm->TextField('permlink', '', $oLang->Get('game_create_permlink'), new FormFieldValidation(true, 'PATTERN_TITLE', $oLang->Get('game_create_validation_title'), false), null, false, array('maxlength' => 30));
-    $oGameCreateForm->SelectBox('octave', '', $arrOctaves, $oLang->Get('game_create_octave'));
+    $oGameCreateForm->TextField('data', $strGameData, '', null, 'hidden');
+    $oGameCreateForm->TextField('dk_title', '', $oLang->Get('game_create_dktitle'), new FormFieldValidation(true, PATTERN_TITLE, $oLang->Get('game_create_validation_title'), false), null, false, array('maxlength' => 30));
+    $oGameCreateForm->TextField('en_title', '', $oLang->Get('game_create_entitle'), new FormFieldValidation(true, PATTERN_TITLE, $oLang->Get('game_create_validation_title'), false), null, false, array('maxlength' => 30));
+    $oGameCreateForm->TextField('permlink', '', $oLang->Get('game_create_permlink'), new FormFieldValidation(true, PATTERN_TITLE, $oLang->Get('game_create_validation_title'), false), null, false, array('maxlength' => 30));
+    //$oGameCreateForm->SelectBox('octave', $arrGameData[1][0], $arrOctaves, $oLang->Get('game_create_octave'));
     $oGameCreateForm->SelectBox('status', 'pending', $arrStatus, $oLang->Get('game_create_status'));
     $oGameCreateForm->SelectBox('genre', '', $arrGenres, $oLang->Get('game_create_genre'));
 }

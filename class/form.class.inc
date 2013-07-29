@@ -420,7 +420,7 @@ class FormField
 
 		$strRtrn = '
 		<div class="inputContainer">
-			<input type="'.$this->strType.'" name="'.$this->strName.'" title="'.$this->oValidation->strError.'" value="'.$this->mValue.'" x-moz-errormessage="'.$this->oValidation->strError.'" placeholder="'.$strLabel.'" data-value="'.$strLabel.'" '.$strAddErrorMessage.' '.RenderProperties($arrProperties).' class="std" />
+			<input type="'.$this->strType.'" name="'.$this->strName.'" title="'.$this->oValidation->strError.'" value="'.htmlentities($this->mValue).'" x-moz-errormessage="'.$this->oValidation->strError.'" placeholder="'.$strLabel.'" data-value="'.$strLabel.'" '.$strAddErrorMessage.' '.RenderProperties($arrProperties).' class="std" />
 			'.$strExtraNodes.'
 		</div>
 		';
@@ -460,7 +460,7 @@ class FormField
         <select name="'.$this->strName.'">
             '.$strOptions.'
         </select>
-        ';   
+        ';
     }
 
 	/**

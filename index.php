@@ -27,6 +27,13 @@ if(is_object($oLoadInfo->oPathUser))
     // Hack #2
     $oPathUser = $oLoadInfo->oPathUser;
 }
+
+// Set oPathGame if needed
+if(is_object($oLoadInfo->oPathGame))
+{
+    // Hack #2
+    $oPathGame = $oLoadInfo->oPathGame;
+}
 // Postbag
 switch($_REQUEST['mode']) // Yep it makes sence to use request here!
 {
@@ -99,6 +106,18 @@ switch($_REQUEST['mode']) // Yep it makes sence to use request here!
 
 		Redirect($_SERVER['HTTP_REFERER']);
 		break;
+	case 'game_create':
+	    $oGameCreateForm = new Form('game_create');
+	    $oGameCreateForm->TextField('data', '', '', null, 'hidden');
+	    $oGameCreateForm->TextField('dk_title', '', $oLang->Get('game_create_dktitle'), new FormFieldValidation(true, PATTERN_TITLE, $oLang->Get('game_create_validation_title'), false), null, false, array('maxlength' => 30));
+	    $oGameCreateForm->TextField('en_title', '', $oLang->Get('game_create_entitle'), new FormFieldValidation(true, PATTERN_TITLE, $oLang->Get('game_create_validation_title'), false), null, false, array('maxlength' => 30));
+		$oGameCreateForm->TextField('permlink', '', $oLang->Get('game_create_permlink'), new FormFieldValidation(true, PATTERN_TITLE, $oLang->Get('game_create_validation_title'), false), null, false, array('maxlength' => 30));
+	    //$oGameCreateForm->SelectBox('octave', 4, $arrOctaves, $oLang->Get('game_create_octave'));
+	    $oGameCreateForm->SelectBox('status', 'pending', $arrStatus, $oLang->Get('game_create_status'));
+	    $oGameCreateForm->SelectBox('genre', '', $arrGenres, $oLang->Get('game_create_genre'));
+
+	    include(SERVER_PROJECT_ROOT_MODULES.'game/action/save.php');
+	    break;
 }
 
 if(!IS_DIALOG)

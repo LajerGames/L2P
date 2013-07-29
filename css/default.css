@@ -63,7 +63,7 @@ div.inputContainer {
 }
 div.inputContainer button.imgSubmit{
 	position: absolute;
-	right: 3vw;
+	right: 1vw;
 	top: 1.7vh;
 	height: 3.4vh;
 	border: 0;
@@ -123,6 +123,19 @@ div#CenteringContainer {
     height: 2vmin;
     margin-right: 5px;
     padding-bottom: 7px;
+}
+
+button[name="facebook_button"] {
+	-webkit-appearance: none;
+	background: none;
+	border: 0;
+	border-radius: 20px;
+	overflow: hidden;
+	margin: 0;
+	padding: 0;
+}
+button[name="facebook_button"] img {
+	height: 35vh;
 }
 
 .popover {
@@ -742,5 +755,8 @@ div.countdown.microphone-permission .next {
 	background-color: #FFF;
 }
 .playPlaylist.tour-step-backdrop {
+	background-color: #FFF;
+}
+#PlaylistInfoContainerInner.tour-step-backdrop {
 	background-color: #FFF;
 }
