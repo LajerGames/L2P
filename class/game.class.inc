@@ -405,8 +405,8 @@ class Game
 			RIGHT JOIN
 				languages ON
 					languages.deleted       = 0
-                 && languages.type      = "game_title"
-                 && languages.lang          = "'.$strLang.'"
+				 && languages.type      = "game_title"
+				 && languages.lang          = "'.$strLang.'"
 				 && languages.parent_id     = games.id
 			LEFT JOIN
 				games_info ON
@@ -433,6 +433,441 @@ class Game
 	public function getGameData()
 	{
 		return new GameData($this->oSql, $this->iGameID, $this->strGameType);
+	}
+}
+class SongGenerator
+{
+	const   Duration_Short      = 'short',  // ~30 secs
+			Duration_Medium     = 'medium', // ~60 secs
+			Duration_Long       = 'long',   // ~120 secs
+			Speed_Slow          = 'slow',   // 60 bpm
+			Speed_Medium        = 'medium', // 80 bom
+			Speed_Fast          = 'fast',   // 100 bpm
+			Pulse_TwoFourths    = '2/4',
+			Pulse_ThreeFourths  = '3/4',
+			Pulse_FourFourths   = '4/4',
+			Pulse_FiveFourths   = '5/4',
+			Pulse_SixFourths    = '6/4',
+			Direction_Up        = 'up',
+			Direction_Down      = 'down',
+			Direction_Stay      = 'stay',
+            Difficulty_Easy     = 'easy',
+            Difficulty_Medium   = 'medium',
+            Difficulty_Hard     = 'hard';
+
+	public  /**
+			* @var MySQLWrapper
+			*/
+			$oSql,
+			$iLowestOctave      = 3,
+			$strLowestNote      = 'G',
+			$iHighestOctave     = 5,
+			$strHighestNote     = 'B',
+			$cSpeed             = SongGenerator::Speed_Slow,
+			$cDuration          = SongGenerator::Duration_Short,
+			$cPulse             = SongGenerator::Pulse_FourFourths,
+			$arrSharps          = array(),
+			$arrFlats           = array(),
+            $cDifficulty        = SongGenerator::Difficulty_Medium;
+
+
+	public function __construct(MySQLWrapper $oSql)
+	{
+		$this->oSql            = $oSql;
+
+		return;
+	}
+
+	public function GenerateSong()
+	{
+		// So get all info about this song your heart can desire!
+		$oBasicSongInfo     = $this->GetBasicSongInfo();
+
+		// To get the starting note we first need to get a random allowed note
+		$iRandomNoteEntry   = $this->GetRandomNoteEntry($oBasicSongInfo->iLowestNoteEntry, $oBasicSongInfo->iHighestNoteEntry);
+
+		// Get info about our first note
+		$arrAllNotes        = $this->GetAllNotes();
+		$oNoteInfo          = $this->GetNoteInfo($iRandomNoteEntry, $arrAllNotes);
+        $iDefaultOctave     = $oNoteInfo->iOctave;
+
+		// Now are we starting in an upwards or downwards direction - We'll give at 50/50 chance of going either up or down as start direction
+		$cStartDirection  = $this->GetDirection(SongGenerator::Direction_Up, 50, 0);
+
+		$arrSong = json_decode('[100,[4],[[1,[[4,"D",0,0,0],[4,"G",0,0,0],[4,"G",0,0,0],[4,"G",0,0,0]]],[1,[[4,"D",0,0,0],[4,"G",0,0,0],[4,"G",0,0,0],[4,"G",0,0,0]]],[1,[[6,"B",0,0,0],[6,"B",0,0,0],[6,"A",0,0,0],[6,"A",0,0,0],[6,"A",0,0,0],[6,"A",0,0,0],[6,"A",0,0,0],[6,"A",0,0,0]]],[1,[[6,"G",0,0,0],[6,"A",0,0,0],[4,"B",0,0,0],[4,"G",0,0,0],[4,"G",0,0,0]]],[1,[[4,"D",0,0,0],[4,"G",0,0,0],[4,"G",0,0,0],[4,"G",0,0,0]]],[1,[[4,"D",0,0,0],[4,"G",0,0,0],[4,"G",0,0,0],[4,"G",0,0,0]]],[1,[[6,"B",0,0,0],[6,"B",0,0,0],[6,"A",0,0,0],[6,"A",0,0,0],[6,"A",0,0,0],[6,"A",0,0,0],[6,"A",0,0,0],[6,"A",0,0,0]]],[1,[[6,"G",0,0,0],[6,"A",0,0,0],[4,"B",0,0,0],[4,"G",0,0,0],[4,"G",0,0,0]]],[1,[[4,"D",1,0,0],[2,"D",1,0,0],[4,"B",0,0,0]]],[1,[[4,"D",1,0,0],[2,"D",1,0,0],[4,"B",0,0,0]]],[1,[[6,"B",0,0,0],[6,"B",0,0,0],[6,"C",1,0,0],[6,"C",1,0,0],[6,"C",1,0,0],[6,"C",1,0,0],[6,"C",1,0,0],[6,"C",1,0,0]]],[1,[[6,"B",0,0,0],[6,"C",1,0,0],[4,"D",1,0,0],[4,"B",0,0,0],[4,"B",0,0,0]]],[1,[[4,"D",1,0,0],[2,"D",1,0,0],[4,"B",0,0,0]]],[1,[[4,"D",1,0,0],[2,"D",1,0,0],[4,"B",0,0,0]]],[1,[[6,"B",0,0,0],[6,"B",0,0,0],[6,"C",1,0,0],[6,"C",1,0,0],[6,"C",1,0,0],[6,"C",1,0,0],[6,"C",1,0,0],[6,"C",1,0,0]]],[1,[[6,"B",0,0,0],[6,"A",0,0,0],[4,"G",0,0,0],[4,"G",0,0,0],[4,"G",0,0,0]]]],["F"],[]]');
+        //printr($arrSong);
+		$arrTacts = array();
+		for($iTactNo = 0; $iTactNo < $oBasicSongInfo->iAmountOfTacts; $iTactNo++)
+		{
+			$arrTacts[] = $this->CreateTactTemplate($oBasicSongInfo);
+		}
+
+        $bFirstNote = true;
+        foreach($arrTacts as $iTactNo => $arrTactInfo)
+        {
+            foreach($arrTactInfo[1] as $iNoteID => $arrNote)
+            {
+                if(!$bFirstNote)
+                {
+                    // Get a new note
+                }
+                $iRelativeOctave                    = $iDefaultOctave - $oNoteInfo->iOctave;
+
+                $arrTacts[$iTactNo][1][$iNoteID][1] = $oNoteInfo->strNotename;
+                $arrTacts[$iTactNo][1][$iNoteID][2] = $iRelativeOctave;
+
+                $bFirstNote = false;
+            }
+        }
+
+		// Now it's time to start generating the song
+		$arrSong = array(
+			$oBasicSongInfo->iBPM,
+			array($oNoteInfo->iOctave),
+			$arrTacts,
+			$this->arrSharps,
+			$this->arrFlats
+		);
+
+        //printr($arrSong);
+
+		return;
+	}
+
+    private function CreateTactTemplate($oBasicSongInfo)
+    {
+        $arrNoteProperties  = $this->MakeNoteProperties($oBasicSongInfo->iBeatsPerTact);
+        $iPercentLeftOfTact = 100;
+        $iChanceToWorkWith  = 100;
+
+        $arrTactNotes = array();
+        while($iPercentLeftOfTact > 0)
+        {
+            // Find out how much chance we have left to work with
+            if($iPercentLeftOfTact != 100)
+            {
+                $iChanceToWorkWith = 0;
+                foreach($arrNoteProperties as $arrNote)
+                {
+                    if($arrNote[0] <= $iPercentLeftOfTact)
+                    {
+                        $iChanceToWorkWith += $arrNote[1];
+                    }
+                }
+            }
+
+            // Get a number between 1 and the amount of chance we have
+            $iLuckyNumber = rand(1, $iChanceToWorkWith);
+
+            // Now loop through the array and find the lucky number's note
+            foreach($arrNoteProperties as $iNoteID => $arrNote)
+            {
+                $iLuckyNumber -= $arrNote[1];
+                // Do we choose this one?
+                if($iLuckyNumber < 1)
+                {
+                    $arrTactNotes[] = array(
+                        $iNoteID,
+                        '#NoteName#',
+                        0,
+                        0,
+                        0
+                    );
+                    // Now we have less percent left of the tact
+                    $iPercentLeftOfTact -= $arrNote[0];
+                    break;
+                }
+            }
+        }
+
+        // Create the tact array
+        return array(
+            $oBasicSongInfo->oGamePulse->iPulseID,
+            $arrTactNotes
+        );
+    }
+
+    private function MakeNoteProperties($iQuarterBeatsPerTact)
+    {
+        // Create percentage change for either note to be chosen according to difficulty
+        switch($this->cDifficulty)
+        {
+            case SongGenerator::Difficulty_Easy :
+                $iWholenote         = 0;
+                $iHalfnotePeriod    = 0;
+                $iHalfnote          = 100;
+                $iQuarternotePeriod = 0;
+                $iQuarternote       = 0;
+                $iEighthnotePeriod  = 0;
+                $iEighthnote        = 0;
+                break;
+            case SongGenerator::Difficulty_Medium :
+                $iWholenote         = 5;
+                $iHalfnotePeriod    = 10;
+                $iHalfnote          = 25;
+                $iQuarternotePeriod = 10;
+                $iQuarternote       = 40;
+                $iEighthnotePeriod  = 0;
+                $iEighthnote        = 10;
+                break;
+            case SongGenerator::Difficulty_Hard :
+                $iWholenote         = 2;
+                $iHalfnotePeriod    = 3;
+                $iHalfnote          = 5;
+                $iQuarternotePeriod = 10;
+                $iQuarternote       = 30;
+                $iEighthnotePeriod  = 25;
+                $iEighthnote        = 25;
+                break;
+        }
+        return array(
+            6   => array(100 / ($iQuarterBeatsPerTact / 0.5),   $iEighthnote),          // Eighthnote
+            5   => array(100 / ($iQuarterBeatsPerTact / 0.75),  $iEighthnotePeriod),    // Eighthperiod
+            4   => array(100 / $iQuarterBeatsPerTact,           $iQuarternote),         // Quarternote
+            3   => array(100 / ($iQuarterBeatsPerTact / 1.5),   $iQuarternotePeriod),   // Quarterperiod
+            2   => array(100 / ($iQuarterBeatsPerTact / 2),     $iHalfnote),            // Halfnote
+            1   => array(100 / ($iQuarterBeatsPerTact / 3),     $iHalfnotePeriod),      // Halfperiod
+            0   => array(100,                                   $iWholenote)            // Wholenote
+        );
+    }
+
+	/**
+	* Tells you which way the notes need to go next :)
+	*
+	* @param const $cCurrentDirection
+	* @param int $iPercentualChanceOfKeepingOnTrack
+	* @param int $iChanceOfStayingAtCurrentNote
+	* @returns constant
+	*/
+	private function GetDirection($cCurrentDirection, $iPercentualChanceOfKeepingOnTrack, $iChanceOfStayingAtCurrentNote = 10)
+	{
+		// First of all, do we stay here?
+		if(GetPercentualChange($iChanceOfStayingAtCurrentNote))
+		{
+			$cDirection       = SongGenerator::Direction_Stay;
+		}
+		else
+		{
+			// Now, do we then change direction?
+			$bContinueDirection = GetPercentualChange($iPercentualChanceOfKeepingOnTrack);
+
+			if($bContinueDirection)
+			{
+				$cDirection = $cCurrentDirection;
+			}
+			else
+			{
+				$cDirection = $cCurrentDirection === SongGenerator::Direction_Up ? SongGenerator::Direction_Down : SongGenerator::Direction_Up;
+			}
+		}
+
+		return $cDirection;
+	}
+
+	/**
+	* Will give a random number between the allowed number entries in the note array, in order to give out a starting note
+	*
+	* @param int $iLowestNoteEntry
+	* @param int $iHighestNoteEntry
+	*/
+	private function GetRandomNoteEntry($iLowestNoteEntry, $iHighestNoteEntry)
+	{
+		return rand($iLowestNoteEntry, $iHighestNoteEntry);
+	}
+
+	private function GetNoteInfo($iEntryID, $arrAllNotes)
+	{
+		$strNotename            = $arrAllNotes[$iEntryID];
+
+		$arrNoteInfo            = explode(',', $strNotename);
+
+		$oNoteInfo              = new AC_Note();
+		$oNoteInfo->iEntry      = $iEntryID;
+		$oNoteInfo->iOctave     = intval($arrNoteInfo[0]);
+		$oNoteInfo->strNotename = $arrNoteInfo[1];
+
+		return $oNoteInfo;
+	}
+
+	public function GetBasicSongInfo()
+	{
+		// Get neccesary calculation info
+		$iBPM               = $this->GetGameBPM();
+		$iTargetDuration    = $this->GetTargetDuration();
+		$oGamePulse         = $this->GetGamePulse();
+
+		// How long time does one beat last?
+		$iDurationPerBeat   = 60/$iBPM;
+
+		// Now get amount of quarternote beats per tact
+		$iBeatsPerTact      = ($oGamePulse->iNumerator / $oGamePulse->iDenominator) * 4;
+
+		// How long time does one tact take?
+		$fTactDuration      = $iDurationPerBeat * $iBeatsPerTact;
+
+		// Find out how many tacts to make to get nearest to the target duration
+		$iAmountOfTacts     = round($iTargetDuration / $fTactDuration);
+
+		// Now get the actual gametime
+		$fActualDuration    = $iAmountOfTacts * $fTactDuration;
+
+		// Now we're about to calculate which note entries we're about to use from the notes array.
+
+		// Get all the basic notes
+		$arrAllNotes = $this->GetAllNotes();
+
+		// Which notes can we use in this instance
+		$iLowestNoteEntry   = 0;
+		$iHighestNoteEntry  = 16;
+		foreach($arrAllNotes as $iNoteEntry => $strNote)
+		{
+			if($strNote == $this->iLowestOctave.','.$this->strLowestNote)
+			{
+				$iLowestNoteEntry = $iNoteEntry;
+			}
+			if($strNote == $this->iHighestOctave.','.$this->strHighestNote)
+			{
+				$iHighestNoteEntry = $iNoteEntry;
+			}
+		}
+
+		// Now create an instance of the GameInfo class in order to get all of this information into a neat object
+		$oBasicSongInfo = new AC_GetBasicSongInfo();
+		$oBasicSongInfo->iBPM               = $iBPM;
+		$oBasicSongInfo->iTargetDuration    = $iTargetDuration;
+		$oBasicSongInfo->oGamePulse         = $oGamePulse;
+		$oBasicSongInfo->iDurationPerBeat   = $iDurationPerBeat;
+        $oBasicSongInfo->fDurationPerTact   = $fTactDuration;
+		$oBasicSongInfo->iBeatsPerTact      = $iBeatsPerTact;
+		$oBasicSongInfo->iAmountOfTacts     = $iAmountOfTacts;
+		$oBasicSongInfo->fActualDuration    = $fActualDuration;
+		$oBasicSongInfo->iLowestNoteEntry   = $iLowestNoteEntry;
+		$oBasicSongInfo->iHighestNoteEntry  = $iHighestNoteEntry;
+
+		return $oBasicSongInfo;
+	}
+
+	/**
+	* Gives you a BPM in numbers instead of the useless string constant we have now.. that is only for the user :D
+	*
+	*/
+	private function GetGameBPM()
+	{
+		$iBPM = 0;
+		switch($this->cSpeed)
+		{
+			case SongGenerator::Speed_Slow :
+				$iBPM = 60;
+				break;
+			case SongGenerator::Speed_Medium :
+				$iBPM = 80;
+				break;
+			case SongGenerator::Speed_Fast :
+				$iBPM = 100;
+				break;
+		}
+
+		return $iBPM;
+	}
+
+	/**
+	* Gives you a number, which is the amount of seconds we're trying to make this song last
+	*
+	*/
+	private function GetTargetDuration()
+	{
+		$iTargetDuration = 0;
+		switch($this->cDuration)
+		{
+			case SongGenerator::Duration_Short :
+				$iTargetDuration = 30;
+				break;
+			case SongGenerator::Duration_Medium :
+				$iTargetDuration = 60;
+				break;
+			case SongGenerator::Duration_Long :
+				$iTargetDuration = 120;
+				break;
+		}
+
+		return $iTargetDuration;
+	}
+
+	/**
+	* Gives you an object containing info about the game pulse.
+	*
+	*/
+	private function GetGamePulse()
+	{
+		$strGamePulse   = '';
+		$iGamePulseID   = 0;
+		switch($this->cPulse)
+		{
+			case SongGenerator::Pulse_TwoFourths :
+				$strGamePulse   = '2/4';
+				$iGamePulseID   = 5;
+				break;
+			case SongGenerator::Pulse_ThreeFourths :
+				$strGamePulse = '3/4';
+				$iGamePulseID   = 2;
+				break;
+			case SongGenerator::Pulse_FourFourths :
+				$strGamePulse = '4/4';
+				$iGamePulseID   = 1;
+				break;
+			case SongGenerator::Pulse_FiveFourths :
+				$strGamePulse = '5/4';
+				$iGamePulseID   = 3;
+				break;
+			case SongGenerator::Pulse_SixFourths :
+				$strGamePulse = '6/4';
+				$iGamePulseID   = 4;
+				break;
+		}
+
+		$arrGamePulse = explode('/', $strGamePulse);
+
+		$oGamePulse = new AC_GetGamePulse();
+		$oGamePulse->strPulse       = $strGamePulse;
+		$oGamePulse->iPulseID       = $iGamePulseID; // Used in JS :)
+		$oGamePulse->iNumerator     = intval($arrGamePulse[0]);
+		$oGamePulse->iDenominator   = intval($arrGamePulse[1]);
+
+		return $oGamePulse;
+	}
+
+	/**
+	* Made to give octave/note combination a mathmatical number which will be easier to calculate with! :)
+	*
+	*/
+	private function GetAllNotes()
+	{
+		return array(
+			'3,G',
+			'3,A',
+			'3,B',
+			'4,C',
+			'4,D',
+			'4,E',
+			'4,F',
+			'4,G',
+			'4,A',
+			'4,B',
+			'5,C',
+			'5,D',
+			'5,E',
+			'5,F',
+			'5,G',
+			'5,A',
+			'5,B',
+			'6,C',
+			'6,D',
+			'6,E',
+			'6,F',
+			'6,G',
+			'6,A',
+			'6,B'
+		);
 	}
 }
 class Illustrations
@@ -647,5 +1082,31 @@ class AC_EndGameAchievement
 			$iPlace,
 			$iUserOvertaken,
 			$bPersonalRecord;
+}
+class AC_GetBasicSongInfo
+{
+	public  $iBPM,
+			$iTargetDuration,
+			$fActualDuration,
+            $iBeatsPerTact,
+			$oGamePulse,
+			$iDurationPerBeat,
+			$fDurationPerTact,
+			$iAmountOfTacts,
+			$iLowestNoteEntry,
+			$iHighestNoteEntry;
+}
+class AC_GetGamePulse
+{
+	public  $strPulse,
+			$iPulseID,
+			$iNumerator,
+			$iDenominator;
+}
+class AC_Note
+{
+	public  $iEntry,
+			$iOctave,
+			$strNotename;
 }
 ?>

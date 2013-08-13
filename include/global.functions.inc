@@ -780,6 +780,17 @@ function CalculateSubscriptionTimeleft($dSubscriptionEnd)
 
     return;
 }
+/**
+* If you give it the int 10, you have a 10% chance if getting a true bool in return :) simple !
+*
+* @param int $iChanceOfTrue
+*/
+function GetPercentualChange($iChanceOfTrue)
+{
+    $iGeneratedNumber = rand(1, 100);
+
+    return $iGeneratedNumber <= $iChanceOfTrue;
+}
 class AC_LoadFileInfo
 {
     public $strLoadfile;

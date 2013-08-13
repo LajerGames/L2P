@@ -64,7 +64,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		this.sound;
 		this.game;
 		this.lastPos		= 0;
-		this.playSound		= false;
+		this.playSound		= true;
 		this.useCountdown	= true;
 		this.currentNote;
 		this.currentTact;
