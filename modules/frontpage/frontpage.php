@@ -19,6 +19,10 @@ if(!isset($oLoginForm))
 /*
 $oGameData = new GameData($oSql);
 $oGameData->GetEndgameAchievement(23, 4, 37, 18000);*/
+$oSongGenerator = new SongGenerator($oSql);
+
+$oSongGenerator->GenerateSong();
+
 $strDialog	= '';
 // We may have a deep link
 if(REQUEST_URI !== '/')
@@ -45,7 +49,6 @@ $rMusic = GetMusic($oSql, 'song', 7);
 $rScale = GetMusic($oSql, 'scale', 7);
 
 // Don't display loginfield if user is logged in
-
 if(isset($_SESSION['UserObject']))
 {
 	// Create headline
@@ -66,7 +69,7 @@ if(isset($_SESSION['UserObject']))
 				<div class="ContentBoxBody">
 					'.$oPageRenderer->RenderDialogLink('/user/'.$_SESSION['UserObject']->username.'/statistics/', PageRenderer::DialogType_Info, $oLang->Get('frontpage_user_statistics'), '/img/icons/statistics-white.svg').'
 					<!--'.$oPageRenderer->RenderDialogLink('/user/subscription/', PageRenderer::DialogType_Action, $oLang->Get('frontpage_user_subscription'), '/img/icons/subscription.svg').'-->
-                    '.$oPageRenderer->RenderDialogLink('/user/settings/', PageRenderer::DialogType_Info, $oLang->Get('frontpage_user_settings'), '/img/icons/settings.svg').'
+					'.$oPageRenderer->RenderDialogLink('/user/settings/', PageRenderer::DialogType_Info, $oLang->Get('frontpage_user_settings'), '/img/icons/settings.svg').'
 					'.($_SESSION['UserObject']->is_god == 1 ? $oPageRenderer->RenderDialogLink('/game/create/edit/', PageRenderer::DialogType_Action, 'nub', '/img/icons/settings.svg') : '').'
 					<a href="/?mode=logout" class="IconLink"><img src="/img/icons/logout.svg" alt="" /> '.$oLang->Get('frontpage_user_logout').'</a>
 				</div>

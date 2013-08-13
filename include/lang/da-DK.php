@@ -148,6 +148,7 @@ $this
 ->Set('validation_concert_pitch', 'Kammertonen skal være numerisk')
 ->Set('countdown_time', 'Spilstart nedtælling')
 ->Set('metronome', 'Metronom')
+->Set('blind_mode', 'Blindetilstand')
 
 # Activate user
 ->SetMenu('activate_')

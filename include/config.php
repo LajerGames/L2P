@@ -38,7 +38,7 @@ define('DEFAULT_LANGUAGE', 'da-DK');
 define('PATTERN_USERNAME', '[\wæøåÆØÅ_-]{2,16}');
 define('PATTERN_FIRST_NAME', '[\wæøåÆØÅ]{0,20}');
 define('PATTERN_LAST_NAME', '[\wæøåÆØÅ]{0,30}');
-define('PATTERN_TITLE', '[\wæøåÆØÅ]{2,30}');
+define('PATTERN_TITLE', '[\wæøåÆØÅ-]{2,30}');
 define('PATTERN_PASSWORD', '^(?=.*\d).{6,}$');
 define('PATTERN_MAIL', '');
 define('PATTERN_INT', '[0-9]{3}');

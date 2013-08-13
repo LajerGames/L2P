@@ -97,6 +97,8 @@ class statistics
                 users_games_history.game_finished           AS tGameFinished,
                 users_games_history.game_duration           AS fGameDuration,
                 users_games_history.game_start_octave       AS iGameStartOctave,
+                users_games_history.game_hand_position      AS iGameHandPosition,
+                users_games_history.is_blind_mode           AS iIsBlindMode,
                 '.$strSelect.'
                 users_games_history.json_statisticsstring   AS strGameStatistics,
                 users_games_history.json_tactstats          AS strTactStatistics
@@ -128,6 +130,8 @@ class statistics
             $oGameData->strGameStatistics   = $oGameObject->strGameStatistics;
             $oGameData->strTactStatistics   = $oGameObject->strTactStatistics;
             $oGameData->iGameStartOctave	= $oGameObject->iGameStartOctave;
+            $oGameData->iGameHandPosition   = $oGameObject->iGameHandPosition;
+            $oGameData->iGameIsBlindMode    = $oGameObject->iIsBlindMode;
 
             $arrGameData[] = $oGameData;
         }
@@ -352,7 +356,7 @@ class statistics
         $arrFavouriteSongs = array();
         foreach($arrGameData as $oGameData)
         {
-            if(!is_array($arrFavouriteSongs[$oGameData->iGameID][$oGameData->iGameStartOctave]))
+            if(!is_array($arrFavouriteSongs[$oGameData->iGameID][$oGameData->iGameStartOctave][$oGameData->iGameHandPosition][$oGameData->iGameIsBlindMode]))
             {
                 if($oGameData->iGameID > 0)
                 {
@@ -376,7 +380,7 @@ class statistics
 
                     $iSongFound = $oSongInfo->iSongID > 0 ? 1 : 0;
 
-                    $arrFavouriteSongs[$oGameData->iGameID][$oGameData->iGameStartOctave] = array(
+                    $arrFavouriteSongs[$oGameData->iGameID][$oGameData->iGameStartOctave][$oGameData->iGameHandPosition][$oGameData->iGameIsBlindMode] = array(
                         'song_found'    => $iSongFound,
                         'name'          => $oSongInfo->strSongTitle,
                         'permlink'      => $oSongInfo->strPermlink,
@@ -387,17 +391,23 @@ class statistics
             }
 
             // Update the information about this song
-            $arrFavouriteSongs[$oGameData->iGameID][$oGameData->iGameStartOctave]['played']++;
-            $arrFavouriteSongs[$oGameData->iGameID][$oGameData->iGameStartOctave]['avg_points']	+= $oGameData->iPoints;
-            $arrFavouriteSongs[$oGameData->iGameID][$oGameData->iGameStartOctave]['start_octave']	= $oGameData->iGameStartOctave;
+            $arrFavouriteSongs[$oGameData->iGameID][$oGameData->iGameStartOctave][$oGameData->iGameHandPosition][$oGameData->iGameIsBlindMode]['played']++;
+            $arrFavouriteSongs[$oGameData->iGameID][$oGameData->iGameStartOctave][$oGameData->iGameHandPosition][$oGameData->iGameIsBlindMode]['avg_points']    += $oGameData->iPoints;
+            $arrFavouriteSongs[$oGameData->iGameID][$oGameData->iGameStartOctave][$oGameData->iGameHandPosition][$oGameData->iGameIsBlindMode]['start_octave']  = $oGameData->iGameStartOctave;
         }
 
         // Now loop through the song array in order to calculate the avrage points obtained on this song
         foreach($arrFavouriteSongs as $iGameID => $arrOctave)
         {
-            foreach($arrOctave as $iStartOctave => $arrGameInfo)
+            foreach($arrOctave as $iStartOctave => $arrHandPosition)
             {
-                $arrFavouriteSongs[$iGameID][$iStartOctave]['avg_points'] = ($arrGameInfo['avg_points'] / $arrGameInfo['played']);
+                foreach($arrHandPosition as $iHandPosition => $arrBlindMode)
+                {
+                    foreach($arrBlindMode as $iIsBlindMode => $arrGameInfo)
+                    {
+                        $arrFavouriteSongs[$iGameID][$iStartOctave][$iHandPosition][$iIsBlindMode]['avg_points'] = ($arrGameInfo['avg_points'] / $arrGameInfo['played']);
+                    }
+                }
             }
         }
 
@@ -526,21 +536,35 @@ class statistics
         $iLoopID = 1;
         foreach($arrFavouriteSongs as $iGameID => $arrOctave)
         {
-            foreach($arrOctave as $iStartOctave => $arrGameInfo)
+            foreach($arrOctave as $iStartOctave => $arrHandPosition)
             {
-                // Is points and played plural?
-                $strPlayed = $arrGameInfo['played'] == 1 ? $this->oLang->Get('statistics_time') : $this->oLang->Get('statistics_times');
-                $strPoints = $arrGameInfo['avg_points'] == 1 ? $this->oLang->Get('global_point') : $this->oLang->Get('global_points');
+                foreach($arrHandPosition as $iHandPosition => $arrBlindMode)
+                {
+                    foreach($arrBlindMode as $iIsBlindMode => $arrGameInfo)
+                    {
+                        // Is points and played plural?
+                        $strPlayed = $arrGameInfo['played'] == 1 ? $this->oLang->Get('statistics_time') : $this->oLang->Get('statistics_times');
+                        $strPoints = $arrGameInfo['avg_points'] == 1 ? $this->oLang->Get('global_point') : $this->oLang->Get('global_points');
 
-                $strFavouriteSongs .= '
-                    <tr data-gameid="'.$iGameID.'" data-gamestartoctave="'.$iStartOctave.'">
-                        <td>'.$iLoopID.'</td>
-                        <td><span class="octave">('.$this->oLang->Get('global_octave').' '.$arrGameInfo['start_octave'].')</span> '.$arrGameInfo['name'].'</td>
-                        <td>'.$arrGameInfo['played'].' '.$strPlayed.'</td>
-                        <td>'.round($arrGameInfo['avg_points']).' '.$strPoints.'</td>
-                    </tr>
-                ';
-                $iLoopID++;
+                        // Attach blindmode batch
+                        $strBlindMode = '';
+                        if($iIsBlindMode > 0)
+                        {
+                            $strBlindMode = '<span class="octave">(Blind)</span>';
+                        }
+
+                        $strFavouriteSongs .= '
+                            <tr data-gameid="'.$iGameID.'" data-gamestartoctave="'.$iStartOctave.'">
+                                <td>'.$iLoopID.'</td>
+                                <td>'.$iHandPosition.'</td>
+                                <td><span class="octave">('.$this->oLang->Get('global_octave').' '.$arrGameInfo['start_octave'].')</span> '.$arrGameInfo['name'].' '.$strBlindMode.'</td>
+                                <td>'.$arrGameInfo['played'].' '.$strPlayed.'</td>
+                                <td>'.round($arrGameInfo['avg_points']).' '.$strPoints.'</td>
+                            </tr>
+                        ';
+                        $iLoopID++;
+                    }
+                }
             }
         }
         if(!empty($strFavouriteSongs))
@@ -549,6 +573,7 @@ class statistics
             <table border="0" cellspacing="0" cellpadding="0" class="table BottomTableView">
                 <tr>
                     <th>#</th>
+                    <th>Pos.</th>
                     <th>'.$this->oLang->Get('statistics_title').'</th>
                     <th>'.$this->oLang->Get('statistics_played').'</th>
                     <th>'.$this->oLang->Get('statistics_avg_pts').'</th>
@@ -911,4 +936,6 @@ class AC_GameData
     public $strGameStatistics;
     public $strTactStatistics;
     public $iGameStartOctave;
+    public $iGameHandPosition;
+    public $iGameIsBlindMode;
 }

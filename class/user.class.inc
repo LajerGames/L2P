@@ -22,14 +22,15 @@ class UserHandler
 				users.points,
 				users.games_started,
 				users.games_finished,
-                users.game_time,
+				users.game_time,
 				users.expire,
 				users.is_god,
 				users_settings.concert_pitch,
 				users_settings.colored_notes,
-                users_settings.kiddie_mode,
-                users_settings.countdown_time,
-				users_settings.metronome
+				users_settings.kiddie_mode,
+				users_settings.countdown_time,
+				users_settings.metronome,
+				users_settings.blind_mode
 			FROM
 				users
 			LEFT JOIN
@@ -84,39 +85,39 @@ class UserHandler
 
 		return;
 	}
-    /**
-    * Gives your an available username
-    *
-    * @param string $strUsername
-    * @param int $iAttemptNo - Should just be left blank
-    */
-    public function GiefUsername($strUsername, $iAttemptNo = 0)
-    {
-        global $oSql;
-        // Make sure there are no spaces in the username
-        $strUsername = str_replace(' ', '', $strUsername);
+	/**
+	* Gives your an available username
+	*
+	* @param string $strUsername
+	* @param int $iAttemptNo - Should just be left blank
+	*/
+	public function GiefUsername($strUsername, $iAttemptNo = 0)
+	{
+		global $oSql;
+		// Make sure there are no spaces in the username
+		$strUsername = str_replace(' ', '', $strUsername);
 
-        // Append attempt no.
-        $strUsernameBid = $iAttemptNo > 0 ? $strUsername.$iAttemptNo : $strUsername;
+		// Append attempt no.
+		$strUsernameBid = $iAttemptNo > 0 ? $strUsername.$iAttemptNo : $strUsername;
 
-        // Check DB for this username
-        $rExistingUsername = $oSql->Select('
-            SELECT
-                users.id
-            FROM
-                users
-            WHERE
-                users.deleted   = 0
-             && users.username  = "'.$strUsernameBid.'"
-        ');
+		// Check DB for this username
+		$rExistingUsername = $oSql->Select('
+			SELECT
+				users.id
+			FROM
+				users
+			WHERE
+				users.deleted   = 0
+			 && users.username  = "'.$strUsernameBid.'"
+		');
 
-        if($rExistingUsername->num_rows > 0)
-        {
-            $iAttemptNo++;
-            $strUsernameBid = $this->GiefUsername($strUsername, $iAttemptNo);
-        }
+		if($rExistingUsername->num_rows > 0)
+		{
+			$iAttemptNo++;
+			$strUsernameBid = $this->GiefUsername($strUsername, $iAttemptNo);
+		}
 
-        return $strUsernameBid;
-    }
+		return $strUsernameBid;
+	}
 }
 ?>

@@ -148,6 +148,7 @@ $this
 ->Set('validation_concert_pitch', 'Concert pitch must be numeric')
 ->Set('countdown_time', 'Gamestart countdown')
 ->Set('metronome', 'Metronome')
+->Set('blind_mode', 'Blind mode')
 
 # Activate user
 ->SetMenu('activate_')
@@ -262,9 +263,11 @@ $this
 ->Set('1_5_title', 'Countdown time')
 ->Set('1_5', 'When you press "Play", we will wait a short while before actually starting the game, this is to make sure you have got the time to pick up your violin and get ready. By adjusting this box, we can tell us how long time you need to pick up your violin at get ready. <br /><br /> Click "Got it" to proceed.')
 ->Set('1_6_title', 'Metronome')
-->Set('1_6', 'It can be a challange, to get the sensation of when to play a new note. If you check this box, we will make a graphical pulsation inside the game to the rythm of the song, this will make it easier to know when a new note is due.')
-->Set('1_7_title', 'Moving on')
-->Set('1_7', 'Click on the "Save" button to continue to the next part.')
+->Set('1_6', 'It can be a challange, to get the sensation of when to play a new note. If you check this box, we will make a graphical pulsation inside the game to the rythm of the song, this will make it easier to know when a new note is due. <br /><br /> Click "Got it" to proceed.')
+->Set('1_7_title', 'Blind mode')
+->Set('1_7', 'By activating this box, you will be unable to see the indicator which show how close you are to hitting the note perfectly. <br /><br /> Click "Got it" to proceed.')
+->Set('1_8_title', 'Moving on')
+->Set('1_8', 'Click on the "Save" button to continue to the next part.')
 ->Set('2_0_title', 'Preparing to play')
 ->Set('2_0', 'Click "View all" on the scales.')
 ->Set('2_1_title', 'A-Major')
