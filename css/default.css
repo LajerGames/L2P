@@ -128,14 +128,14 @@ div#CenteringContainer {
 button[name="facebook_button"] {
 	-webkit-appearance: none;
 	background: none;
-	border: 0;
-	border-radius: 20px;
-	overflow: hidden;
-	margin: 0;
+	border: none;
 	padding: 0;
+	color: #000;
+	height: 33vh;
 }
 button[name="facebook_button"] img {
-	height: 35vh;
+	height: 30vh;
+	margin-bottom: 5px;
 }
 
 .popover {

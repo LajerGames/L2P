@@ -42,6 +42,10 @@
 	color: black;
 }
 
+.modal-body {
+	max-height: 40vh;
+}
+
 .modal.modal-info {
 	width: 70vw;
 	margin-top: -35vh;

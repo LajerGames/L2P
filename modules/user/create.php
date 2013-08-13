@@ -17,7 +17,7 @@ $strBody    = '
 		'.$oCreateUserForm->RenderFields(false).'
 	</div>
 	<div class="float--right">
-		<button name="facebook_button"><img src="/img/icons/facebook.svg" name="facebook_button" /></button>
+		<button name="facebook_button"><img src="/img/icons/facebook.svg" name="facebook_button" /><br>'.$oLang->Get('create_user_signup_with_facebook').'</button>
 	</div>
 	<div class="clear"></div>
 ';

@@ -113,9 +113,22 @@ else
 				</div>
 			</div>
 			<div class="ContentBoxBodyContainer">
-				<div class="ContentBoxBody upper">
-					'.$oLoginForm->RenderFields(false).'
-					<button name="facebook_login"><img src="/img/icons/facebook.svg" /></button>
+				<div class="ContentBoxBody upper" id="LoginContainer">
+					<div class="login-container-box login-container-box-main">
+						<button name="facebook_login"><img src="/img/icons/facebook.svg" /> Facebook</button>
+
+						<button name="custom_login"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="width: 3vmin;max-width: 100%;vertical-align: middle;height: 3vmin;" x="0px" y="0px" viewBox="0 0 145 145" enable-background="new 0 0 162.058 162.058" xml:space="preserve">
+						<g>
+							<path fill="#71C211" d="M94.404,141.6c-7.867-17.328-7.938-38.852,1.684-54.75c10.923-18.047,26.561-28.658,46.117-32.729 c-3.263-12.452-9.752-23.598-18.52-32.492c-0.215,0.099-0.43,0.193-0.645,0.292c-19.941,9.265-38.215,21.103-51.938,38.736 c-15.911,20.449-23.955,43.287-17.583,69.204c1.22,4.961,2.806,9.604,4.719,13.956c4.459,0.857,9.061,1.313,13.77,1.313 C79.824,145.129,87.35,143.889,94.404,141.6z"/>
+							<path fill="#71C211" d="M44.29,139.642c-3.076-8.517-5.209-17.741-6.396-27.646C32.592,67.788,48.221,31.288,83.196,3.356 c0.865-0.691,1.738-1.368,2.612-2.04C81.34,0.455,76.727,0,72.008,0C31.932,0-0.556,32.488-0.556,72.564 C-0.557,102.824,17.966,128.752,44.29,139.642z"/>
+							<path fill="#71C211" d="M142.979,87.738c-10.028,0.532-21.638,5.623-29.525,13.187c-11.212,10.757-14.875,24.226-10.684,37.375 C123.045,128.795,138.202,110.189,142.979,87.738z"/>
+						</g>
+					</svg> Magic Tune</button>
+					</div>
+					<div class="login-container-box">
+						'.$oLoginForm->RenderFields(false).'
+						<a href="#" name="custom_login_back"><i class="icon-arrow-left icon-white"></i> Back</a>
+					</div>
 				</div>
 				'.$oPageRenderer->RenderDialogLink('/user/create/', PageRenderer::DialogType_Action, '
 					<span>'.$oLang->Get('frontpage_create_user').'</span>

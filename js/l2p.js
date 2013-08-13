@@ -1639,6 +1639,16 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 
 		L2P.facebook.login(function () {});
 	});
+	$('#frontpage_container [name="custom_login"]').on('click', function (e) {
+		e.preventDefault();
+
+		$(this).parents('#LoginContainer').first().addClass('login-container-custom');
+	});
+	$('#frontpage_container [name="custom_login_back"]').on('click', function (e) {
+		e.preventDefault();
+
+		$(this).parents('#LoginContainer').first().removeClass('login-container-custom');
+	});
 
 	return L2P;
 });

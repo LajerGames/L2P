@@ -408,3 +408,48 @@ td[data-action="toggle-game"].can_pause .ContentBoxGameControl-playpause-pause {
     -o-transform: initial;
     transform: initial;
 }
+
+#LoginContainer {
+    width: 200%;
+}
+#LoginContainer.login-container-custom {
+    -webkit-transform: translateX(-50%);
+}
+#LoginContainer .login-container-box {
+    height: 20vh;
+    float: left;
+    width: 50%;
+}
+#LoginContainer .login-container-box-main button {
+    width: 20vw;
+    height: 5vh;
+    overflow: hidden;
+    margin: 2vh 0;
+    background-color: #FFF;
+    color: #3C599F;
+    border: 1px solid #000;
+    line-height: 3vh;
+    text-align: left;
+    font-weight: bold;
+}
+#LoginContainer .login-container-box.login-container-box-main {
+    text-align: center;
+}
+
+#LoginContainer button[name="custom_login"] {
+	color: #71C211;
+}
+#LoginContainer button[name="facebook_login"] img,
+#LoginContainer button[name="custom_login"] svg {
+	float: none;
+	display: inline-block;
+	margin-left: 5px;
+	margin-right: 5px;
+}
+#LoginContainer a[name="custom_login_back"] i {
+	vertical-align: middle;
+	margin-top: -2px;
+}
+#LoginContainer form {
+	margin: 0;
+}
