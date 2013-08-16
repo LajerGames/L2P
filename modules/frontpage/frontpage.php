@@ -16,12 +16,6 @@ if(!isset($oLoginForm))
 	$oLoginForm->TextField('username', '', $oLang->Get('login_username'), new FormFieldValidation(true, PATTERN_USERNAME, $oLang->Get('validation_username')), null, false, array('autocomplete' => 'off'));
 	$oLoginForm->TextField('password', '', $oLang->Get('login_password'), new FormFieldValidation(true, PATTERN_PASSWORD, $oLang->Get('validation_password')), 'password', true);
 }
-/*
-$oGameData = new GameData($oSql);
-$oGameData->GetEndgameAchievement(23, 4, 37, 18000);*/
-$oSongGenerator = new SongGenerator($oSql);
-
-$oSongGenerator->GenerateSong();
 
 $strDialog	= '';
 // We may have a deep link

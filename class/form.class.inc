@@ -156,7 +156,7 @@ class Form
 		$strMethod = $this->bIsPostMethod ? 'post' : 'get';
 
 		return '
-		<form '.$strAction.' method="'.$strMethod.'" '.RenderProperties($this->arrProperties).' class="'.$this->strClass.'" />
+		<form '.$strAction.' method="'.$strMethod.'" '.RenderProperties($this->arrProperties).' class="'.$this->strClass.'">
 			<fieldset>
 				<input type="hidden" name="mode" value="'.$this->strMode.'" />
 		';
@@ -183,7 +183,6 @@ class Form
 
 		return '
 				'.$strSubmitArea.'
-            </fieldset>
 			</fieldset>
 		</form>
 		';
@@ -192,6 +191,10 @@ class Form
 	/**
 	* Will return all fields
 	*
+	* @param bool $bIncludeSubmitArea
+	* @param string $strSubmitButtonName
+	* @param string $strCancelButtonName
+	* @param bool $bUseTableView
 	* @return string
 	*/
 	public function RenderFields($bIncludeSubmitArea = true, $strSubmitButtonName = 'Save changes', $strCancelButtonName = '', $bUseTableView = false)

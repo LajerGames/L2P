@@ -86,6 +86,30 @@ class browse
 				}
 			}
 
+			$oPrimaVistaForm	= new Form('prima_vista', null, true);
+			$oPrimaVistaForm->SelectBox('duration', SongGenerator::Duration_Short, array(
+				SongGenerator::Duration_Short	=> SongGenerator::Duration_Short,
+				SongGenerator::Duration_Medium	=> SongGenerator::Duration_Medium,
+				SongGenerator::Duration_Long	=> SongGenerator::Duration_Long
+			), 'Duration');
+			$oPrimaVistaForm->SelectBox('spped', SongGenerator::Speed_Slow, array(
+				SongGenerator::Speed_Slow	=> SongGenerator::Speed_Slow,
+				SongGenerator::Speed_Medium	=> SongGenerator::Speed_Medium,
+				SongGenerator::Speed_Fast	=> SongGenerator::Speed_Fast
+			), 'Speed');
+			$oPrimaVistaForm->SelectBox('pulse', SongGenerator::Pulse_FourFourths, array(
+				SongGenerator::Pulse_TwoFourths		=> SongGenerator::Pulse_TwoFourths,
+				SongGenerator::Pulse_ThreeFourths	=> SongGenerator::Pulse_ThreeFourths,
+				SongGenerator::Pulse_FourFourths	=> SongGenerator::Pulse_FourFourths,
+				SongGenerator::Pulse_FiveFourths	=> SongGenerator::Pulse_FiveFourths,
+				SongGenerator::Pulse_SixFourths		=> SongGenerator::Pulse_SixFourths
+			), 'Pulse');
+			$oPrimaVistaForm->SelectBox('difficulty', SongGenerator::Difficulty_Easy, array(
+				SongGenerator::Difficulty_Easy		=> SongGenerator::Difficulty_Easy,
+				SongGenerator::Difficulty_Medium	=> SongGenerator::Difficulty_Medium,
+				SongGenerator::Difficulty_Hard		=> SongGenerator::Difficulty_Hard
+			), 'Difficulty');
+
 			$strMusic	= '
 				<div class="browse-submode'.($strSubMode === 'position1' ? ' browse-submode--focus' : '').'" data-submode="position1">
 					<div class="browse-submode-title">Skalaer Position 1</div>
@@ -99,9 +123,11 @@ class browse
 					<div class="browse-submode-title">Skalaer Position 3</div>
 					<div class="browse-submode-content"><div class="browse-submode-content-inner">'.implode('', $arrPosition3).'</div></div>
 				</div>
-				<div class="browse-submode'.($strSubMode === 'primavista' ? ' browse-submode--focus' : '').'" data-submode="primavista">
+				<div class="browse-submode browse-submode--prima-vista'.($strSubMode === 'primavista' ? ' browse-submode--focus' : '').'" data-submode="primavista">
 					<div class="browse-submode-title">Prima Vista</div>
-					<div class="browse-submode-content"><div class="browse-submode-content-inner">BLIB BLOB</div></div>
+					<div class="browse-submode-content"><div class="browse-submode-content-inner">
+						'.$oPrimaVistaForm->RenderFields(true, 'Generate Song', null, true).'
+					</div></div>
 				</div>
 			';
 		}
