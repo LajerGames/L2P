@@ -1,7 +1,6 @@
 <?php
 // Always have access to config file
 require_once($_SERVER['DOCUMENT_ROOT'].'/include/config.php');
-exit;
 $rGames = $oSql->Select('
     SELECT
         *
@@ -30,7 +29,6 @@ while($oGames = mysqli_fetch_object($rGames))
     $oSql->Update('games', array('start_tone' => $strStartingNote), $iGameID);
 }
 exit;
-
 // Now put game titles into the new language table
 $rGameTitles = $oSql->Select('
     SELECT

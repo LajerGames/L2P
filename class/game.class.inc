@@ -405,7 +405,7 @@ class Game
 			RIGHT JOIN
 				languages ON
 					languages.deleted       = 0
-				 && languages.type      = "game_title"
+				 && languages.type          = "game_title"
 				 && languages.lang          = "'.$strLang.'"
 				 && languages.parent_id     = games.id
 			LEFT JOIN
@@ -459,16 +459,16 @@ class SongGenerator
 			* @var MySQLWrapper
 			*/
 			$oSql,
-			$iLowestOctave      = 3,
-			$strLowestNote      = 'G',
+			$iLowestOctave      = 4,
+			$strLowestNote      = 'C',
 			$iHighestOctave     = 5,
 			$strHighestNote     = 'B',
-			$cSpeed             = SongGenerator::Speed_Slow,
+			$cSpeed             = SongGenerator::Speed_Medium,
 			$cDuration          = SongGenerator::Duration_Short,
 			$cPulse             = SongGenerator::Pulse_FourFourths,
 			$arrSharps          = array(),
 			$arrFlats           = array(),
-            $cDifficulty        = SongGenerator::Difficulty_Medium;
+            $cDifficulty        = SongGenerator::Difficulty_Easy;
 
 
 	public function __construct(MySQLWrapper $oSql)
@@ -486,13 +486,10 @@ class SongGenerator
 		// To get the starting note we first need to get a random allowed note
 		$iRandomNoteEntry   = $this->GetRandomNoteEntry($oBasicSongInfo->iLowestNoteEntry, $oBasicSongInfo->iHighestNoteEntry);
 
-		// Get info about our first note
+		// Get array with all notes which exists :)
 		$arrAllNotes        = $this->GetAllNotes();
-		$oNoteInfo          = $this->GetNoteInfo($iRandomNoteEntry, $arrAllNotes);
+        $oNoteInfo          = $this->GetNoteInfo($iRandomNoteEntry, $arrAllNotes);
         $iDefaultOctave     = $oNoteInfo->iOctave;
-
-		// Now are we starting in an upwards or downwards direction - We'll give at 50/50 chance of going either up or down as start direction
-		$cStartDirection  = $this->GetDirection(SongGenerator::Direction_Up, 50, 0);
 
 		$arrSong = json_decode('[100,[4],[[1,[[4,"D",0,0,0],[4,"G",0,0,0],[4,"G",0,0,0],[4,"G",0,0,0]]],[1,[[4,"D",0,0,0],[4,"G",0,0,0],[4,"G",0,0,0],[4,"G",0,0,0]]],[1,[[6,"B",0,0,0],[6,"B",0,0,0],[6,"A",0,0,0],[6,"A",0,0,0],[6,"A",0,0,0],[6,"A",0,0,0],[6,"A",0,0,0],[6,"A",0,0,0]]],[1,[[6,"G",0,0,0],[6,"A",0,0,0],[4,"B",0,0,0],[4,"G",0,0,0],[4,"G",0,0,0]]],[1,[[4,"D",0,0,0],[4,"G",0,0,0],[4,"G",0,0,0],[4,"G",0,0,0]]],[1,[[4,"D",0,0,0],[4,"G",0,0,0],[4,"G",0,0,0],[4,"G",0,0,0]]],[1,[[6,"B",0,0,0],[6,"B",0,0,0],[6,"A",0,0,0],[6,"A",0,0,0],[6,"A",0,0,0],[6,"A",0,0,0],[6,"A",0,0,0],[6,"A",0,0,0]]],[1,[[6,"G",0,0,0],[6,"A",0,0,0],[4,"B",0,0,0],[4,"G",0,0,0],[4,"G",0,0,0]]],[1,[[4,"D",1,0,0],[2,"D",1,0,0],[4,"B",0,0,0]]],[1,[[4,"D",1,0,0],[2,"D",1,0,0],[4,"B",0,0,0]]],[1,[[6,"B",0,0,0],[6,"B",0,0,0],[6,"C",1,0,0],[6,"C",1,0,0],[6,"C",1,0,0],[6,"C",1,0,0],[6,"C",1,0,0],[6,"C",1,0,0]]],[1,[[6,"B",0,0,0],[6,"C",1,0,0],[4,"D",1,0,0],[4,"B",0,0,0],[4,"B",0,0,0]]],[1,[[4,"D",1,0,0],[2,"D",1,0,0],[4,"B",0,0,0]]],[1,[[4,"D",1,0,0],[2,"D",1,0,0],[4,"B",0,0,0]]],[1,[[6,"B",0,0,0],[6,"B",0,0,0],[6,"C",1,0,0],[6,"C",1,0,0],[6,"C",1,0,0],[6,"C",1,0,0],[6,"C",1,0,0],[6,"C",1,0,0]]],[1,[[6,"B",0,0,0],[6,"A",0,0,0],[4,"G",0,0,0],[4,"G",0,0,0],[4,"G",0,0,0]]]],["F"],[]]');
         //printr($arrSong);
@@ -502,37 +499,251 @@ class SongGenerator
 			$arrTacts[] = $this->CreateTactTemplate($oBasicSongInfo);
 		}
 
-        $bFirstNote = true;
+        // Run through all the tacts and give them a
+        $iChanceToProceedThisWay    = 50;
+        $iLoopsThisDirection        = 0;
+        $cCurrentDirection          = SongGenerator::Direction_Up;
+        $iNotesLeftThisDirection    = $this->CalculateNotesLeftThisDirection($cSuggestedNewDirection, $arrAllNotes, $oNoteInfo, $oBasicSongInfo);
         foreach($arrTacts as $iTactNo => $arrTactInfo)
         {
             foreach($arrTactInfo[1] as $iNoteID => $arrNote)
             {
+                // In which direction are we supposed to go?
+                $cSuggestedNewDirection  = $this->GetDirection($cCurrentDirection, $iChanceToProceedThisWay);
+
+                // Only find out if we can go this way if we're not continueing last note
+                if($cSuggestedNewDirection !== SongGenerator::Direction_Stay)
+                {
+                    // Is this new direction valid?
+                    $iNotesLeftThisDirection    = $this->CalculateNotesLeftThisDirection($cSuggestedNewDirection, $arrAllNotes, $oNoteInfo, $oBasicSongInfo);
+
+                    // If we cannot continue this direction
+                    if($iNotesLeftThisDirection < 1)
+                    {
+                        // There is no way... :)
+                        $cSuggestedNewDirection  = $this->GetDirection($cSuggestedNewDirection, 0);
+                        $iNotesLeftThisDirection    = $this->CalculateNotesLeftThisDirection($cSuggestedNewDirection, $arrAllNotes, $oNoteInfo, $oBasicSongInfo);
+                    }
+                }
+
+                // Did that chance our direction?
+                // If so, reset iLoopsThisDirection
+                if($cSuggestedNewDirection !== $cCurrentDirection && $cSuggestedNewDirection !== SongGenerator::Direction_Stay)
+                {
+                    $cCurrentDirection      = $cSuggestedNewDirection;
+                    $iLoopsThisDirection    = 0;
+                }
+
+                // If we're not going to dublicate the last note we just played, the tell the system thhat's we're proceeding on the current path :)
+                if($cSuggestedNewDirection !== SongGenerator::Direction_Stay)
+                {
+                    // Add one counter to the iLoopsThisDirection variable
+                    $iLoopsThisDirection++;
+
+                    // What is the chance that we'll continue this direction the next time?
+                    $iChanceToProceedThisWay = $this->CalculateOddsOfKeepingDirection($iLoopsThisDirection);
+
+                    // How many notes do we jump?
+                    $iNotesToJump   = $this->HowManyNotesDoWeJump($iNotesLeftThisDirection);
+
+                    $iNotesToJump   = $cCurrentDirection === SongGenerator::Direction_Down ? $iNotesToJump * -1 : $iNotesToJump;
+
+                    // Now fetch the new noteobject Fido!
+                    $oNoteInfo = $this->GetNoteInfo(($oNoteInfo->iEntry+$iNotesToJump), $arrAllNotes);
+                }
+
+                $iRelativeOctave                    = $oNoteInfo->iOctave - $iDefaultOctave;
+
+                $arrTacts[$iTactNo][1][$iNoteID][1] = $oNoteInfo->strNotename;
+                $arrTacts[$iTactNo][1][$iNoteID][2] = $iRelativeOctave;
+            }   
+        }
+        /*
+
+        // Now are we starting in an upwards or downwards direction - We'll give at 50/50 chance of going either up or down as start direction
+        
+        */
+/*
+        $bFirstNote             = true;
+        $iLoopsThisDirection    = 0;
+        foreach($arrTacts as $iTactNo => $arrTactInfo)
+        {
+            foreach($arrTactInfo[1] as $iNoteID => $arrNote)
+            {
+                $bResetFirstNote = true;
                 if(!$bFirstNote)
                 {
-                    // Get a new note
+                    // Get a new note - can we proceed in the direction we're at right now?
+                    $bChangeDirection           = false;
+                    $iNotesLeftThisDirection    = $this->CalculateNotesLeftThisDirection($cCurrentDirection, $arrAllNotes, $oNoteInfo, $oBasicSongInfo);
+                    if($iNotesLeftThisDirection < 1)
+                    {
+                        $bChangeDirection = true;
+                    }
+
+                    // Do we need to change direction?
+                    if($bChangeDirection)
+                    {
+                        $cNewDirectionSuggestion = $this->GetDirection($cCurrentDirection, 0);
+
+                        if($cNewDirectionSuggestion !== SongGenerator::Direction_Stay)
+                        {
+                            $cCurrentDirection      = $cNewDirectionSuggestion;
+                            $iLoopsThisDirection    = 0;
+                        }
+                        else
+                        {
+                            $bRepeatPreviousnote = true;
+                        }
+                    }
+
+                    // If we're not repeating previous note we need to tell the system that this is one (more) time we're going in this direction
+                    $iNotesToJump = 0;
+                    if(!$bRepeatPreviousnote)
+                    {
+                        $iLoopsThisDirection++;
+                        // Now to find out how many notes to jump?
+                        $iNotesToJump   = $this->HowManyNotesDoWeJump($iNotesLeftThisDirection);
+                        $iNotesToJump   = $cCurrentDirection === SongGenerator::Direction_Up ? $iNotesToJump : $iNotesToJump * -1;
+                    }
+
+                    // Save the new note in the noteinfo object
+                    $oNoteInfo = $this->GetNoteInfo(($oNoteInfo->iEntry+$iNotesToJump), $arrAllNotes);
+
+                    // Do we need to change direction
+                    $iOddsOfKeepingDirection = $this->CalculateOddsOfKeepingDirection($iLoopsThisDirection);
+
+                    $cNewDirectionSuggestion = $this->GetDirection($cCurrentDirection, $iOddsOfKeepingDirection);
+
+                    if($cNewDirectionSuggestion !== SongGenerator::Direction_Stay && $cNewDirectionSuggestion !== $cCurrentDirection)
+                    {
+                        // Looks like we're changing direction
+                        $cCurrentDirection      = $cNewDirectionSuggestion;
+                        $iLoopsThisDirection    = 0;
+                    }
+                    elseif($cNewDirectionSuggestion === SongGenerator::Direction_Stay)
+                    {
+                        $bFirstNote         = true;
+                        $bResetFirstNote    = false;
+                    }
                 }
                 $iRelativeOctave                    = $iDefaultOctave - $oNoteInfo->iOctave;
 
                 $arrTacts[$iTactNo][1][$iNoteID][1] = $oNoteInfo->strNotename;
                 $arrTacts[$iTactNo][1][$iNoteID][2] = $iRelativeOctave;
 
-                $bFirstNote = false;
+                if($bResetFirstNote)
+                {
+                    $bFirstNote = false;
+                }
             }
-        }
+        }*/
 
 		// Now it's time to start generating the song
 		$arrSong = array(
 			$oBasicSongInfo->iBPM,
-			array($oNoteInfo->iOctave),
+			array($iDefaultOctave),
 			$arrTacts,
 			$this->arrSharps,
 			$this->arrFlats
 		);
 
-        //printr($arrSong);
+        echo json_encode($arrSong);
 
 		return;
 	}
+
+    private function CalculateOddsOfKeepingDirection($iLoopsThisDirection)
+    {
+        $iChanceOfKeepingOnDirection = 0;
+        switch($iLoopsThisDirection)
+        {
+            case 1 :
+                $iChanceOfKeepingOnDirection = 85;
+                break;
+            case 2 :
+                $iChanceOfKeepingOnDirection = 75;
+                break;
+            case 3 :
+                $iChanceOfKeepingOnDirection = 60;
+                break;
+            case 4 :
+                $iChanceOfKeepingOnDirection = 50;
+                break;
+            case 5 :
+                $iChanceOfKeepingOnDirection = 35;
+                break;
+            case 6 :
+                $iChanceOfKeepingOnDirection = 20;
+                break;
+            case 7 :
+                $iChanceOfKeepingOnDirection = 15;
+                break;
+            case 8 :
+                $iChanceOfKeepingOnDirection = 0;
+                break;
+        }
+
+        return $iChanceOfKeepingOnDirection;
+    }
+
+    private function HowManyNotesDoWeJump($iMaxDistance)
+    {
+        $arrNoteJump = array();
+        switch($this->cDifficulty)
+        {
+            case SongGenerator::Difficulty_Easy :
+                $arrNoteJump[95]    = 1;
+                $arrNoteJump[5]     = 2;
+                break;
+            case SongGenerator::Difficulty_Medium :
+                $arrNoteJump[87]    = 1;
+                $arrNoteJump[13]    = 2;
+                break;
+            case SongGenerator::Difficulty_Hard :
+                $arrNoteJump[87]    = 1;
+                $arrNoteJump[15]    = 2;
+                $arrNoteJump[5]     = 3;
+                break;
+        }
+
+        // Get a random number from 1 to a hundred and find out how many notes to jump?
+        $iLuckyNumber = rand(1, 100);
+
+        $iJump = 0;
+        foreach($arrNoteJump as $iProbability => $iJumps)
+        {
+            $iLuckyNumber -= $iProbability;
+
+            if($iLuckyNumber < 1)
+            {
+                if($iMaxDistance < $iJumps)
+                {
+                    $iJumps = $iMaxDistance;
+                }
+                $iJump = $iJumps;
+
+                break;
+            }
+        }
+
+        return $iJump;
+    }
+
+    private function CalculateNotesLeftThisDirection($cDirection, $arrAllNotes, AC_Note $oNoteInfo, AC_GetBasicSongInfo $oBasicSongInfo)
+    {
+        switch($cDirection)
+        {
+            case SongGenerator::Direction_Up :
+                $iNotesLeftDirection = ($oBasicSongInfo->iHighestNoteEntry - ($oNoteInfo->iEntry));
+                break;
+            case SongGenerator::Direction_Down :
+                $iNotesLeftDirection = ($oNoteInfo->iEntry - $oBasicSongInfo->iLowestNoteEntry);
+                break;
+        }
+
+        return $iNotesLeftDirection;   
+    }
 
     private function CreateTactTemplate($oBasicSongInfo)
     {
@@ -622,12 +833,12 @@ class SongGenerator
         }
         return array(
             6   => array(100 / ($iQuarterBeatsPerTact / 0.5),   $iEighthnote),          // Eighthnote
-            5   => array(100 / ($iQuarterBeatsPerTact / 0.75),  $iEighthnotePeriod),    // Eighthperiod
+            //7   => array(100 / ($iQuarterBeatsPerTact / 0.75),  $iEighthnotePeriod),    // Eighthperiod
             4   => array(100 / $iQuarterBeatsPerTact,           $iQuarternote),         // Quarternote
-            3   => array(100 / ($iQuarterBeatsPerTact / 1.5),   $iQuarternotePeriod),   // Quarterperiod
+            5   => array(100 / ($iQuarterBeatsPerTact / 1.5),   $iQuarternotePeriod),   // Quarterperiod
             2   => array(100 / ($iQuarterBeatsPerTact / 2),     $iHalfnote),            // Halfnote
-            1   => array(100 / ($iQuarterBeatsPerTact / 3),     $iHalfnotePeriod),      // Halfperiod
-            0   => array(100,                                   $iWholenote)            // Wholenote
+            3   => array(100 / ($iQuarterBeatsPerTact / 3),     $iHalfnotePeriod),      // Halfperiod
+            1   => array(100,                                   $iWholenote)            // Wholenote
         );
     }
 
