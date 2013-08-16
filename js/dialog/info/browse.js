@@ -176,5 +176,20 @@ define(['jquery', 'l2p', 'playlist', 'api', 'fM'], function ($, L2P, Playlist, a
 						}
 					});
 				});
+
+		$dialog
+			.find('.browse-submode--prima-vista form')
+				.on('submit', function (e) {
+					e.preventDefault();
+
+					var	$this	= $(this),
+						data	= fM.form.getElements.call(this);
+
+					L2P.$modal.off('hide.bs.modal');
+					fM.link.navigate($this.attr('action'), 'Magic Tune', {
+						title:	'Magic Tune',
+						data:	data
+					});
+				});
 	});
 })
