@@ -34,15 +34,18 @@ if($iGameID == 0)
 }
 
 // Save points into a variable
-$iPoints        = $arrGame[3];
+$iPoints			= $arrGame[3];
 
 // When did the game start and end
-$iStartTime     = $arrGame[4][0]; // In ms
-$iGameTime      = $arrGame[4][1]; // In ms
-$fGameDuration  = $arrGame[4][2]; // Decimal seconds
+$iStartTime			= $arrGame[4][0]; // In ms
+$iGameTime			= $arrGame[4][1]; // In ms
+$fGameDuration		= $arrGame[4][2]; // Decimal seconds
 
 // Start Octave
-$iStartOctave	= $arrGame[6];
+$iStartOctave		= $arrGame[6];
+
+// Finger position
+$iFingerposition	= $arrGame[7];
 
 $strStartDate   = date('Y-m-d H:i:s', ($iStartTime / 1000));
 
@@ -102,7 +105,7 @@ if(is_array($arrGame))
                                     }
                                     else
                                     {
-                                        $arrNotePlays[$arrNoteInfoEntry[3]]++;   
+                                        $arrNotePlays[$arrNoteInfoEntry[3]]++;
                                     }
 
                                     // Some statistics for this perticular note
@@ -236,6 +239,7 @@ $arrSavegame = array(
     'game_finished'         => $strEndDateTime,
     'game_duration'         => $fGameDuration,
     'game_start_octave'		=> $iStartOctave,
+    'game_hand_position'	=> $iFingerposition,
     'json_gamestring'       => $strJsonGameString,
     'json_statisticsstring' => $strGameStatistics,
     'json_tactstats'        => $strTactStatistics

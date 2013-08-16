@@ -18,7 +18,8 @@ define(['jquery', 'fM', 'l2p', 'api', 'highcharts'], function ($, fM, L2P, api, 
             var	$tr		= $(this),
             	gameid			= $tr.attr('data-gameid'),
             	gamestartoctave	= $tr.attr('data-gamestartoctave'),
-            	gamehistoryid	= $tr.attr('data-gamehistoryid');
+            	gamehistoryid	= $tr.attr('data-gamehistoryid'),
+            	handposition	= $tr.attr('data-handposition');
 
             if(gameid !== undefined) {
             	$formSearch.find('input[name="game_ids"]').val(gameid);
@@ -28,6 +29,9 @@ define(['jquery', 'fM', 'l2p', 'api', 'highcharts'], function ($, fM, L2P, api, 
 			}
             if(gamehistoryid !== undefined) {
             	$formSearch.find('input[name="game_history_ids"]').val(gamehistoryid);
+			}
+            if(handposition !== undefined) {
+            	$formSearch.find('input[name="game_handposition"]').val(handposition);
 			}
 
            	$dialog.find('.BottomTableView tr').off('click');

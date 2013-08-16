@@ -554,7 +554,7 @@ class statistics
                         }
 
                         $strFavouriteSongs .= '
-                            <tr data-gameid="'.$iGameID.'" data-gamestartoctave="'.$iStartOctave.'">
+                            <tr data-gameid="'.$iGameID.'" data-gamestartoctave="'.$iStartOctave.'" data-handposition="'.$iHandPosition.'">
                                 <td>'.$iLoopID.'</td>
                                 <td>'.$iHandPosition.'</td>
                                 <td><span class="octave">('.$this->oLang->Get('global_octave').' '.$arrGameInfo['start_octave'].')</span> '.$arrGameInfo['name'].' '.$strBlindMode.'</td>
@@ -904,6 +904,7 @@ class statistics
                     <input type="hidden" name="game_ids" value="'.implode(',', $this->oSearch->arrGameIDs).'" />
                     <input type="hidden" name="game_startoctave" value="'.implode(',', $this->oSearch->arrStartOctaves).'" />
                     <input type="hidden" name="start_octave" value="'.$this->oSearch->iStartOctave.'" />
+                    <input type="hidden" name="game_handposition" value="'.$this->oSearch->iHandPosition.'" />
                 </form>
                 <div class="hidden" data-statistic="'.htmlentities(json_encode(array($arrLeftChart, $arrRightChart))).'"></div>
                 <div class="statistic-graph"></div>

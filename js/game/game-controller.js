@@ -71,6 +71,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		this.paused			= false;
 		this.lastLeft		= -1;
 		this.isEdit			= false;
+		this.fingerpos		= null;
 
 		$(fM.visibility).on('change', function (e, visibility) {
 			if(visibility.hidden) {
@@ -547,8 +548,10 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 			this.game.setSpeed(speed);
 		}
 	};
-	GameController.prototype.importGame	= function (gameInfo, title, defaultOctave) {
+	GameController.prototype.importGame	= function (gameInfo, title, defaultOctave, fingerpos) {
 		var	that	= this;
+
+		this.fingerpos	= fingerpos;
 
 		require(['game/game', 'game/tact', 'game/note', 'game/options'], function (Game, Tact, Node, options) {
 			var game        = new Game(gameInfo[0]),
@@ -910,7 +913,8 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 				this.game.getDuration()						// 2	game duration
 			],
 			this.permlink,			// 5	permlink
-			this.game.startOctave	// 6	startOctave
+			this.game.startOctave,	// 6	startOctave
+			this.fingerpos			// 7	fingerpos
 		];
 
 		this.game.tacts.forEach(function (tact) {
@@ -938,8 +942,6 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 
 			data[2].push(JSON.stringify(tactData));
 		});
-
-		// console.log(data);
 
 		return JSON.stringify(data);
 	};

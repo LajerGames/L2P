@@ -245,7 +245,8 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						$compassBox	= $('div.ContentBoxGameCompass'),
 						compass		= new Compass($compassBox),
 						state		= fM.link.getCurrentNavigate() || {},
-						urlItems	= (url || location.href).split('/');
+						urlItems	= (url || location.href).split('/'),
+						fingerpos	= urlItems.length >= 5 ? (/[0-9]+/.test(urlItems[4]) ? +/[0-9]+/.exec(urlItems[4])[0] : null) : null;
 
 					L2P.resetBoxText($('#song_title'));
 					L2P.resetBoxText($('#scale_title'));
@@ -332,7 +333,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 
 					ControllerSet('play');
 
-					L2P.gameController.importGame(data, title, octave);
+					L2P.gameController.importGame(data, title, octave, fingerpos);
 					if(url) {
 						L2P.gameController.permlink	= url.match(/\/game\/([^\/]+)/g)[0].substr(6);
 					} else {
