@@ -4,5 +4,8 @@ $strTitleBarColor = '#E2A30C';
 $strHeadline        = $oLang->Get('browse_headline_scales');
 $strType            = 'scale';
 
+$arrURI				= explode('/', REQUEST_URI);
+$strSubMode			= $arrURI[3];
+
 require('browse.inc');
 ?>

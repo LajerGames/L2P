@@ -36,10 +36,6 @@ if($strType == 'music')
 	}
 	$strAdditionalSearch .= '</select>';
 }
-elseif($strType == 'scales')
-{
-	echo "YAY";
-}
 
 $strLoops	= '';
 for($iLoopNo = 1; $iLoopNo <= 10; $iLoopNo++)
@@ -69,7 +65,7 @@ $strBody	= '
 			<input type="text" name="title" value="" placeholder="Title" data-value="Title" data-type="'.$strType.'" autocomplete="off" class="std" id="musicSearch">
 			'.$strAdditionalSearch.'<br>
 			<div id="list">
-				'.$oBrowse->RenderMusic($strType).'
+				'.$oBrowse->RenderMusic($strType, '', 0, $strSubMode).'
 			</div>
 		</td>
 		<td id="PlaylistContainer">

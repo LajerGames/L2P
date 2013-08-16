@@ -39,8 +39,9 @@ define(['jquery'], function ($) {
 		that.navigated	= function (url, title, obj) {
 			document.title	= title;
 
-			obj			= $.extend(history.state, obj);
-			obj.title	= title;
+			obj				= $.extend(history.state, obj);
+			obj.title		= title;
+			obj.pathname	= document.location.pathname;
 
 			if(obj._id !== undefined) {
 				his[obj._id]	= obj;
@@ -51,13 +52,17 @@ define(['jquery'], function ($) {
 			} else {
 				console.log('no nav id', obj);
 			}
-		}
+		};
+		that.replaceUrl	= function (url) {
+			var	current	= this.getCurrent();
+			window.history.replaceState(current, current.title, url);
+		};
 		that.getHistory	= function () {
 			return his;
-		}
+		};
 		that.getParentHistory	= function () {
 			return his.slice(0, lastState._id);
-		}
+		};
 		that.getParent	= function () {
 			return lastState && lastState._id ? his[lastState._id - 1] : undefined;
 		};
@@ -66,6 +71,9 @@ define(['jquery'], function ($) {
 		};
 		that.getCurrentNavigate	= function () {
 			return lastState ? his[lastState._id + 1] : (his.length === 1 ? his[0] : undefined);
+		};
+		that.getLatest	= function () {
+			return his[his.length - 1];
 		};
 
 		return that;

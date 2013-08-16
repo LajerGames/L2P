@@ -628,6 +628,9 @@ div.countdown .illustration table#ViolinFingerBoard {
 	85% { -webkit-transform: scale(0.9); opacity: 1;}
 	98% { -webkit-transform: scale(0.2); opacity: 0.5;}
 }
+@-webkit-keyframes spin {
+	100% { -webkit-transform: rotate(360deg);}
+}
 
 @-moz-keyframes countdown_number {
 	0% { -moz-transform: scale(0.2); opacity: 0.5;}
@@ -645,6 +648,9 @@ div.countdown .illustration table#ViolinFingerBoard {
 	5% { -moz-transform: scale(1); opacity: 1;}
 	85% { -moz-transform: scale(0.9); opacity: 1;}
 	98% { -moz-transform: scale(0.2); opacity: 0.5;}
+}
+@-moz-keyframes spin {
+	100% { -moz-transform: rotate(360deg);}
 }
 
 @-ms-keyframes countdown_number {
@@ -664,6 +670,9 @@ div.countdown .illustration table#ViolinFingerBoard {
 	85% { -ms-transform: scale(0.9); opacity: 1;}
 	98% { -ms-transform: scale(0.2); opacity: 0.5;}
 }
+@-ms-keyframes spin {
+	100% { -ms-transform: rotate(360deg);}
+}
 
 @-o-keyframes countdown_number {
 	0% { -o-transform: scale(0.2); opacity: 0.5;}
@@ -682,6 +691,9 @@ div.countdown .illustration table#ViolinFingerBoard {
 	85% { -o-transform: scale(0.9); opacity: 1;}
 	98% { -o-transform: scale(0.2); opacity: 0.5;}
 }
+@-o-keyframes spin {
+	100% { -o-transform: rotate(360deg);}
+}
 
 @keyframes countdown_number {
 	0% { transform: scale(0.2); opacity: 0.5;}
@@ -699,6 +711,16 @@ div.countdown .illustration table#ViolinFingerBoard {
 	5% { transform: scale(1); opacity: 1;}
 	85% { transform: scale(0.9); opacity: 1;}
 	98% { transform: scale(0.2); opacity: 0.5;}
+}
+@keyframes spin {
+	100% { transform: rotate(360deg);}
+}
+.animate-spinning-infinite {
+	-webkit-animation: spin 2s linear infinite;
+	-moz-animation: spin 2s linear infinite;
+	-ms-animation: spin 2s linear infinite;
+	-o-animation: spin 2s linear infinite;
+	animation: spin 2s linear infinite;
 }
 
 div.countdown.microphone-permission .next {

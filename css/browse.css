@@ -176,3 +176,20 @@
 #StatsGraph {
     width: 3vmin;
 }
+
+.browse-submode .browse-submode-content {
+    overflow: hidden;
+    -webkit-transition: 1s;
+}
+.browse-submode:not(.browse-submode--focus) .browse-submode-content {
+	height: 0px;
+}
+.browse-submode .browse-submode-title {
+    color: #000;
+    font-size: 3vmin;
+    line-height: 3vmin;
+    cursor: pointer;
+}
+.browse-submode {
+    margin-bottom: 10px;
+}

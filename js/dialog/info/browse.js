@@ -130,5 +130,51 @@ define(['jquery', 'l2p', 'playlist', 'api', 'fM'], function ($, L2P, Playlist, a
 						break;
 				}
 			});
+
+		function submodeOpen() {
+			var	$submodeContent	= $(this),
+				$submode		= $submodeContent.parents('.browse-submode').first();
+
+			$submode.addClass('browse-submode--focus');
+
+			$submodeContent.off('webkitTransitionEnd', submodeOpen);
+		}
+
+		$dialog
+			.find('#list')
+				.on('click', '.browse-submode-title', function (e) {
+					var	$title		= $(this),
+						$submode	= $title.parents('.browse-submode').first(),
+						$list		= $submode.parents('#list').first();
+
+					$list.find('.browse-submode').each(function () {
+						var	$thisSubmode	= $(this),
+							submode			= $thisSubmode.data().submode,
+							height;
+
+						if($thisSubmode.is($submode) && !$thisSubmode.hasClass('browse-submode--focus')) {
+							fM.link.replaceUrl('/browse/scales/'+submode+'/');
+
+							height	= $thisSubmode.find('.browse-submode-content-inner').height();
+							$thisSubmode
+								.find('.browse-submode-content')
+									.on('webkitTransitionEnd', submodeOpen)
+									.css('height', height);
+						} else {
+							if($thisSubmode.hasClass('browse-submode--focus')) {
+								if($thisSubmode.is($submode)) {
+									fM.link.replaceUrl('/browse/scales/');
+								}
+
+								$thisSubmode
+									.removeClass('browse-submode--focus');
+
+								$thisSubmode
+									.find('.browse-submode-content')
+										.css('height', '0px');
+							}
+						}
+					});
+				});
 	});
 })

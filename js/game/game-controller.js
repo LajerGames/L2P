@@ -111,6 +111,13 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 				.setPos(options.leftMargin + options.markerPos, options.topPos + 50 + options.lineHeight * (4 / 2 - 0.5) - 0.85 * options.lineHeight * 0.5 + 1.5)
 				.setFill('#090')
 				.appendTo(this.svgStart);
+		new SVGElement('rect')
+				.setPos(200, 200)
+				.setDimensions(50, 50)
+				.setFill('#000')
+				.setOpacity(0)
+				.addClass('animate-spinning-infinite')
+				.appendTo(this.svgStart);
 
 		this.setPointerPos(1);
 
@@ -175,6 +182,16 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 					}
 				});
 			});
+
+			if(L2P_global.blind_mode && that.compass.enabled) {
+				that.compass.setTone(options.tones.names[4]['A']);
+				that.compass.disable();
+			} else if(!L2P_global.blind_mode && !that.compass.enabled) {
+				that.compass.enable();
+			}
+			if(L2P_global.blind_mode) {
+				that.svgPointer.hide();
+			}
 
 			if(this.useCountdown) {
 				api.get.lang(function (data) {
@@ -248,6 +265,8 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		this.paused	= true;
 	};
 	GameController.prototype.stopGame	= function () {
+		this.compass.enable();
+		this.svgPointer.show();
 		if(this.game && this.game.running) {
 			this.game.stop();
 
@@ -730,6 +749,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 
 		if(this.game && this.game.running) {
 			var	newPos	= gameController.currentLeft();
+			console.log(newPos);
 
 			this.game.tacts.forEach(function (tact) {
 				if(tact.hasPlayed) {
@@ -837,8 +857,10 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 						var	colorPercent	= note.isRest ? 0 : Math.min(toneDiff.ratioRel, 1),
 							color			= that.generatePercentColor(colorPercent);
 
-						that.svgPointer.setFill(color);
-						that.svgLine.setStroke(color, 3);
+						if(!L2P_global.blind_mode) {
+							that.svgPointer.setFill(color);
+							that.svgLine.setStroke(color, 3);
+						}
 					}
 				});
 			});

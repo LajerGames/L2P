@@ -101,6 +101,7 @@ class PageRenderer
 			'username'		    => $_SESSION['UserObject']->username,
 			'fb_id'				=> intval($_SESSION['UserObject']->fb_id),
 			'kiddie_mode'	    => intval($_SESSION['UserObject']->kiddie_mode) === 1,
+			'blind_mode'	    => intval($_SESSION['UserObject']->blind_mode) === 1,
 			'colored_notes'	    => intval($_SESSION['UserObject']->colored_notes) === 1,
 			'concert_pitch'	    => empty($_SESSION['UserObject']->concert_pitch) ? 442 : $_SESSION['UserObject']->concert_pitch,
 			'lang'			    => $arrPreloadLang,
@@ -255,6 +256,7 @@ class PageRenderer
 			'user'			=> array(
 				'language_code'		=> $oLang->strLanguageCode,
 				'kiddie_mode'	    => intval($_SESSION['UserObject']->kiddie_mode) === 1,
+				'blind_mode'	    => intval($_SESSION['UserObject']->blind_mode) === 1,
 				'colored_notes'	    => intval($_SESSION['UserObject']->colored_notes) === 1,
 				'concert_pitch'	    => empty($_SESSION['UserObject']->concert_pitch) ? 442 : $_SESSION['UserObject']->concert_pitch,
 	            'countdown_time'    => intval($_SESSION['UserObject']->countdown_time),

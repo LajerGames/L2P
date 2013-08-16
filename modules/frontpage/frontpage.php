@@ -202,15 +202,11 @@ echo $oPageRenderer->Renderpage($oLang, '
 			</div>
 			<div class="ContentBoxBodyContainer">
 				<div class="ContentBoxBody">
-					'.$oTemplate->RenderContentResource('
-					<div>
-						{{availability}}
-						<a href="/game/{{permlink}}" data-dialog="game" title="{{info}}" class="OpenGame">
-							{{title}}
-						</a>
-						<div class="clear"></div>
-					</div>
-					', $rScale, 7, false).'
+					<a href="/browse/scales/position1/" data-dialog="info">Skalaer Position 1</a>
+					<a href="/browse/scales/position2/" data-dialog="info">Skalaer Position 2</a>
+					<a href="/browse/scales/position3/" data-dialog="info">Skalaer Position 3</a>
+					<a href="/browse/scales/primavista/" data-dialog="info" style="margin-bottom: 11.25vh;">Prima Vista</a>
+
 					<div>
 						<a href="/browse/scales/" data-dialog="info" title="'.$oLang->Get('frontpage_view_all_scales_title').'" class="ViewAllGames">
 						-- '.$oLang->Get('frontpage_view_all').' --

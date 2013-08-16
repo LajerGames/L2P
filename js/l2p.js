@@ -154,9 +154,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					var	pathname	= location.pathname;
 					L2P.$modal.on('hide', function (e) {
 						if(!$(e.target).hasClass('tour-step-backdrop')) {
-							if(location.pathname === pathname) {
-								fM.link.navigate('/');
-							}
+							fM.link.navigate('/');
 						}
 					});
 
@@ -203,17 +201,20 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					L2P.$modal.find('button.btn[data-dismiss]').text(L2P_global.lang.global_button_close);
 
 					var	pathname	= location.pathname;
-					L2P.$modal.on('hide', function (e) {
-						if(!$(e.target).hasClass('tour-step-backdrop')) {
-							if(location.pathname === pathname) {
-								fM.link.navigate('/');
-							}
-						}
-					});
 
 					fM.link.navigated(url, title, {
 						is_dialog:	true
 					});
+
+					var	current	= fM.link.getCurrent();
+					L2P.$modal.on('hide', function (e) {
+						L2P.$modal.off('hide');
+
+						if(!$(e.target).hasClass('tour-step-backdrop')) {
+							fM.link.navigate('/');
+						}
+					});
+
 					var	parent	= fM.link.getParent();
 					if(parent && parent.is_dialog) {
 						L2P.$modal
@@ -285,7 +286,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					L2P.gameController.isEdit	= false;
 
 					compass.setTone(options.tones.names[4]['A']);
-					compass.show();
+					compass.enable();
 					L2P.gameController.compass	= compass;
 
 					$speed.on('change', function () {

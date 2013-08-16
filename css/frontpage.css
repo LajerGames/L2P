@@ -197,6 +197,16 @@ body.ShowGame div.ContentBoxGameCompass img:nth-child(2) {
 	right: 0;
 	left: inherit;
 }
+div.ContentBoxGameCompass.disabled {
+	opacity: 0.3;
+}
+div.ContentBoxGameCompass > div > * {
+	-webkit-transition: opacity 0.5s, all 0.2s;
+	-moz-transition: opacity 0.5s, all 0.2s;
+	-ms-transition: opacity 0.5s, all 0.2s;
+	-o-transition: opacity 0.5s, all 0.2s;
+	transition: opacity 0.5s, all 0.2s;
+}
 div.ContentBoxGameCompass div.ContentBoxGameCompass-tone-before {
     position: absolute;
     top: 1vh;
@@ -223,11 +233,6 @@ div.ContentBoxGameCompass div.ContentBoxGameCompass-line {
 	top: 1vh;
 	background: #000;
 	width: 2px;
-	-webkit-transition: 0.2s;
-	-moz-transition: 0.2s;
-	-ms-transition: 0.2s;
-	-o-transition: 0.2s;
-	transition: 0.2s;
 }
 body.ShowGame div.ContentBoxGameCompass.tour-step-backdrop div.ContentBoxGameCompass-tone-before,
 body.ShowGame div.ContentBoxGameCompass.tour-step-backdrop div.ContentBoxGameCompass-tone-current,

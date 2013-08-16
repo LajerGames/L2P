@@ -188,7 +188,8 @@ function GetMusic($oSql, $strType = 'song', $iLimit = 0, $strSearch = '')
             languages.name  AS title,
             games.permlink,
             games.availability,
-            games.octave
+            games.octave,
+            games.start_tone
         FROM
             games
         RIGHT JOIN
@@ -235,6 +236,11 @@ function FindLoadFile(MySQLWrapper $oSql, $bReturn404 = false)
     elseif(substr(REQUEST_URI, 0, 6) === '/game/' && substr(REQUEST_URI, -6) !== '/save/')
     {
         $oLoadInfo->strLoadfile = SERVER_PROJECT_ROOT_MODULES.'game/game.php';
+    }
+    elseif(substr(REQUEST_URI, 0, 8) === '/browse/')
+    {
+    	$arrURI	= explode('/', REQUEST_URI);
+        $oLoadInfo->strLoadfile = SERVER_PROJECT_ROOT_MODULES.'browse/'.$arrURI['2'].'.php';
     }
     else
     {

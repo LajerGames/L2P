@@ -1,6 +1,35 @@
 <?php
 // Always have access to config file
 require_once($_SERVER['DOCUMENT_ROOT'].'/include/config.php');
+exit;
+$rGames = $oSql->Select('
+    SELECT
+        *
+    FROM
+        games
+');
+
+while($oGames = mysqli_fetch_object($rGames))
+{
+    $iGameID    = $oGames->id;
+    $arrGame    = json_decode($oGames->game);
+
+    foreach($arrGame[2] as $arrTacts)
+    {
+        foreach($arrTacts[1] as $arrNote)
+        {
+            if($arrNote[1] !== null)
+            {
+                $strStartingNote = $arrNote[1];
+                break;
+            }
+        }
+        break;
+    }
+
+    $oSql->Update('games', array('start_tone' => $strStartingNote), $iGameID);
+}
+exit;
 
 // Now put game titles into the new language table
 $rGameTitles = $oSql->Select('

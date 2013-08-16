@@ -105,7 +105,7 @@ require(['jquery', 'browserdetect'], function ($, AC) {
 				e.stopPropagation();
 
 				if(L2P.$modal && L2P.$modal.is(':visible')) {
-					L2P.$modal.modal('hide');
+					L2P.$modal.off('hide').modal('hide');
 				}
 				$('.popover.validation-error:visible').remove();
 

@@ -163,6 +163,11 @@ define(function () {
 
 		return this;
 	};
+	SVGElement.prototype.setOpacity	= function (opacity) {
+		this.node.style.opacity	= opacity;
+
+		return this;
+	}
 	SVGElement.prototype.setPath	= function (path) {
 		this.node.setAttributeNS(null, 'd', path);
 
@@ -297,6 +302,16 @@ define(function () {
 			yc:	BBox.y + BBox.height / 2
 		};
 	};
+	SVGElement.prototype.addClass	= function (className) {
+		this.node.classList.add(className);
+
+		return this;
+	}
+	SVGElement.prototype.removeClass	= function (className) {
+		this.node.classList.remove(className);
+
+		return this;
+	}
 	SVGElement.prototype.appendTo	= function (elem) {
 		if(elem.constructor === SVGElement) {
 			elem.node.appendChild(this.node);
@@ -311,6 +326,14 @@ define(function () {
 	};
 	SVGElement.prototype.getY		= function () {
 		return this.node.y.baseVal.value;
+	};
+	SVGElement.prototype.hide		= function () {
+		this.node.style.display	= 'none';
+		return this;
+	};
+	SVGElement.prototype.show		= function () {
+		this.node.style.display	= '';
+		return this;
 	};
 
 	return SVGElement;
