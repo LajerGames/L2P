@@ -32,6 +32,9 @@
 	color: #000;
 	vertical-align: top;
 }
+#info h4 {
+    margin-top: 0;
+}
 #info div[data-content="illustration"] {
 	overflow: hidden;
 	height: 320px;
@@ -72,7 +75,7 @@
 #list .addToPlaylist,
 #PlaylistItems .removeFromPlaylist {
 	float: right;
-	width: 1vw;
+	height: 3vh;
 	cursor: pointer;
 	padding: 3px 5px 3px 5px;
 }
@@ -83,6 +86,7 @@
 }
 #PlaylistContainer h2 {
 	position: relative;
+	margin-top: 0;
 }
 #PlaylistContainer img.listPlaylist,
 #PlaylistContainer img.playPlaylist {
@@ -137,7 +141,7 @@
 #PlaylistList img {
 	position: absolute;
 	right: 0;
-	height: 2vh;
+	height: 3vh;
 	padding: 0.5vh;
 }
 
