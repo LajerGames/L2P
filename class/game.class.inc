@@ -556,12 +556,12 @@ class SongGenerator
 
                 $arrTacts[$iTactNo][1][$iNoteID][1] = $oNoteInfo->strNotename;
                 $arrTacts[$iTactNo][1][$iNoteID][2] = $iRelativeOctave;
-            }   
+            }
         }
         /*
 
         // Now are we starting in an upwards or downwards direction - We'll give at 50/50 chance of going either up or down as start direction
-        
+
         */
 /*
         $bFirstNote             = true;
@@ -742,7 +742,7 @@ class SongGenerator
                 break;
         }
 
-        return $iNotesLeftDirection;   
+        return $iNotesLeftDirection;
     }
 
     private function CreateTactTemplate($oBasicSongInfo)

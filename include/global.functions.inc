@@ -201,6 +201,7 @@ function GetMusic($oSql, $strType = 'song', $iLimit = 0, $strSearch = '')
         WHERE
             games.deleted           = 0
          && games.type              = "'.$strType.'"
+         && games.status            = "ready"
          '.$strWhereCondition.'
         GROUP BY
             languages.name
@@ -796,6 +797,26 @@ function GetPercentualChange($iChanceOfTrue)
     $iGeneratedNumber = rand(1, 100);
 
     return $iGeneratedNumber <= $iChanceOfTrue;
+}
+function GetNoteNamesArray()
+{
+    return array(
+        'C' => 'C',
+        'D' => 'D',
+        'E' => 'E',
+        'F' => 'F',
+        'G' => 'G',
+        'A' => 'A',
+        'B' => 'B'
+    );
+}
+function GetOctavesArray()
+{
+    return array(
+        3 => 3,
+        4 => 4,
+        5 => 5
+    );
 }
 class AC_LoadFileInfo
 {
