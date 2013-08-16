@@ -205,3 +205,6 @@
 .browse-submode {
     margin-bottom: 10px;
 }
+.form-horizontal .FormTable td {
+    padding: 1.3vmin;
+}

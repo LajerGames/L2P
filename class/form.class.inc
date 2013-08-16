@@ -197,23 +197,38 @@ class Form
 	* @param bool $bUseTableView
 	* @return string
 	*/
-	public function RenderFields($bIncludeSubmitArea = true, $strSubmitButtonName = 'Save changes', $strCancelButtonName = '', $bUseTableView = false)
+	public function RenderFields($bIncludeSubmitArea = true, $strSubmitButtonName = 'Save changes', $strCancelButtonName = '', $iTableViewColoumns = 0)
 	{
 		$strHtml	= $this->RenderFormStart();
 
-        if($bUseTableView)
+        if($iTableViewColoumns > 0)
         {
-            $strHtml .= '<table border="0" cellspacing="0" cellpadding="0" class="FormTable">';
+            $iCellLoops = 0;
+            $strHtml    .= '
+                <table border="0" cellspacing="0" cellpadding="0" class="FormTable">
+                    <tr>
+            ';
             foreach($this->arrFields as $strName => $oField)
             {
+                $bNewRow = is_integer((++$iCellLoops / $iTableViewColoumns));
+
+
                 $strHtml    .= '
-                    <tr>
                         <td>'.$oField->strLabel.'</td>
                         <td>'.$oField->RenderField().'</td>
-                    </tr>
                 ';
+
+                if($bNewRow)
+                {
+                    $strHtml .= '
+                        </tr><tr>
+                    ';
+                }
             }
-            $strHtml .= '</table>';
+            $strHtml .= '
+                    </tr>
+                </table>
+            ';
         }
         else
         {
