@@ -212,3 +212,6 @@
 .form-horizontal .FormTable td {
     padding: 1.3vmin;
 }
+#list .inputContainer {
+	color: #000;
+}

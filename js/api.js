@@ -75,6 +75,14 @@ define(['jquery'], function ($) {
 					callback( data );
 				}
 			});
+		},
+		game_generation_duration:	function ( callback, data ) {
+			new	_apiGetter( 'game.generation.duration.php', data )
+			.then( function ( data ) {
+				if( callback ) {
+					callback( data );
+				}
+			});
 		}
 	};
 

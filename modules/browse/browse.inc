@@ -5,7 +5,7 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/include/config.php');
 require_once(SERVER_PROJECT_ROOT_CLASS_MODULE.'browse.class.inc');
 
 // Distinguise between songs and scales
-if($strType == 'music')
+if($strType == 'song')
 {
 	$rGenres = $oSql->Select('
 		SELECT
@@ -52,7 +52,7 @@ $strBody	= '
 		<td id="info">
 			<h4>'.$oLang->Get('browse_start_position').'</h4>
 			<div data-content="illustration"></div>
-			<ul class="unstyled">
+			<ul class="list-unstyled">
 				<li data-content="title"></li>
 				<li data-content="octave"></li>
 				<li data-content="author"></li>

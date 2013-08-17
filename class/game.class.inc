@@ -651,7 +651,7 @@ class SongGenerator
 			$this->arrFlats
 		);
 
-		return json_encode($arrSong);
+		return $arrSong;
 	}
 
     private function CalculateOddsOfKeepingDirection($iLoopsThisDirection)
@@ -901,6 +901,11 @@ class SongGenerator
 		return $oNoteInfo;
 	}
 
+	/**
+	* GetBasicSongInfo
+	*
+	* @return AC_GetBasicSongInfo
+	*/
 	public function GetBasicSongInfo()
 	{
 		// Get neccesary calculation info
@@ -1142,6 +1147,95 @@ class SongGenerator
                 break;
         }
     }
+
+    /**
+    * SaveGame
+    *
+    * @return AC_GeneratedSong_Saved
+    */
+    public function SaveGame()
+    {
+    	global	$oLang;
+
+		$strUUID	= '';
+		while(empty($strUUID))
+		{
+			$strUUID	= substr(UUID(true), 0, 6);
+
+			$rCheck		= $this->oSql->Select('
+				SELECT
+					games.id
+				FROM
+					games
+				WHERE
+					games.deleted	= 0
+				 &&	games.uuid		= "'.$strUUID.'"
+			');
+
+			if($rCheck->num_rows > 0)
+			{
+				$strUUID	= '';
+			}
+		}
+
+		$arrGameData		= $this->GenerateSong();
+
+		$strStartingNote	= '';
+	    foreach($arrGameData[2] as $arrTacts)
+	    {
+	        foreach($arrTacts[1] as $arrNote)
+	        {
+	            if($arrNote[1] !== null)
+	            {
+	                $strStartingNote = $arrNote[1];
+	                break;
+	            }
+	        }
+	        break;
+	    }
+
+		$iGameID		= $this->oSql->Insert('games', array(
+			'title'			=> 'Prima Vista',
+			'permlink'		=> $strUUID,
+			'game'			=> json_encode($arrGameData),
+			'type'			=> 'song',
+			'octave'		=> $arrGameData[1][0],
+			'start_tone'	=> $strStartingNote,
+			'status'		=> 'generated',
+			'availability'	=> 'users',
+			'user_id'		=> $_SESSION['UserObject']->id
+		));
+
+		$this->oSql->Insert('languages', array(
+			'type'		=> 'game_title',
+			'lang'		=> 'da-DK',
+			'parent_id'	=> $iGameID,
+			'name'		=> 'Prima Vista'
+		));
+		$this->oSql->Insert('languages', array(
+			'type'		=> 'game_title',
+			'lang'		=> 'en-US',
+			'parent_id'	=> $iGameID,
+			'name'		=> 'Prima Vista'
+		));
+		$this->oSql->Insert('games_titles', array(
+			'lang'		=> 'da-DK',
+			'game_id'	=> $iGameID,
+			'title'		=> 'Prima Vista'
+		));
+		$this->oSql->Insert('games_titles', array(
+			'lang'		=> 'en-US',
+			'game_id'	=> $iGameID,
+			'title'		=> 'Prima Vista'
+		));
+
+		$oReturn	= new AC_GeneratedSong_Saved();
+		$oReturn->arrGameData	= $arrGameData;
+		$oReturn->iGameID		= $iGameID;
+		$oReturn->strUUID		= $strUUID;
+
+		return $oReturn;
+    }
 }
 class Illustrations
 {
@@ -1381,5 +1475,11 @@ class AC_Note
 	public  $iEntry,
 			$iOctave,
 			$strNotename;
+}
+class AC_GeneratedSong_Saved
+{
+	public	$strUUID,
+			$arrGameData,
+			$iGameID;
 }
 ?>

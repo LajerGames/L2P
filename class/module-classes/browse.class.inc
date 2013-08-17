@@ -10,15 +10,25 @@ class browse
 		return;
 	}
 
-	public function RenderMusic($strType, $strSearch = '', $iAmt = 100, $strSubMode = '')
+	/**
+	* RenderMusic
+	*
+	* @param string $strType
+	* @param string $strSearch
+	* @param int $iAmt
+	* @param string $strSubMode
+	* @param int $iGenreID
+	* @return string
+	*/
+	public function RenderMusic($strType, $strSearch = '', $iAmt = 100, $strSubMode = '', $iGenreID = 0)
 	{
 		global	$oTemplate,
 				$oLang;
 
-		$rMusic		= GetMusic($this->oSql, $strType, $iAmt, $strSearch);
+		$rMusic		= GetMusic($this->oSql, $strType, $iAmt, $strSearch, $iGenreID);
 		$strMusic	= '';
 
-		if($strType === 'music')
+		if($strType === 'song')
 		{
 			while($oMusic = $this->oSql->FetchObject($rMusic, false))
 			{
@@ -115,8 +125,6 @@ class browse
                 'd_minor'           => $oLang->Get('game_key_d_minor')
             );
 
-            //printr(GetMusicKeys($oLang));
-
 			$oPrimaVistaForm	= new Form('prima_vista', '/game/action/generate-game/', true);
 			$oPrimaVistaForm->SelectBox('difficulty', SongGenerator::Difficulty_Easy, array(
                 SongGenerator::Difficulty_Easy        => $oLang->Get('browse_song_generator_difficulty_easy'),
@@ -145,6 +153,7 @@ class browse
             $oPrimaVistaForm->SelectBox('highest_note', 'B', GetNoteNamesArray(), $oLang->Get('browse_song_generator_note_highest'));
             $oPrimaVistaForm->SelectBox('highest_octave', '5', GetOctavesArray(), $oLang->Get('browse_song_generator_octave_highest'));
             $oPrimaVistaForm->SelectBox('key', 'c_major', $arrKeys, $oLang->Get('browse_song_generator_key'));
+            $oPrimaVistaForm->TextField('qduration' /** Something is wrong with the sorting of the fields - therefore the added "q" */, 0.00, $oLang->Get('browse_song_generator_actual_duration'), null, 'hidden');
 
 			$strMusic	= '
 				<div class="browse-submode'.($strSubMode === 'position1' ? ' browse-submode--focus' : '').'" data-submode="position1">

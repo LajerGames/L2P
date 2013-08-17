@@ -32,6 +32,20 @@ if($oGameCreateForm->Validate($_POST))
 			}
 		}
 
+		$strStartingNote	= '';
+	    foreach($arrGameData[2] as $arrTacts)
+	    {
+	        foreach($arrTacts[1] as $arrNote)
+	        {
+	            if($arrNote[1] !== null)
+	            {
+	                $strStartingNote = $arrNote[1];
+	                break;
+	            }
+	        }
+	        break;
+	    }
+
 		// If the default Octave isn't the first octave, we need to recalc the relative octaves
 		if($iDefaultOctave !== $iFirstOctave)
 		{
@@ -58,6 +72,7 @@ if($oGameCreateForm->Validate($_POST))
 			'game'			=> $strGameData,
 			'type'			=> 'song',
 			'octave'		=> $iFirstOctave,
+			'start_tone'	=> $strStartingNote,
 			'status'		=> $strStatus,
 			'availability'	=> 'users'
 		));

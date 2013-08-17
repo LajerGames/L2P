@@ -120,6 +120,7 @@ $this
 ->Set('song_generator_octave_highest', 'Højeste oktav')
 ->Set('song_generator_note_help', 'Flyt med din mus')
 ->Set('song_generator_key', 'Toneart')
+->Set('song_generator_actual_duration', 'Reel varighed')
 
 # Create user
 ->SetMenu('create_user_')
@@ -291,6 +292,7 @@ $this
 ->Set('children', 'Børn')
 ->Set('rock', 'Rock')
 ->Set('wedding', 'Bryllup')
+->Set('gospel', 'Gospel')
 
 ->SetMenu('tour_')
 ->Set('0_0_title', 'Guidet tour')

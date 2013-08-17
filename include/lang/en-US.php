@@ -120,6 +120,7 @@ $this
 ->Set('song_generator_octave_highest', 'Highest octave')
 ->Set('song_generator_note_help', 'Move with your mouse')
 ->Set('song_generator_key', 'Key')
+->Set('song_generator_actual_duration', 'Real duration')
 
 # Create user
 ->SetMenu('create_user_')
@@ -291,6 +292,7 @@ $this
 ->Set('children', 'Children')
 ->Set('rock', 'Rock')
 ->Set('wedding', 'Wedding')
+->Set('gospel', 'Gospel')
 
 ->SetMenu('tour_')
 ->Set('0_0_title', 'Guided tour')

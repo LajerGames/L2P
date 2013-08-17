@@ -166,7 +166,7 @@ function RenderProperties($arrProperties)
 
 	return $strProperties;
 }
-function GetMusic($oSql, $strType = 'song', $iLimit = 0, $strSearch = '')
+function GetMusic($oSql, $strType = 'song', $iLimit = 0, $strSearch = '', $iGenreID = 0)
 {
 	$strType = $strType == 'song' ? 'song' : 'scale';
 
@@ -177,6 +177,20 @@ function GetMusic($oSql, $strType = 'song', $iLimit = 0, $strSearch = '')
 	{
 		$strWhereCondition = '
 		 &&	games.title LIKE "%'.$strSearch.'%"
+		';
+	}
+	if($iGenreID > 0)
+	{
+		$strWhereCondition = '
+		 &&	games.id	IN(
+		 		SELECT
+					games_genres.game_id
+		 		FROM
+		 			games_genres
+		 		WHERE
+		 			games_genres.deleted	= 0
+		 		 &&	games_genres.genre_id	= '.$iGenreID.'
+		 	)
 		';
 	}
 

@@ -5,7 +5,9 @@ define(['jquery', 'l2p', 'playlist', 'api', 'fM'], function ($, L2P, Playlist, a
 			$info			= $dialog.find('#info'),
 			showInfoFor		= null,
 			$playlistInner	= $dialog.find('#PlaylistInfoContainerInner'),
-			$playlistList	= $playlistInner.find('#PlaylistList');
+			$playlistList	= $playlistInner.find('#PlaylistList'),
+			$primaVistaForm	= $dialog.find('.browse-submode--prima-vista form'),
+			$primaVistaDurationBox;
 
 		L2P.get.playlist(null, function (playlist) {
 			render	= L2P.render.playlist(playlist, $dialog.find('#PlaylistItems'));
@@ -59,14 +61,21 @@ define(['jquery', 'l2p', 'playlist', 'api', 'fM'], function ($, L2P, Playlist, a
 			.find('#list, #PlaylistItems')
 				.on('mouseover', 'a', showInfo);
 
-		$dialog.find("#musicSearch")
-			.on("keyup", function() {
-				var	oParam = {}
-				oParam.searchstring	= $(this).val();
-				oParam.type     	= $(this).attr('data-type');
+		(function () {
+			var	$title	= $dialog.find('#musicSearch'),
+				$genre	= $dialog.find('#SongContainer select[name="genre"]');
 
-				$dialog.find("#list").load("/ajax/browse.render.music.php", oParam);
-			});
+			function searchMusic() {
+				$dialog.find("#list").load("/ajax/browse.render.music.php", {
+					searchstring:	$title.val(),
+					genre_id:		$genre.val(),
+					type:			'song'
+				});
+			}
+
+			$title.on('keyup', searchMusic);
+			$genre.on('change', searchMusic);
+		}());
 
 		$playlistList
 			.on('click', 'div[data-playlist_id]', function (e) {
@@ -177,19 +186,32 @@ define(['jquery', 'l2p', 'playlist', 'api', 'fM'], function ($, L2P, Playlist, a
 					});
 				});
 
-		$dialog
-			.find('.browse-submode--prima-vista form')
-				.on('submit', function (e) {
-					e.preventDefault();
+		function updateGameGenerationDuration() {
+			var	data	= fM.form.getElements.call($primaVistaForm[0]);
 
-					var	$this	= $(this),
-						data	= fM.form.getElements.call(this);
+			api.get.game_generation_duration(function (data) {
+				if(!$primaVistaDurationBox) {
+					$primaVistaDurationBox	= $primaVistaForm.find('[name="qduration"]').parent();
+				}
 
-					L2P.$modal.off('hide.bs.modal');
-					fM.link.navigate($this.attr('action'), 'Magic Tune', {
-						title:	'Magic Tune',
-						data:	data
-					});
+				$primaVistaDurationBox.text(data.duration.toFixed(0)+' '+data.sec);
+			}, data);
+		}
+
+		$primaVistaForm
+			.on('submit', function (e) {
+				e.preventDefault();
+
+				var	data	= fM.form.getElements.call(this);
+
+				L2P.$modal.off('hide.bs.modal');
+				fM.link.navigate($primaVistaForm.attr('action'), 'Magic Tune', {
+					title:	'Magic Tune',
+					data:	data
 				});
+			})
+			.on('change', 'select', updateGameGenerationDuration);
+
+		updateGameGenerationDuration();
 	});
 })

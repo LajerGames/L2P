@@ -10,8 +10,6 @@ $strHighestNote     = $_POST['highest_note'];
 $strHighestOctave   = intval($_POST['highest_octave']);
 $strKey             = $_POST['key'];
 
-//printr(GetMusicKeys($oLang));
-
 // Now make a new instance of the SongGenerator
 $oSongGenerator = new SongGenerator($oSql);
 
@@ -63,7 +61,7 @@ if(in_array($strHighestOctave, $arrOctaves))
 # Key
 $oSongGenerator->strGamekey = $strKey;
 
-echo $oSongGenerator->GenerateSong();
+$oGameSaved	= $oSongGenerator->SaveGame();
 
-exit;
+Redirect('/game/'.$oGameSaved->strUUID.'/'.$oGameSaved->arrGameData[1][0].'/');
 ?>
