@@ -123,13 +123,13 @@ class PageRenderer
 				<link rel="icon" href="'.HTTP_PROJECT_ROOT_IMG.'favicon64.png" sizes="64x64">
 				<link rel="icon" href="'.HTTP_PROJECT_ROOT_IMG.'favicon128.png" sizes="128x128">
 
-				<link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Open Sans">
-				<link rel="stylesheet" href="'.HTTP_PROJECT_ROOT.'bootstrap/css/bootstrap.min.css?v='.GIT_COMMIT_HASH.'">
+				<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open Sans">
+				<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0-wip/css/bootstrap.min.css">
 				<link rel="stylesheet" href="'.HTTP_PROJECT_ROOT_CSS.'bootstrap-tour.min.css?v='.GIT_COMMIT_HASH.'">
 				<link rel="stylesheet" href="'.HTTP_PROJECT_ROOT_CSS.'default.css?v='.GIT_COMMIT_HASH.'">
 				'.$strCSSFiles.'
 
-                <script data-main="'.HTTP_PROJECT_ROOT_JAVASCRIPT.(SYSTEM_DEV ? 'main' : 'magic-tune').'" src="'.HTTP_PROJECT_ROOT_JAVASCRIPT.'require.js?v='.GIT_COMMIT_HASH.'"></script>
+                <script data-main="'.HTTP_PROJECT_ROOT_JAVASCRIPT.(!SYSTEM_DEV ? 'main' : 'magic-tune').'" src="'.HTTP_PROJECT_ROOT_JAVASCRIPT.'require.js?v='.GIT_COMMIT_HASH.'"></script>
 				<script>
 					var	L2P_global	= '.json_encode($arrL2PGlobals, JSON_FORCE_OBJECT).';
 				</script>

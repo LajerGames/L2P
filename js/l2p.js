@@ -141,22 +141,28 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 
 						var	data	= fM.form.getElements.call(this);
 
-						L2P.$modal.off('hide');
+						L2P.$modal.off('hide.bs.modal');
 						fM.link.navigate(L2P.$modal.attr('action'), 'Magic Tune', {
 							title:	'Magic Tune',
 							data:	data
 						});
 					}
 
-					L2P.$modal.modal('show');
-					L2P.$modal.on('submit', onSubmit);
+					L2P.$modal
+						.on('submit', onSubmit);
 
 					var	pathname	= location.pathname;
-					L2P.$modal.on('hide', function (e) {
-						if(!$(e.target).hasClass('tour-step-backdrop')) {
-							fM.link.navigate('/');
-						}
-					});
+					L2P.$modal
+						.on('hide.bs.modal', function (e) {
+							if(!$(e.target).hasClass('tour-step-backdrop')) {
+								fM.link.navigate('/');
+							}
+						})
+						.on('shown.bs.modal', function (e) {
+							$('.modal-backdrop').on('click', function (e) {
+								L2P.$modal.modal('hide');
+							});
+						});
 
 					fM.form.autofocus(L2P.$modal);
 
@@ -172,6 +178,8 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 									window.history.back();
 								});
 					}
+
+					L2P.$modal.modal('show');
 
 					L2P.form.inputValidation.error();
 					if(infoScript) {
@@ -195,7 +203,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					var	$modalFooter	= L2P.$modal.find('.modal-footer');
 					if(buttons) {
 						buttons.forEach(function (button) {
-							$modalFooter.prepend('<button class="btn">'+button+'</button>');
+							$modalFooter.prepend('<button class="btn btn-default">'+button+'</button>');
 						});
 					}
 					L2P.$modal.find('button.btn[data-dismiss]').text(L2P_global.lang.global_button_close);
@@ -207,13 +215,19 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					});
 
 					var	current	= fM.link.getCurrent();
-					L2P.$modal.on('hide', function (e) {
-						L2P.$modal.off('hide');
+					L2P.$modal
+						.on('hide.bs.modal', function (e) {
+							L2P.$modal.off('hide.bs.modal');
 
-						if(!$(e.target).hasClass('tour-step-backdrop')) {
-							fM.link.navigate('/');
-						}
-					});
+							if(!$(e.target).hasClass('tour-step-backdrop')) {
+								fM.link.navigate('/');
+							}
+						})
+						.on('shown.bs.modal', function (e) {
+							$('.modal-backdrop').on('click', function (e) {
+								L2P.$modal.modal('hide');
+							});
+						});
 
 					var	parent	= fM.link.getParent();
 					if(parent && parent.is_dialog) {

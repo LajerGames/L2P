@@ -91,5 +91,4 @@ define(function() {
 		return Note;
 	})();
 	return Note;
-})
-
+});

@@ -48,6 +48,10 @@ define(['jquery'], function ($) {
 				window.history.replaceState(obj, title, document.location.pathname);
 				lastState	= obj;
 
+				if(_gaq) {
+					_gaq.push(['_trackPageview', document.location.pathname]);
+				}
+
 				$that.trigger('navigate-done', [lastState]);
 			} else {
 				console.log('no nav id', obj);

@@ -158,7 +158,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		// console.log(this.game);
 		this.game.reset();
 
-		this.SVGNotes.animateAbs(0, -501, 0);
+		this.SVGNotes.animateAbs(0, -505, 0);
 
 		// console.log('reset-pos', this.SVGNotes.node.style.webkitTransition, this.SVGNotes.node.style.webkitTransform);
 		this.initView();
@@ -228,7 +228,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 
 		gameController.SVGNotes.node.style.width	= (totalWidth + gameController.defWidth / 4)+'px';
 
-		gameController.SVGNotes.animateAbs(-totalWidth, -501, relativeDuration, this.gameDone.bind(this));
+		gameController.SVGNotes.animateAbs(-totalWidth, -505, relativeDuration, this.gameDone.bind(this));
 
 		$(gameController.svgLine.node).on('webkitAnimationEnd', function () {
 			gameController.svgLine.node.classList.remove('pulse');
@@ -259,9 +259,9 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 	};
 	GameController.prototype.pauseGame	= function () {
 		if(L2P_global.kiddie_mode) {
-			this.SVGNotes.animateAbs(-this.currentLeft() + 30, -501, 0);
+			this.SVGNotes.animateAbs(-this.currentLeft() + 30, -505, 0);
 		} else {
-			this.SVGNotes.animateAbs((-Math.floor(this.currentLeft() / (this.defWidth / 4)) + 0.5) * (this.defWidth / 4) - 20, -501, 0);
+			this.SVGNotes.animateAbs((-Math.floor(this.currentLeft() / (this.defWidth / 4)) + 0.5) * (this.defWidth / 4) - 20, -505, 0);
 		}
 		this.paused	= true;
 	};
@@ -328,7 +328,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		});
 
 		if(dontResetPos !== true) {
-			this.SVGNotes.animateAbs(0, -501, 0);
+			this.SVGNotes.animateAbs(0, -505, 0);
 		}
 		this.SVGNotes.removeChildNodes();
 
@@ -682,10 +682,10 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		var	gameController	= this;
 
 		if(tact === -1) {
-			gameController.SVGNotes.animateAbs(0, -501, 0);
+			gameController.SVGNotes.animateAbs(0, -505, 0);
 		} else {
 			gameController.getTactX(tact, function (x) {
-				gameController.SVGNotes.animateAbs(-x, -501, 0);
+				gameController.SVGNotes.animateAbs(-x, -505, 0);
 			});
 		}
 	};
@@ -694,7 +694,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 
 		gameController.getNoteX(note, function (noteX) {
 			gameController.getTactX(note.tact, function (tactX) {
-				gameController.SVGNotes.animateAbs(-(noteX + tactX), -501, 0);
+				gameController.SVGNotes.animateAbs(-(noteX + tactX), -505, 0);
 			});
 		});
 	};

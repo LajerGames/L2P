@@ -7,10 +7,11 @@ if(DEBUG) {
 }
 require.config({
 	paths:	{
-		'jquery':	'jquery-2.0.3.min',
-		'tour':		'bootstrap-tour',
-		'json':		'requirejs/json',
-		'facebook':	'//connect.facebook.net/en_US/all'
+		'jquery':		'jquery-2.0.3',
+		'tour':			'bootstrap-tour',
+		'json':			'requirejs/json',
+		'facebook':		'//connect.facebook.net/en_US/all',
+		'bootstrap':	'//netdna.bootstrapcdn.com/bootstrap/3.0.0-wip/js/bootstrap'
 	},
 	shim:	{
 		highcharts:	{
@@ -28,7 +29,7 @@ require(['jquery', 'browserdetect'], function ($, AC) {
 	var	$intro,
 		wait	= 0;
 	if(!AC.Detector.isChrome() || (AC.Detector.isWin() && !AC.Detector.winAtLeastVersion(6))) {
-		require(['bootstrap.min'], function () {
+		require(['bootstrap'], function () {
 			if(['l2p.fmads.dk','l3p.fmads.dk','l2p.magic-tune.com','l3p.magic-tune.com'].indexOf(location.host) === -1) {
 				$([
 					'<div id="system_requirements">',
@@ -105,15 +106,11 @@ require(['jquery', 'browserdetect'], function ($, AC) {
 				e.stopPropagation();
 
 				if(L2P.$modal && L2P.$modal.is(':visible')) {
-					L2P.$modal.off('hide').modal('hide');
+					L2P.$modal.off('hide.bs.modal').modal('hide');
 				}
 				$('.popover.validation-error:visible').remove();
 
 				popstateTitle(e);
-
-				if(_gaq) {
-					_gaq.push(['_trackPageview', document.location.pathname]);
-				}
 
 				switch(document.location.pathname) {
 					case '/':
