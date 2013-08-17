@@ -1,106 +1,69 @@
 <?php
-// Validate
-printr($_POST);
-/*
-if($oGameCreateForm->Validate($_POST))
+// Get data
+$strDifficulty      = $_POST['difficulty'];
+$strSpeed           = $_POST['speed'];
+$strPulse           = $_POST['pulse'];
+$strDuration        = $_POST['duration'];
+$strLowestNote      = $_POST['lowest_note'];
+$strLowestOctave    = intval($_POST['lowest_octave']);
+$strHighestNote     = $_POST['highest_note'];
+$strHighestOctave   = intval($_POST['highest_octave']);
+$strKey             = $_POST['key'];
+
+//printr(GetMusicKeys($oLang));
+
+// Now make a new instance of the SongGenerator
+$oSongGenerator = new SongGenerator($oSql);
+
+# Difficulty
+if($strDifficulty === SongGenerator::Difficulty_Easy ||$strDifficulty === SongGenerator::Difficulty_Medium || $strDifficulty === SongGenerator::Difficulty_Hard)
 {
-    if($oPathGame->iGameID === 0)
-    {
-        $strGameData    = $_POST['data'];
-        $strTitleDK        = $_POST['dk_title'];
-        $strTitleEN        = $_POST['en_title'];
-        $strPermlink    = $_POST['permlink'];
-        $strStatus        = $_POST['status'];
-        $iGenreID        = intval($_POST['genre']);
-
-        $arrGameData    = json_decode($strGameData, true);
-        $iDefaultOctave    = $arrGameData[1][0];
-
-        // Find the first octave
-        $iFirstOctave    = -1;
-        foreach($arrGameData[2] as $arrTactInfo)
-        {
-            if($iFirstOctave !== -1)
-            {
-                break;
-            }
-            foreach($arrTactInfo[1] as $arrNoteInfo)
-            {
-                if(!is_null($arrNoteInfo[1]))
-                {
-                    $iFirstOctave    = $iDefaultOctave + $arrNoteInfo[2];
-                    break;
-                }
-            }
-        }
-
-        // If the default Octave isn't the first octave, we need to recalc the relative octaves
-        if($iDefaultOctave !== $iFirstOctave)
-        {
-            $arrGameData[1][0]    = $iFirstOctave;
-            $iOctaveDiff        = $iDefaultOctave - $iFirstOctave;
-
-            foreach($arrGameData[2] as $iTactNo => $arrTactInfo)
-            {
-                foreach($arrTactInfo[1] as $iNoteNo => $arrNoteInfo)
-                {
-                    if(!is_null($arrNoteInfo[1]))
-                    {
-                        $arrGameData[2][$iTactNo][1][$iNoteNo][2]    += $iOctaveDiff;
-                    }
-                }
-            }
-
-            $strGameData    = json_encode($arrGameData);
-        }
-
-        $iGameID        = $oSql->Insert('games', array(
-            'title'            => $strTitleEN,
-            'permlink'        => $strPermlink,
-            'game'            => $strGameData,
-            'type'            => 'song',
-            'octave'        => $iFirstOctave,
-            'status'        => $strStatus,
-            'availability'    => 'users'
-        ));
-        $oSql->Insert('languages', array(
-            'type'        => 'game_title',
-            'lang'        => 'da-DK',
-            'parent_id'    => $iGameID,
-            'name'        => $strTitleDK
-        ));
-        $oSql->Insert('languages', array(
-            'type'        => 'game_title',
-            'lang'        => 'en-US',
-            'parent_id'    => $iGameID,
-            'name'        => $strTitleEN
-        ));
-        $oSql->Insert('games_titles', array(
-            'lang'        => 'da-DK',
-            'game_id'    => $iGameID,
-            'title'        => $strTitleDK
-        ));
-        $oSql->Insert('games_titles', array(
-            'lang'        => 'en-US',
-            'game_id'    => $iGameID,
-            'title'        => $strTitleEN
-        ));
-        $oSql->Insert('games_genres', array(
-            'game_id'    => $iGameID,
-            'genre_id'    => $iGenreID
-        ));
-
-        Redirect('/game/'.$strPermlink.'/');
-    }
-    else
-    {
-
-    }
+    $oSongGenerator->cDifficulty    = $strDifficulty;
 }
-else
+
+# Speed
+if($strSpeed === SongGenerator::Speed_Slow ||$strSpeed === SongGenerator::Speed_Medium || $strSpeed === SongGenerator::Speed_Fast)
 {
-    echo 'did not validate';
+    $oSongGenerator->cSpeed         = $strSpeed;
 }
-*/
+
+# Pulse
+if($strPulse === SongGenerator::Pulse_TwoFourths ||$strPulse === SongGenerator::Pulse_ThreeFourths || $strPulse === SongGenerator::Pulse_FourFourths || $strPulse === SongGenerator::Pulse_FiveFourths || $strPulse === SongGenerator::Pulse_SixFourths)
+{
+    $oSongGenerator->cPulse         = $strPulse;
+}
+
+# Duration
+if($strDuration === SongGenerator::Duration_Short ||$strDuration === SongGenerator::Duration_Medium || $strDuration === SongGenerator::Duration_Long)
+{
+    $oSongGenerator->cDuration      = $strDuration;
+}
+
+# Notes
+$arrNotes   = GetNoteNamesArray();
+$arrOctaves = GetOctavesArray();
+if(in_array($strLowestNote, $arrNotes))
+{
+    $oSongGenerator->strLowestNote  = $strLowestNote;
+}
+if(in_array($strLowestOctave, $arrOctaves))
+{
+    $oSongGenerator->iLowestOctave  = $strLowestOctave;
+}
+
+if(in_array($strHighestNote, $arrNotes))
+{
+    $oSongGenerator->strHighestNote  = $strHighestNote;
+}
+if(in_array($strHighestOctave, $arrOctaves))
+{
+    $oSongGenerator->iHighestOctave  = $strHighestOctave;
+}
+
+# Key
+$oSongGenerator->strGamekey = $strKey;
+
+echo $oSongGenerator->GenerateSong();
+
 exit;
 ?>

@@ -818,6 +818,37 @@ function GetOctavesArray()
         5 => 5
     );
 }
+function GetMusicKeys($oLang)
+{
+    array(
+        'c_major'           => $oLang->Get('game_key_c_major'),
+        'a_minor'           => $oLang->Get('game_key_a_minor'),
+        'g_major'           => $oLang->Get('game_key_g_major'),
+        'e_minor'           => $oLang->Get('game_key_e_minor'),
+        'd_major'           => $oLang->Get('game_key_d_major'),
+        'b_minor'           => $oLang->Get('game_key_b_minor'),
+        'a_major'           => $oLang->Get('game_key_a_major'),
+        'f_sharp_minor'     => $oLang->Get('game_key_f_sharp_minor'),
+        'e_major'           => $oLang->Get('game_key_e_major'),
+        'c_sharp_minor'     => $oLang->Get('game_key_c_sharp_minor'),
+        'b_major'           => $oLang->Get('game_key_b_major'),
+        'g_sharp_minor'     => $oLang->Get('game_key_g_sharp_minor'),
+        'f_sharp_major'     => $oLang->Get('game_key_f_sharp_major'),
+        'd_sharp_minor'     => $oLang->Get('game_key_d_sharp_minor'),
+        'g_flat_major'      => $oLang->Get('game_key_g_flat_major'),
+        'e_flat_minor'      => $oLang->Get('game_key_e_flat_minor'),
+        'd_flat_major'      => $oLang->Get('game_key_d_flat_major'),
+        'b_flat_minor'      => $oLang->Get('game_key_b_flat_minor'),
+        'a_flat_major'      => $oLang->Get('game_key_a_flat_major'),
+        'f_minor'           => $oLang->Get('game_key_f_minor'),
+        'e_flat_major'      => $oLang->Get('game_key_e_flat_major'),
+        'c_minor'           => $oLang->Get('game_key_c_minor'),
+        'b_flat_major'      => $oLang->Get('game_key_b_flat_major'),
+        'g_minor'           => $oLang->Get('game_key_g_minor'),
+        'f_major'           => $oLang->Get('game_key_f_major'),
+        'd_minor'           => $oLang->Get('game_key_d_minor')
+    );
+}
 class AC_LoadFileInfo
 {
     public $strLoadfile;

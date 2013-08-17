@@ -441,7 +441,7 @@ class SongGenerator
 			Duration_Medium     = 'medium', // ~60 secs
 			Duration_Long       = 'long',   // ~120 secs
 			Speed_Slow          = 'slow',   // 60 bpm
-			Speed_Medium        = 'medium', // 80 bom
+			Speed_Medium        = 'medium', // 80 bpm
 			Speed_Fast          = 'fast',   // 100 bpm
 			Pulse_TwoFourths    = '2/4',
 			Pulse_ThreeFourths  = '3/4',
@@ -468,7 +468,8 @@ class SongGenerator
 			$cPulse             = SongGenerator::Pulse_FourFourths,
 			$arrSharps          = array(),
 			$arrFlats           = array(),
-            $cDifficulty        = SongGenerator::Difficulty_Easy;
+            $cDifficulty        = SongGenerator::Difficulty_Easy,
+            $strGamekey         = 'c-major';
 
 
 	public function __construct(MySQLWrapper $oSql)
@@ -482,6 +483,8 @@ class SongGenerator
 	{
 		// So get all info about this song your heart can desire!
 		$oBasicSongInfo     = $this->GetBasicSongInfo();
+
+        $this->SetSharpsAndFlats();
 
 		// To get the starting note we first need to get a random allowed note
 		$iRandomNoteEntry   = $this->GetRandomNoteEntry($oBasicSongInfo->iLowestNoteEntry, $oBasicSongInfo->iHighestNoteEntry);
@@ -648,9 +651,7 @@ class SongGenerator
 			$this->arrFlats
 		);
 
-        echo json_encode($arrSong);
-
-		return;
+		return json_encode($arrSong);
 	}
 
     private function CalculateOddsOfKeepingDirection($iLoopsThisDirection)
@@ -1080,6 +1081,67 @@ class SongGenerator
 			'6,B'
 		);
 	}
+
+    private function SetSharpsAndFlats()
+    {
+        switch($this->strGamekey)
+        {
+            case 'c_major' :
+                // None
+                break;
+            case 'a_minor' :
+                // None
+                break;
+            case 'g_major' :
+            case 'e_minor' :
+                $this->arrSharps = array('F');
+                break;
+            case 'd_major' :
+            case 'b_minor' :
+                $this->arrSharps = array('F', 'C');
+                break;
+            case 'a_major' :
+            case 'f_sharp_minor' :
+                $this->arrSharps = array('F', 'C', 'G');
+                break;
+            case 'e_major' :
+            case 'c_sharp_minor' :
+                $this->arrSharps = array('F', 'C', 'G', 'D');
+                break;
+            case 'b_major' :
+            case 'g_sharp_minor' :
+                $this->arrSharps = array('F', 'C', 'G', 'D', 'A');
+                break;
+            case 'f_sharp_major' :
+            case 'd_sharp_minor' :
+                $this->arrSharps = array('F', 'C', 'G', 'D', 'A', 'E');
+                break;
+            case 'g_flat_major' :
+            case 'e_flat_minor' :
+                $this->arrFlats = array('B', 'E', 'A', 'D', 'G', 'C');
+                break;
+            case 'd_flat_major' :
+            case 'b_flat_minor' :
+                $this->arrFlats = array('B', 'E', 'A', 'D', 'G');
+                break;
+            case 'a_flat_major' :
+            case 'f_minor' :
+                $this->arrFlats = array('B', 'E', 'A', 'D');
+                break;
+            case 'e_flat_major' :
+            case 'c_minor' :
+                $this->arrFlats = array('B', 'E', 'A');
+                break;
+            case 'b_flat_major' :
+            case 'g_minor' :
+                $this->arrFlats = array('B', 'E');
+                break;
+            case 'f_major' :
+            case 'd_minor' :
+                $this->arrFlats = array('B');
+                break;
+        }
+    }
 }
 class Illustrations
 {

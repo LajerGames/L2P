@@ -115,6 +115,8 @@ class browse
                 'd_minor'           => $oLang->Get('game_key_d_minor')
             );
 
+            //printr(GetMusicKeys($oLang));
+
 			$oPrimaVistaForm	= new Form('prima_vista', '/game/action/generate-game/', true);
 			$oPrimaVistaForm->SelectBox('difficulty', SongGenerator::Difficulty_Easy, array(
                 SongGenerator::Difficulty_Easy        => $oLang->Get('browse_song_generator_difficulty_easy'),
