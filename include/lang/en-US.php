@@ -89,6 +89,10 @@ $this
 ->Set('user_statistics', 'Statistics')
 ->Set('user_settings', 'Settings')
 ->Set('user_subscription', 'Subscription')
+->Set('scales_position', '1st')
+->Set('scales_position', '2nd')
+->Set('scales_position', '3rd')
+->Set('scales_position text', 'position scales')
 
 # Browse
 ->SetMenu('browse_')
@@ -316,7 +320,7 @@ $this
 ->Set('1_8_title', 'Moving on')
 ->Set('1_8', 'Click on the "Save" button to continue to the next part.')
 ->Set('2_0_title', 'Preparing to play')
-->Set('2_0', 'Click "View all" on the scales.')
+->Set('2_0', 'Click "First position scales" to show all available scales.')
 ->Set('2_1_title', 'A-Major')
 ->Set('2_1', 'Add this A-Major scale to your playlist by clicking the plus sign.')
 ->Set('2_2_title', 'Playlist')

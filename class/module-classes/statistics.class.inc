@@ -554,7 +554,7 @@ class statistics
                         }
 
                         $strFavouriteSongs .= '
-                            <tr data-gameid="'.$iGameID.'" data-gamestartoctave="'.$iStartOctave.'" data-handposition="'.$iHandPosition.'">
+                            <tr data-gameid="'.$iGameID.'" data-gamestartoctave="'.$iStartOctave.'" data-handposition="'.$iHandPosition.'" data-blindmode="'.$strBlindMode.'">
                                 <td>'.$iLoopID.'</td>
                                 <td>'.$iHandPosition.'</td>
                                 <td><span class="octave">('.$this->oLang->Get('global_octave').' '.$arrGameInfo['start_octave'].')</span> '.$arrGameInfo['name'].' '.$strBlindMode.'</td>
