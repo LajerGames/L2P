@@ -1,5 +1,6 @@
 .modal {
 	overflow: hidden;
+	bottom: initial;
 }
 .modal-info {
 	width: 70vw;

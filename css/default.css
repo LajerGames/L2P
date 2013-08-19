@@ -157,8 +157,8 @@ button[name="facebook_button"] img {
 .popover.tour .popover-content strong {
 	font-size: 1.4vmin;
 }
-.tour-backdrop {
-	z-index: 1109;
+.tour-backdrop-modal {
+	 z-index: 1109;
 }
 .tour-step-background {
 	background: transparent;
@@ -738,14 +738,22 @@ div.countdown.microphone-permission .next {
 	border-color: #71C211;
 	background-color: #71C211;
 }
-.popover.tour.left,
-.popover.tour .arrow:after {
-	border-left-color: #71C211;
+.popover.right .arrow:after {
+    border-right-color: #71C211;
+}
+.popover.top .arrow:after {
+    border-top-color: #71C211;
+}
+.popover.left .arrow:after {
+    border-left-color: #71C211;
+}
+.popover.bottom .arrow:after {
+    border-bottom-color: #71C211;
 }
 .popover.tour .popover-title {
 	background-color: #71C211;
 }
-.popover.tour .popover-content {
+.popover.tour .popover-content-box {
 	background-color: #FFF;
 	border-bottom-left-radius: 6px;
 	border-bottom-right-radius: 6px;
@@ -760,7 +768,9 @@ div.countdown.microphone-permission .next {
     left: 3px;
     bottom: 3px;
 }
-.popover.tour .popover-content p {}
+.popover-content-buttons {
+    padding: 2px;
+}
 .popover.tour .popover-content p {
     height: 25px;
     color: #FFF;
@@ -771,10 +781,13 @@ div.countdown.microphone-permission .next {
 .IconLink.tour-step-backdrop {
 	background-color: #1DBAE7;
 }
-.ViewAllGames.tour-step-backdrop {
+.ContentBoxOrange .ContentBoxBody a.tour-step-backdrop {
 	background-color: #E2A30C;
 }
 .browse-item.tour-step-backdrop {
+	background-color: #FFF;
+}
+#info .tour-step-backdrop {
 	background-color: #FFF;
 }
 .playPlaylist.tour-step-backdrop {

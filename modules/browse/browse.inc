@@ -51,7 +51,7 @@ $strBody	= '
 	<tr>
 		<td id="info">
 			<h4>'.$oLang->Get('browse_start_position').'</h4>
-			<div data-content="illustration"></div>
+			<div data-box="illustration"></div>
 			<ul class="list-unstyled">
 				<li data-content="title"></li>
 				<li data-content="octave"></li>

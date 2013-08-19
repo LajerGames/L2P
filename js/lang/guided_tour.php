@@ -7,7 +7,7 @@ $arrLang	= array(
 );
 $arrItems	= array(
 	1,
-	8,
+	9,
 	6,
 	1,
 	2,

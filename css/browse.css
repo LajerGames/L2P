@@ -35,7 +35,7 @@
 #info h4 {
     margin-top: 0;
 }
-#info div[data-content="illustration"] {
+#info div[data-box="illustration"] {
 	overflow: hidden;
 	height: 320px;
 }

@@ -467,10 +467,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					var	current	= fM.link.getCurrentNavigate();
 					data	= data || current && current.data;
 
-					console.log('nav', urlAjax, data);
-
 					getAjax(urlAjax, data, function (data) {
-						console.log(data);
 						switch(data.dialogType) {
 							case 'action':
 								if(tour && !tour.callback(url)) {
@@ -893,7 +890,11 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					this.$tbody	= $container.find('tbody');
 					this.$tbody.on('click', '.removeFromPlaylist', function () {
 						var	$this	= $(this),
-							game	= $this.parents('tr').data('game')
+							game	= $this.parents('tr').data('game');
+
+						if($this.parents('.tour-step-backdrop').length > 0) {
+							return;
+						}
 
 						playlist.removeGame(game);
 					});
@@ -970,13 +971,14 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					is_add	= $elem.is('[data-action="add-to-playlist"]'),
 					urlRaw	= $item.attr('href'),
 					url		= urlRaw+(urlRaw.indexOf('?') === -1 ? (urlRaw.substr(urlRaw.length - 1, 1) === '/' ? '' : '/') : ''),
-					title	= data.title;
+					title	= data.title,
+					is_guided_tour_item	= $item.is('a[data-dialog="game"]') && ($item.is('.tour-step-backdrop') || $item.parents('.tour-step-backdrop').length > 0);
 
 				if(is_add) {
 					L2P.get.playlist(null, function () {
 						playlist.addGame(url, title);
 					});
-				} else {
+				} else if(!is_guided_tour_item) {
 					require(['fM'], function (fM) {
 						fM.link.navigate(url, 'Magic Tune', {
 							title:	'Magic Tune'
@@ -1078,10 +1080,12 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 
 					function tourGame(tuner) {
 						tuner.$tuner.one('noise_ok', function () {
+							controller.tour.removeState('end');
 							controller.tour.start(true);
 						});
 					}
 					function tourGameTick(e, freq) {
+						console.log(e, freq);
 						if(freq !== -1) {
 							$(tuner).off('tick', tourGameTick);
 
@@ -1099,18 +1103,41 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					controller.tour		= new Tour({
 						useLocalStorage:	true,
 						container:			'body',
-						debug:				false,
+						debug:				true,
 						labels:		{
-							next:	'<button class="btn">'+lang.tour_button_got_it+'</button>',
+							next:	'<button class="btn btn-primary">'+lang.tour_button_got_it+'</button>',
 							prev:	'',
-							end:	'<button class="btn">'+lang.tour_button_end_tour+'</button>',
+							end:	'<button class="btn btn-default">'+lang.tour_button_end_tour+'</button>',
 						},
 						keyboard:	false,
 						template:	function (i, step) {
 							if(step.labelsOff) {
-								return '<div class="popover tour popover--no-labels"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div>';
+								return [
+									'<div class="popover tour">',
+										'<div class="arrow"></div>',
+										'<h3 class="popover-title"></h3>',
+										'<div class="popover-content-box">',
+											'<div class="popover-content"></div>',
+											'<div class="popover-content-buttons">',
+												'<button class="btn btn-default" data-role="end">'+lang.tour_button_end_tour+'</button>',
+											'</div>',
+										'</div>',
+									'</div>'
+								].join('');
 							} else {
-								return '<div class="popover tour"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div>';
+								return [
+									'<div class="popover tour">',
+										'<div class="arrow"></div>',
+										'<h3 class="popover-title"></h3>',
+										'<div class="popover-content-box">',
+											'<div class="popover-content"></div>',
+											'<div class="popover-content-buttons">',
+												'<button class="btn btn-default" data-role="end">'+lang.tour_button_end_tour+'</button>',
+												'<button class="btn btn-primary pull-right" data-role="next">'+lang.tour_button_got_it+'</button>',
+											'</div>',
+										'</div>',
+									'</div>'
+								].join('');
 							}
 						},
 						onShow:		function (tour) {
@@ -1127,7 +1154,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						element:	'#guide',
 						title:		lang.tour_0_0_title,
 						content:	lang.tour_0_0,
-						placement:	'left',
+						placement:	'bottom',
 						backdrop:	true
 					});
 
@@ -1151,7 +1178,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					});
 
 					(function (tour) {
-						[null, 'concert_pitch', 'color_nodes', 'language', 'kiddie_mode', 'countdown_time', 'metronome'].forEach(function (name, i) {
+						[null, 'concert_pitch', 'color_nodes', 'language', 'kiddie_mode', 'countdown_time', 'metronome', 'blind_mode'].forEach(function (name, i) {
 							if(name) {
 								tour.addStep({
 									element:	'.modal-action.in table.FormTable [name="'+name+'"]',
@@ -1167,9 +1194,9 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 
 					controller.tour.addStep({
 						element:	'.modal-action.in .modal-footer .btn.btn-primary',
-						title:		lang.tour_1_7_title,
-						content:	lang.tour_1_7,
-						placement:	'left',
+						title:		lang.tour_1_8_title,
+						content:	lang.tour_1_8,
+						placement:	'top',
 						container:	'.modal-action.in',
 						backdrop:	true,
 						labelsOff:	true,
@@ -1185,7 +1212,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					});
 
 					controller.tour.addStep({
-						element:	'a[href="/browse/scales/"]',
+						element:	'a[href="/browse/scales/position1/"]',
 						title:		lang.tour_2_0_title,
 						content:	lang.tour_2_0,
 						placement:	'left',
@@ -1193,10 +1220,9 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						labelsOff:	true,
 						onShow:		function (tour) {
 							controller.callback	= function (url) {
-								if(url === '/browse/scales/') {
+								if(url === '/browse/scales/position1/') {
 									tour.hideStep(tour._current);
 									L2P.get.playlist('new', function (playlist) {
-										console.log(playlist);
 									}, lang.tour_0_0_title);
 
 									return true;
@@ -1207,9 +1233,9 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					});
 
 					controller.tour.addStep({
-						element:	'.modal-info.in #list a[href="/game/a-major/4"]',
-						title:		lang['tour_2_1_title'],
-						content:	lang['tour_2_1'],
+						element:	'.modal-info.in #list a[href="/game/a-major/4/1"]',
+						title:		lang.tour_2_1_title,
+						content:	lang.tour_2_1,
 						placement:	'right',
 						container:	'.modal-info.in',
 						backdrop:	true,
@@ -1239,7 +1265,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					});
 
 					controller.tour.addStep({
-						element:	'.modal-info.in #info div[data-content="illustration"]',
+						element:	'.modal-info.in #info div[data-box="illustration"]',
 						title:		lang.tour_2_3_title,
 						content:	lang.tour_2_3,
 						placement:	'right',
@@ -1248,9 +1274,9 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					});
 
 					controller.tour.addStep({
-						element:	'.modal-info.in #list a[href="/game/b-major/4"]',
-						title:		lang['tour_2_4_title'],
-						content:	lang['tour_2_4'],
+						element:	'.modal-info.in #list a[href="/game/b-major/4/1"]',
+						title:		lang.tour_2_4_title,
+						content:	lang.tour_2_4,
 						placement:	'right',
 						container:	'.modal-info.in',
 						backdrop:	true,
@@ -1273,8 +1299,9 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						backdrop:	true,
 						labelsOff:	true,
 						onShow:		function (tour) {
+							$('.modal-info.in #PlaylistItems [name="loops"]').val(1);
 							controller.callback = function (url) {
-								if(url === '/game/a-major/4/') {
+								if(url === '/game/a-major/4/1/') {
 									if(tuner) {
 										controller.tour.next();
 									} else {
@@ -1304,7 +1331,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 							setTimeout(function () {
 								if(tour.current === current) {
 									$('div.ContentBoxGameCompass')
-										.data('popover')
+										.data('bs.popover')
 											.$tip
 												.find('.popover-content span')
 													.show();
@@ -1331,6 +1358,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						backdrop:	true
 					});
 
+					controller.tour.removeState('end');
 					controller.tour.setCurrentStep(0);
 					controller.tour.start(true);
 

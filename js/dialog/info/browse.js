@@ -35,7 +35,7 @@ define(['jquery', 'l2p', 'playlist', 'api', 'fM'], function ($, L2P, Playlist, a
 							.find('[data-content="author"]').text(data.author).end()
 							.find('[data-content="year"]').text(data.year === 0 ? '' : data.year).end()
 							.find('[data-content="difficulty"]').text(data.difficulty).end()
-							.find('[data-content="illustration"]').html(data.illustration).end()
+							.find('[data-box="illustration"]').html(data.illustration).end()
 							.find('a[data-content="statistics"]').attr('href', '/user/'+L2P_global.username+'/statistics/'+data.statistics_uuid+'/').end()
 							.show();
 					}, permlink, octave);
