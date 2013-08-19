@@ -32,7 +32,7 @@ define(['jquery'], function ($) {
 				window.history.pushState(obj, title, url);
 			}
 
-			console.log('fm-nav', url, obj);
+			// console.log('fm-nav', url, obj);
 
 			$(window).trigger('popstate', ['fM']);
 		}
@@ -54,7 +54,7 @@ define(['jquery'], function ($) {
 
 				$that.trigger('navigate-done', [lastState]);
 			} else {
-				console.log('no nav id', obj);
+				// console.log('no nav id', obj);
 			}
 		};
 		that.replaceUrl	= function (url) {

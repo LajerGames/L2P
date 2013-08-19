@@ -10,8 +10,7 @@ require.config({
 		'jquery':		'jquery-2.0.3',
 		'tour':			'bootstrap-tour',
 		'json':			'requirejs/json',
-		'facebook':		'//connect.facebook.net/en_US/all',
-		'bootstrap':	'//netdna.bootstrapcdn.com/bootstrap/3.0.0-wip/js/bootstrap'
+		'facebook':		'//connect.facebook.net/en_US/all'
 	},
 	shim:	{
 		highcharts:	{

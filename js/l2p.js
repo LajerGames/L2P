@@ -13,7 +13,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 	}
 
 	function FBAuth(response) {
-		console.log('fbAuth', response);
+		// console.log('fbAuth', response);
 		fbUser	= response;
 		if(response.status === 'connected') {
 			if(+response.authResponse.userID !== L2P_global.fb_id) {
@@ -21,7 +21,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 				if(hasTriedAutologin !== 'true') {
 					require(['fM'], function (fM) {
 						FB.api('/me', function (user) {
-							console.log('tryLogin', user);
+							// console.log('tryLogin', user);
 							fM.link.navigate('/user/create/', 'Magic-Tune', {
 								title:	'Magic-Tune',
 								data:	{
@@ -34,13 +34,13 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						});
 					});
 				} else {
-					console.log('skipped autologin');
+					// console.log('skipped autologin');
 				}
 
 				sessionStorage.setItem('l2p_fb_autologin', 'true');
 			} else {
 				FB.api('/me', function (user) {
-					console.log('logged in', user);
+					// console.log('logged in', user);
 				});
 			}
 		}
@@ -1067,7 +1067,6 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 		],
 		guided_tour:	function () {
 			require(['fM', 'tour', 'json!lang/guided_tour.php'], function (fM, Tour, lang) {
-				console.log(lang);
 				if(tour && tour.tour) {
 					tour.tour.start();
 					return;
@@ -1085,7 +1084,6 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						});
 					}
 					function tourGameTick(e, freq) {
-						console.log(e, freq);
 						if(freq !== -1) {
 							$(tuner).off('tick', tourGameTick);
 
@@ -1202,7 +1200,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						labelsOff:	true,
 						onShow:		function (tour) {
 							controller.callback	= function (url) {
-								console.log('callback test', url, url === '/');
+								// console.log('callback test', url, url === '/');
 								if(url === '/') {
 									return true;
 								}
@@ -1652,10 +1650,10 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 								}
 							});
 						});
-						console.log(JSON.stringify(gameController.exportGame()));
+						// console.log(JSON.stringify(gameController.exportGame()));
 						break;
 					default:
-						console.log(e.which);
+						// console.log(e.which);
 						break;
 					}
 				}

@@ -752,7 +752,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 
 		if(this.game && this.game.running) {
 			var	newPos	= gameController.currentLeft();
-			console.log(newPos);
+			// console.log(newPos);
 
 			this.game.tacts.forEach(function (tact) {
 				if(tact.hasPlayed) {
