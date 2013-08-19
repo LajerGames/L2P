@@ -75,7 +75,7 @@ $this
 # Frontpage
 ->SetMenu('frontpage_')
 ->Set('choose_song', 'Choose song')
-->Set('choose_scale', 'Choose scale')
+->Set('choose_scale', 'Choose excercise')
 ->Set('login', 'Login with')
 ->Set('edit', 'Edit user')
 ->Set('create_user', 'Create user')
@@ -97,7 +97,7 @@ $this
 # Browse
 ->SetMenu('browse_')
 ->Set('headline_songs', 'Browse songs')
-->Set('headline_scales', 'Browse scales')
+->Set('headline_scales', 'Browse excercises')
 ->Set('search_title', 'Title')
 ->Set('playlist_save', 'Save playlist')
 ->Set('playlist_play', 'Play playlist')

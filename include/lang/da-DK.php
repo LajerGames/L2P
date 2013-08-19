@@ -75,7 +75,7 @@ $this
 # Frontpage
 ->SetMenu('frontpage_')
 ->Set('choose_song', 'Vælg sang')
-->Set('choose_scale', 'Vælg skala')
+->Set('choose_scale', 'Vælg øvelse')
 ->Set('login', 'Log ind med')
 ->Set('edit', 'Rediger bruger')
 ->Set('create_user', 'Opret bruger')
@@ -97,7 +97,7 @@ $this
 # Browse
 ->SetMenu('browse_')
 ->Set('headline_songs', 'Vis sange')
-->Set('headline_scales', 'Vis skalaer')
+->Set('headline_scales', 'Vis øvelser')
 ->Set('search_title', 'Titel')
 ->Set('playlist_save', 'Gem playlist')
 ->Set('playlist_play', 'Spil playlist')
