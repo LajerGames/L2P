@@ -196,9 +196,9 @@ echo $oPageRenderer->Renderpage($oLang, '
 			</div>
 			<div class="ContentBoxBodyContainer">
 				<div class="ContentBoxBody">
-					<a href="/browse/scales/position1/" data-dialog="info">Skalaer Position 1</a>
-					<a href="/browse/scales/position2/" data-dialog="info">Skalaer Position 2</a>
-					<a href="/browse/scales/position3/" data-dialog="info">Skalaer Position 3</a>
+					<a href="/browse/scales/position1/" data-dialog="info">'.$oLang->Get('frontpage_scales_position_first').' '.$oLang->Get('frontpage_scales_position_text').'</a>
+					<a href="/browse/scales/position2/" data-dialog="info">'.$oLang->Get('frontpage_scales_position_second').' '.$oLang->Get('frontpage_scales_position_text').'</a>
+					<a href="/browse/scales/position3/" data-dialog="info">'.$oLang->Get('frontpage_scales_position_third').' '.$oLang->Get('frontpage_scales_position_text').'</a>
 					<a href="/browse/scales/primavista/" data-dialog="info" style="margin-bottom: 11.25vh;">Prima Vista</a>
 
 					<div>

@@ -89,10 +89,10 @@ $this
 ->Set('user_statistics', 'Statistikker')
 ->Set('user_settings', 'Indstillinger')
 ->Set('user_subscription', 'Abonnement')
-->Set('scales_position', 'Første')
-->Set('scales_position', 'Anden')
-->Set('scales_position', 'Tredje')
-->Set('scales_position text', 'position skalaer')
+->Set('scales_position_first', 'Første')
+->Set('scales_position_second', 'Anden')
+->Set('scales_position_third', 'Tredje')
+->Set('scales_position_text', 'position skalaer')
 
 # Browse
 ->SetMenu('browse_')

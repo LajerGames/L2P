@@ -106,7 +106,7 @@ div#CenteringContainer {
     float: right;
     background-color: #B73535;
     padding: 0 1vw 0 1vw;
-    line-height: 5vh;
+    line-height: 6vh;
     margin-right: 1vw;
     opacity: 0.5;
     -webkit-transition: 0.3s;
@@ -120,9 +120,10 @@ div#CenteringContainer {
     opacity: 1;
 }
 #guide img {
-    height: 2vmin;
+    height: 3vh;
     margin-right: 5px;
-    padding-bottom: 7px;
+    display: inline-block;
+    vertical-align: text-bottom;
 }
 
 button[name="facebook_button"] {

@@ -89,10 +89,10 @@ $this
 ->Set('user_statistics', 'Statistics')
 ->Set('user_settings', 'Settings')
 ->Set('user_subscription', 'Subscription')
-->Set('scales_position', '1st')
-->Set('scales_position', '2nd')
-->Set('scales_position', '3rd')
-->Set('scales_position text', 'position scales')
+->Set('scales_position_first', '1st')
+->Set('scales_position_second', '2nd')
+->Set('scales_position_third', '3rd')
+->Set('scales_position_text', 'position scales')
 
 # Browse
 ->SetMenu('browse_')

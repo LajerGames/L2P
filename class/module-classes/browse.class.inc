@@ -157,15 +157,15 @@ class browse
 
 			$strMusic	= '
 				<div class="browse-submode'.($strSubMode === 'position1' ? ' browse-submode--focus' : '').'" data-submode="position1">
-					<div class="browse-submode-title">Skalaer Position 1</div>
+					<div class="browse-submode-title">'.$oLang->Get('frontpage_scales_position_first').' '.$oLang->Get('frontpage_scales_position_text').'</div>
 					<div class="browse-submode-content"><div class="browse-submode-content-inner">'.implode('', $arrPosition1).'</div></div>
 				</div>
 				<div class="browse-submode'.($strSubMode === 'position2' ? ' browse-submode--focus' : '').'" data-submode="position2">
-					<div class="browse-submode-title">Skalaer Position 2</div>
+					<div class="browse-submode-title">'.$oLang->Get('frontpage_scales_position_second').' '.$oLang->Get('frontpage_scales_position_text').'</div>
 					<div class="browse-submode-content"><div class="browse-submode-content-inner">'.implode('', $arrPosition2).'</div></div>
 				</div>
 				<div class="browse-submode'.($strSubMode === 'position3' ? ' browse-submode--focus' : '').'" data-submode="position3">
-					<div class="browse-submode-title">Skalaer Position 3</div>
+					<div class="browse-submode-title">'.$oLang->Get('frontpage_scales_position_third').' '.$oLang->Get('frontpage_scales_position_text').'</div>
 					<div class="browse-submode-content"><div class="browse-submode-content-inner">'.implode('', $arrPosition3).'</div></div>
 				</div>
 				<div class="browse-submode browse-submode--prima-vista'.($strSubMode === 'primavista' ? ' browse-submode--focus' : '').'" data-submode="primavista">

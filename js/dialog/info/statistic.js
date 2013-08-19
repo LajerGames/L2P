@@ -19,7 +19,8 @@ define(['jquery', 'fM', 'l2p', 'api', 'highcharts'], function ($, fM, L2P, api, 
             	gameid			= $tr.attr('data-gameid'),
             	gamestartoctave	= $tr.attr('data-gamestartoctave'),
             	gamehistoryid	= $tr.attr('data-gamehistoryid'),
-            	handposition	= $tr.attr('data-handposition');
+            	handposition	= $tr.attr('data-handposition'),
+            	isblindmode		= $tr.attr('data-isblindmode');
 
             if(gameid !== undefined) {
             	$formSearch.find('input[name="game_ids"]').val(gameid);
@@ -32,6 +33,9 @@ define(['jquery', 'fM', 'l2p', 'api', 'highcharts'], function ($, fM, L2P, api, 
 			}
             if(handposition !== undefined) {
             	$formSearch.find('input[name="game_handposition"]').val(handposition);
+			}
+            if(isblindmode !== undefined) {
+            	$formSearch.find('input[name="game_isblindmode"]').val(isblindmode);
 			}
 
            	$dialog.find('.BottomTableView tr').off('click');

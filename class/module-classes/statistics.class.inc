@@ -905,6 +905,7 @@ class statistics
                     <input type="hidden" name="game_startoctave" value="'.implode(',', $this->oSearch->arrStartOctaves).'" />
                     <input type="hidden" name="start_octave" value="'.$this->oSearch->iStartOctave.'" />
                     <input type="hidden" name="game_handposition" value="'.$this->oSearch->iHandPosition.'" />
+                    <input type="hidden" name="game_isblindmode" value="'.$this->oSearch->iIsBlindMode.'" />
                 </form>
                 <div class="hidden" data-statistic="'.htmlentities(json_encode(array($arrLeftChart, $arrRightChart))).'"></div>
                 <div class="statistic-graph"></div>
