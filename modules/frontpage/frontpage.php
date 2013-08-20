@@ -110,7 +110,7 @@ else
 				</div>
 			</div>
 			<div class="ContentBoxBodyContainer">
-				<div class="ContentBoxBody upper" id="LoginContainer">
+				<div class="ContentBoxBody upper'.(!$oLoginForm->bIsValid ? ' login-container-custom' : '').'" id="LoginContainer">
 					<div class="login-container-box login-container-box-main">
 						<button name="facebook_login"><img src="/img/icons/facebook.svg" /> Facebook</button>
 

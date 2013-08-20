@@ -44,7 +44,7 @@ select, textarea, input[type="text"], input[type="password"], input[type="dateti
 	height: 4vh;
 	font-size: 2vmin;
 	line-height: 2vmin;
-	margin: 1vh 2vw 2vh 2vw;
+	margin: 1vh 2vw 1vh 2vw;
 	box-sizing: content-box;
 }
 input[type="checkbox"], input[type="radio"] {
@@ -132,7 +132,7 @@ button[name="facebook_button"] {
 	border: none;
 	padding: 0;
 	color: #000;
-	height: 33vh;
+	height: 34vh;
 }
 button[name="facebook_button"] img {
 	height: 30vh;
@@ -738,17 +738,32 @@ div.countdown.microphone-permission .next {
 	border-color: #71C211;
 	background-color: #71C211;
 }
-.popover.right .arrow:after {
-    border-right-color: #71C211;
-}
 .popover.top .arrow:after {
     border-top-color: #71C211;
 }
 .popover.left .arrow:after {
     border-left-color: #71C211;
 }
+.popover.right .arrow:after {
+    border-right-color: #71C211;
+}
 .popover.bottom .arrow:after {
     border-bottom-color: #71C211;
+}
+.popover.validation-error {
+    border-color: #900;
+}
+.popover.left.validation-error .arrow:after {
+    border-left-color: #900;
+}
+.popover.top.validation-error .arrow:after {
+    border-top-color: #900;
+}
+.popover.right.validation-error .arrow:after {
+    border-right-color: #900;
+}
+.popover.bottom.validation-error .arrow:after {
+    border-bottom-color: #900;
 }
 .popover.tour .popover-title {
 	background-color: #71C211;
@@ -795,4 +810,21 @@ div.countdown.microphone-permission .next {
 }
 #PlaylistInfoContainerInner.tour-step-backdrop {
 	background-color: #FFF;
+}
+
+
+input:focus:invalid,
+textarea:focus:invalid,
+select:focus:invalid {
+  color: #b94a48;
+  border-color: #ee5f5b;
+}
+
+input:focus:invalid:focus,
+textarea:focus:invalid:focus,
+select:focus:invalid:focus {
+  border-color: #e9322d;
+  -webkit-box-shadow: 0 0 6px #f8b9b7;
+     -moz-box-shadow: 0 0 6px #f8b9b7;
+          box-shadow: 0 0 6px #f8b9b7;
 }

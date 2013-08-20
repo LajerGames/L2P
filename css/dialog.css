@@ -9,7 +9,7 @@
 	overflow: auto;
 }
 .modal-action {
-	top: 18vh;
+	top: 21vh;
 }
 
 .modal-header .modal-header-back-icon {
@@ -62,7 +62,7 @@
 	overflow: auto;
 }
 .modal-action .modal-body {
-	height: 48vh;
+	height: 42vh;
 }
 
 .modal-body,

@@ -10,5 +10,7 @@ define(['jquery', 'l2p'], function ($, L2P) {
 			});
 		}
 		$dialog.find('[name="facebook_button"]').on('click', login);
+		console.log($dialog.find('input:visible,select:visible').first()[0]);
+		$dialog.find('input:visible,select:visible').first().focus();
 	});
 });

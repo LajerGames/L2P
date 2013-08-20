@@ -181,7 +181,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 
 					L2P.$modal.modal('show');
 
-					L2P.form.inputValidation.error();
+					L2P.form.inputValidation.error(null, L2P.$modal);
 					if(infoScript) {
 						infoScript(L2P.$modal);
 					}
@@ -397,8 +397,8 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 		},
 		form:	{
 			inputValidation:	{
-				error:	function (inputName) {
-					$('input[data-content][data-content!=""]' + (inputName ? '[name="'+inputName+'"]' : '')).each(function () {
+				error:	function (inputName, context) {
+					$('input[data-content][data-content!=""]' + (inputName ? '[name="'+inputName+'"]' : ''), context || 'body').each(function () {
 						var	that		= this,
 							clientRects	= this.getClientRects();
 
@@ -408,6 +408,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 							$(this).popover({
 								trigger:	'focus',
 								placement:	placement,
+								container:	'body',
 								template:	'<div class="popover validation-error"><div class="arrow"></div><div class="popover-content"><p></p></div></div>'
 							}).popover('show');
 						} else { // We most sure have a dialog
