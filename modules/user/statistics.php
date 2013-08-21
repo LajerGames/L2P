@@ -38,6 +38,14 @@ if(is_object($oStatisticsSearch))
 	{
 		$oStatisticsSearchObject->arrStartOctaves	= explode(',', $oStatisticsSearch->arrSearch['game_startoctave']);
 	}
+    if(strlen($oStatisticsSearch->arrSearch['game_handposition']) > 0)
+    {
+        $oStatisticsSearchObject->arrGameHandPositions    = explode(',', $oStatisticsSearch->arrSearch['game_handposition']);
+    }
+    if(strlen($oStatisticsSearch->arrSearch['game_isblindmode']) > 0)
+    {
+        $oStatisticsSearchObject->iGameIsBlindMode    = intval($oStatisticsSearch->arrSearch['game_isblindmode']);
+    }
 }
 
 // Create new instance of the statistics class

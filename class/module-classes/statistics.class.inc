@@ -84,6 +84,30 @@ class statistics
             ';
         }
 
+        # Game HandPosition
+        if(is_array($oCustomSearch->arrGameHandPositions))
+        {
+            // Create a string which will contain CSV with GameIDs
+            $strINClause = '';
+            foreach($oCustomSearch->arrGameHandPositions as $iGameHandPosition)
+            {
+                $strINClause .= $iGameHandPosition.',';
+            }
+            $strINClause = empty($strINClause) ? 0 : rtrim($strINClause, ',');
+
+            $strConditions .= '
+             && users_games_history.game_hand_position    IN('.$strINClause.')
+            ';
+        }
+
+        # Blind mode
+        if($oCustomSearch->iGameIsBlindMode > 0)
+        {
+            $strConditions .= '
+             && users_games_history.is_blind_mode = 1
+            ';
+        }
+
         // The entire gamestring is pretty damn huge, only fetch it if it's neccesary
         $strSelect = $bReturnEntireGamestring ? 'users_games_history.json_gamestring            AS strEntireGame' : '';
 
@@ -554,7 +578,7 @@ class statistics
                         }
 
                         $strFavouriteSongs .= '
-                            <tr data-gameid="'.$iGameID.'" data-gamestartoctave="'.$iStartOctave.'" data-handposition="'.$iHandPosition.'" data-blindmode="'.$strBlindMode.'">
+                            <tr data-gameid="'.$iGameID.'" data-gamestartoctave="'.$iStartOctave.'" data-handposition="'.$iHandPosition.'" data-isblindmode="'.intval($iIsBlindMode).'">
                                 <td>'.$iLoopID.'</td>
                                 <td>'.$iHandPosition.'</td>
                                 <td><span class="octave">('.$this->oLang->Get('global_octave').' '.$arrGameInfo['start_octave'].')</span> '.$arrGameInfo['name'].' '.$strBlindMode.'</td>
@@ -606,6 +630,7 @@ class statistics
             $strTopPlayedRows .= '
                 <tr data-gamehistoryid="'.$oGameData->iDataID.'">
                     <td>'.$iLoopID.'</td>
+                    <td>'.$oGameData->iGameHandPosition.'</td>
                     <td>'.RenderDate($oGameData->tGameStart, $this->oLang).'</td>
                     <td>'.$oGameData->iPoints.' '.$strPoints.'</td>
                 </tr>
@@ -619,6 +644,7 @@ class statistics
             <table border="0" cellspacing="0" cellpadding="0" class="table BottomTableView">
                 <tr>
                     <th>#</th>
+                    <th>Pos.</th>
                     <th>'.$this->oLang->Get('time_date').'</th>
                     <th>'.$this->oLang->Get('global_points').'</th>
                 </tr>
@@ -925,6 +951,8 @@ class AC_RenderStatisticsSearch
     public $arrStartOctaves;
     public $arrGameHistoryIDs;
     public $iStartOctave;
+    public $arrGameHandPositions;
+    public $iGameIsBlindMode;
 }
 class AC_GameData
 {
