@@ -10679,12 +10679,12 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 		this.gameContainerDiv	= document.getElementById('game_container_div');
 		this.pointContainerDiv	= document.createElement('div');
 		this.pointContainerDiv.style.width				= '130px';
-		this.pointContainerDiv.style.height				= '40px';
+		this.pointContainerDiv.style.height				= '10vmin';
 		this.pointContainerDiv.style.borderRadius		= '5px';
 		this.pointContainerDiv.style.position			= 'absolute';
 		this.pointContainerDiv.style.top				= '0';
 		this.pointContainerDiv.style.textAlign			= 'center';
-		this.pointContainerDiv.style.padding			= '15px 0';
+		this.pointContainerDiv.style.padding			= '2vmin 0';
 		this.pointContainerDiv.style.webkitTransform	= 'translate3d(145px, 150px, 0)';
 		this.SVGNotes		= new SVGElement(this.svgNotes);
 		this.svgStart		= svg.querySelector('#start');
@@ -10766,7 +10766,7 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 			div.style.webkitTransform	= 'translate3d(145px, 100px, 0)';
 			div.style.opacity			= '0';
 			setTimeout(function () {
-				div.remove();
+				//div.remove();
 			}, 1000);
 		}, 0);
 
