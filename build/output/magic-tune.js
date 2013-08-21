@@ -10693,7 +10693,7 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 		this.sound;
 		this.game;
 		this.lastPos		= 0;
-		this.playSound		= true;
+		this.playSound		= false;
 		this.useCountdown	= true;
 		this.currentNote;
 		this.currentTact;
