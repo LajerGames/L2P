@@ -13,15 +13,20 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 	}
 
 	function FBAuth(response) {
-		// console.log('fbAuth', response);
 		fbUser	= response;
+
+		// If we are connected to Facebook
 		if(response.status === 'connected') {
+			// If the logged in FacebookUser is the same as the logged in MagicTune users
 			if(+response.authResponse.userID !== L2P_global.fb_id) {
+				// Only autologin once per session
 				var hasTriedAutologin	= sessionStorage.getItem('l2p_fb_autologin');
 				if(hasTriedAutologin !== 'true') {
 					require(['fM'], function (fM) {
+						// Get info about the user
 						FB.api('/me', function (user) {
-							// console.log('tryLogin', user);
+							// Redirect to the Login/UserCreate page
+							// We use the same page for both - if the user has given MagicTune access to Facebook, we know we are allowed to create a user
 							fM.link.navigate('/user/create/', 'Magic-Tune', {
 								title:	'Magic-Tune',
 								data:	{
@@ -33,21 +38,18 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 							});
 						});
 					});
-				} else {
-					// console.log('skipped autologin');
 				}
 
+				// Make sure we only autologin once
 				sessionStorage.setItem('l2p_fb_autologin', 'true');
-			} else {
-				FB.api('/me', function (user) {
-					// console.log('logged in', user);
-				});
 			}
 		}
 
+		// "Subscribe" to changes in the user logged in to facebook
 		FB.Event.subscribe('auth.authResponseChange', FBAuth);
 	}
 
+	// Initialize Facebook
 	FB.init({
     	appId      : '178214939022167',
     	channelUrl : '//magic-tune.com/channel.php',
@@ -112,13 +114,18 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 		dialog:	{
 			action:	function (url, title, html, color, submitText, script) {
 				var	requireScripts	= ['fM', 'text!templates/modal.html'];
+
+				// If this dialog has a js-file we need to include
 				if(script) {
 					requireScripts.push('dialog/action/'+script);
 				}
 				require(requireScripts, function (fM, modalText, infoScript) {
+					// Set up the Modal
 					L2P.$modal	= $(modalText).addClass('modal-action');
 					L2P.$modal.find('.modal-header').css('background-color', color).find(' h2').text(title);
 					L2P.$modal.find('.modal-body').html(html);
+
+					// Set the submit button
 					if(submitText === '') {
 						L2P.$modal.find('.modal-footer button.btn-primary').remove();
 					} else {
@@ -126,8 +133,10 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					}
 					L2P.$modal.find('button.btn[data-dismiss]').text(L2P_global.lang.global_button_close);
 
+					// Parse the modal-content with some Facebook functions
 					FB.XFBML.parse(L2P.$modal.find('.modal-body')[0]);
 
+					// Crappy fix for correct posting of the form
 					var	action	= url || document.location.pathname;
 					if(location.search.substring(1) !== '')
 					{
@@ -136,12 +145,15 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 
 					L2P.$modal.attr('action', action).attr('method', 'post');
 
+					// Post the form via Ajax
 					function onSubmit(e) {
 						e.preventDefault();
 
 						var	data	= fM.form.getElements.call(this);
 
+						// Make sure we don't close the modal multiple times
 						L2P.$modal.off('hide.bs.modal');
+						// Post the form
 						fM.link.navigate(L2P.$modal.attr('action'), 'Magic Tune', {
 							title:	'Magic Tune',
 							data:	data
@@ -151,7 +163,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					L2P.$modal
 						.on('submit', onSubmit);
 
-					var	pathname	= location.pathname;
+					// Fix/Hack for not opening/closing the modal multiple times
 					L2P.$modal
 						.on('hide.bs.modal', function (e) {
 							if(!$(e.target).hasClass('tour-step-backdrop')) {
@@ -164,11 +176,15 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 							});
 						});
 
+					// Autofocus first field
 					fM.form.autofocus(L2P.$modal);
 
+					// Update our history
 					fM.link.navigated(url, title, {
 						is_dialog:	true
 					});
+
+					// Set the back-button (if needed)
 					var	parent	= fM.link.getParent();
 					if(parent && parent.is_dialog) {
 						L2P.$modal
@@ -179,13 +195,18 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 								});
 					}
 
+					// Show the modal
 					L2P.$modal.modal('show');
 
+					// Show any validation errors
 					L2P.form.inputValidation.error(null, L2P.$modal);
+
+					// If we have an extra script, run it now
 					if(infoScript) {
 						infoScript(L2P.$modal);
 					}
 
+					// If we are on a tour, go to next step
 					if(tour && tour.tour) {
 						tour.tour.next();
 					}
@@ -193,14 +214,19 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 			},
 			info: function (url, title, html, color, buttons, script) {
 				var	requireScripts	= ['fM', 'text!templates/info.html'];
+
+				// If this dialog has a js-file we need to include
 				if(script) {
 					requireScripts.push('dialog/info/'+script);
 				}
 				require(requireScripts, function (fM, modalText, infoScript) {
+					// Set up the Modal
 					L2P.$modal	= $(modalText).addClass('modal-info');
 					L2P.$modal.find('.modal-header').css('background-color', color).find(' h2').text(title);
 					L2P.$modal.find('.modal-body').html(html);
 					var	$modalFooter	= L2P.$modal.find('.modal-footer');
+
+					// Set the buttons
 					if(buttons) {
 						buttons.forEach(function (button) {
 							$modalFooter.prepend('<button class="btn btn-default">'+button+'</button>');
@@ -208,13 +234,12 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					}
 					L2P.$modal.find('button.btn[data-dismiss]').text(L2P_global.lang.global_button_close);
 
-					var	pathname	= location.pathname;
-
+					// Update our history
 					fM.link.navigated(url, title, {
 						is_dialog:	true
 					});
 
-					var	current	= fM.link.getCurrent();
+					// Fix/Hack for not opening/closing the modal multiple times
 					L2P.$modal
 						.on('hide.bs.modal', function (e) {
 							L2P.$modal.off('hide.bs.modal');
@@ -229,6 +254,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 							});
 						});
 
+					// Set the back-button (if needed)
 					var	parent	= fM.link.getParent();
 					if(parent && parent.is_dialog) {
 						L2P.$modal
@@ -239,11 +265,15 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 								});
 					}
 
+					// Show the modal
 					L2P.$modal.modal('show');
 
+					// If we have an extra script, run it now
 					if(infoScript) {
 						infoScript(L2P.$modal);
 					}
+
+					// If we are on a tour, go to next step
 					if(tour && tour.tour) {
 						tour.tour.next();
 					}
@@ -259,21 +289,28 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						$compassBox	= $('div.ContentBoxGameCompass'),
 						compass		= new Compass($compassBox),
 						state		= fM.link.getCurrentNavigate() || {},
+						// Get some info from the url
 						urlItems	= (url || location.href).split('/'),
 						fingerpos	= urlItems.length >= 5 ? (/[0-9]+/.test(urlItems[4]) ? +/[0-9]+/.exec(urlItems[4])[0] : null) : null;
 
+					// Reset the text in the Song and Scale container-header
 					L2P.resetBoxText($('#song_title'));
 					L2P.resetBoxText($('#scale_title'));
 
+					// Mark our history as is_game
 					state.is_game	= true;
 
+					// Insert the svg-elements (if first time)
 					if(generate) {
 						$game_container.html(gameText);
 					}
+
+					// Update our html, so it will show the game
 					$body_container.addClass('ShowGame');
 					$body_container.addClass(type);
 					$body_container.removeClass(type === 'song' ? 'scale' : 'song');
 
+					// Find some elements
 					svgContainer	= $game_container.find('#svg_container')[0];
 					if($controller === undefined) {
 						$controller	= $('.ContentBoxGameControl');
@@ -287,8 +324,10 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						$stopGame	= $game_container.find('#stopGame'),
 						$game_title	= type === 'song' ? $('#song_title') : $('#scale_title');
 
+					// Set the game-title
 					$game_title.html(title);
 
+					// Generate the gameController and Sound
 					if(generate) {
 						if(!sound) {
 							sound	= new Sound();
@@ -298,9 +337,11 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						L2P.gameController.sound	= sound;
 					}
 
+					// Reset any edit-info on the gameController
 					L2P.gameController.isEdit	= false;
 					L2P.gameController.edit		= null;
 
+					// Reset our compass
 					compass.setTone(options.tones.names[4]['A']);
 					compass.enable();
 					L2P.gameController.compass	= compass;
@@ -309,17 +350,19 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						L2P.gameController.setGameSpeed(+this.value);
 					});
 					if(generate) {
+						// Subscribe to some events
 						$(L2P.gameController).on({
+							// Update the speed in the visual box
 							gameLoadSpeedChange:	function (e, speed) {
 								$speed.val(speed).trigger('change');
 							},
-							gameStart:	function () {},
 							gameEnd:	function (e, gameInfo) {
 								var	currentState	= fM.link.getCurrent() || {};
 
 								if(L2P.gameController.isEdit) {
 									L2P.gameController.moveToTact(-1);
 								} else {
+									// If we didn't come from a playlist, we just go to statistics
 									if(!currentState || !currentState.from_playlist) {
 										api.get.statistic_uuid(function (data) {
 											fM.link.navigate('/user/'+L2P_global.username+'/statistics/'+data.uuid+'/');
@@ -328,10 +371,9 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 										});
 									}
 								}
-								ControllerSet('restart');
-							},
-							notePoints:	function (note) {
 
+								// Update the play/pause/restart button
+								ControllerSet('restart');
 							}
 						});
 
@@ -341,21 +383,23 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 							if(L2P.gameController.game && !L2P.gameController.game.running) {
 								L2P.gameController.startGame();
 
+								// Update the play/pause/restart button
 								ControllerSet('pause');
 							} else {
 								L2P.gameController.stopGame();
 
+								// Update the play/pause/restart button
 								ControllerSet('play');
 							}
 						});
 					}
 
+					// Update the play/pause/restart button
 					ControllerSet('play');
 
+					// Import the game into the gameController
 					L2P.gameController.importGame(data, title, octave, fingerpos);
-					/*L2P.gameController.importGame(
-						[120,[4],[[6,[[6,"G",0,[3]],[6,"C",0,[3]],[8,"E",0,[3]],[8,"F",0,[3]],[6,"G",0,[3]],[6,"C",0,[3]],[8,"E",0,[3]],[8,"F",0,[3]],[6,"G",0,[3]],[6,"C",0,[3]],[8,"E",0,[3]],[8,"F",0,[3]],[6,"G",0,[3]],[6,"C",0,[3]],[8,"E",0,[3]],[8,"F",0,[3]]]],[6,[[6,"G",0,[3]],[6,"C",0,[3]],[8,"E",0,[3,0]],[8,"F",0,[3]],[6,"G",0,[3]],[6,"C",0,[3]],[8,"E",0,[3]],[8,"F",0,[3]],[6,"G",0,[3]],[6,"C",0,[3]],[8,"E",0,[3]],[8,"F",0,[3]],[6,"G",0,[3]],[6,"C",0,[3]],[8,"E",0,[3]],[8,"F",0,[3]]]],[6,[[1,"G",-1,[1]],[2,"G",-1,[2]]]],[6,[[6,"D",0,[3]],[6,"G",-1,[3]],[8,"B",-1,[3]],[8,"C",0,[3]],[6,"D",0,[3]],[6,"G",-1,[3]],[8,"B",-1,[3]],[8,"C",0,[3]],[6,"D",0,[3]],[6,"G",-1,[3]],[8,"B",-1,[3]],[8,"C",0,[3]],[6,"D",0,[3]],[6,"G",-1,[3]],[8,"B",-1,[3]],[8,"C",0,[3]]]],[6,[[1,"F",0,[1]],[2,"F",0,[2]]]],[6,[[6,"C",1,[3]],[6,"F",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]],[6,"C",1,[3]],[6,"F",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]],[6,"C",1,[3]],[6,"F",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]],[6,"C",1,[3]],[6,"F",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]]]],[6,[[1,"G",-1,[1]],[2,"G",-1,[2]]]],[6,[[6,"D",0,[3]],[6,"G",-1,[3]],[8,"B",-1,[3]],[8,"C",0,[3]],[6,"D",0,[3]],[6,"G",-1,[3]],[8,"B",-1,[3]],[8,"C",0,[3]],[6,"D",0,[3]],[6,"G",-1,[3]],[8,"B",-1,[3]],[8,"C",0,[3]],[6,"D",0,[3]],[6,"G",-1,[3]],[8,"B",-1,[3]],[8,"C",0,[3]]]],[6,[[1,"F",0,[1]],[2,"F",0,[2]]]],[6,[[6,"C",1,[3]],[6,"F",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]],[6,"C",1,[3]],[6,"F",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]],[6,"C",1,[3]],[6,"F",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]],[6,"C",1,[3]],[6,"F",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]]]],[6,[[5,"G",0,[]],[5,"C",0,[]],[8,"E",0,[3]],[8,"F",0,[3]],[4,"G",0,[]],[4,"C",0,[]],[8,"E",0,[3]],[8,"F",0,[3]]]],[6,[[1,"D",0,[1]],[2,"D",0,[2]]]],[6,[[5,"F",0,[]],[5,"B",-1,[]],[7,"D",0,[3]],[7,"E",0,[3]],[7,"D",0,[3]],[7,"B",-1,[3]]]],[6,[[1,"C",0,[1]],[2,"C",0,[2]]]],[6,[[6,"C",1,[3]],[6,"G",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]],[6,"C",1,[3]],[6,"G",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]],[6,"B",0,[3]],[6,"E",0,[3]],[8,"G",0,[3]],[8,"A",0,[3]],[6,"B",0,[3]],[6,"E",0,[3]],[8,"G",0,[3]],[8,"A",0,[3]]]],[6,[[6,"F",0,[3]],[6,"B",-1,[3]],[8,"D",0,[3]],[8,"E",0,[3]],[6,"F",0,[3]],[6,"B",-1,[3]],[8,"D",0,[3]],[8,"E",0,[3]],[6,"G",0,[3]],[6,"C",0,[3]],[8,"E",0,[3]],[8,"F",0,[3]],[6,"G",0,[3]],[6,"C",0,[3]],[8,"E",0,[3]],[8,"F",0,[3]]]],[6,[[6,"A",0,[3]],[6,"E",0,[3]],[8,"F",0,[3]],[8,"G",0,[3]],[6,"A",0,[3]],[6,"E",0,[3]],[8,"F",0,[3]],[8,"G",0,[3]],[6,"E",0,[3]],[6,"A",-1,[3]],[8,"C",0,[3]],[8,"D",0,[3]],[6,"B",0,[3]],[6,"F",0,[3]],[8,"G",0,[3]],[8,"A",0,[3]]]],[6,[[6,"C",1,[3]],[6,"G",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]],[6,"C",1,[3]],[6,"G",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]],[6,"C",1,[3]],[6,"G",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]],[6,"C",1,[3]],[6,"G",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]]]],[6,[[3,"C",1,[]],[3,"B",0,[]]]],[6,[[3,"F",0,[]],[3,"G",0,[]]]],[6,[[3,"A",-1,[]],[5,"E",0,[]],[5,"D",0,[]]]],[6,[[6,"C",1,[3]],[6,"G",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]],[6,"C",1,[3]],[6,"G",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]],[6,"C",1,[3]],[6,"G",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]],[6,"C",1,[3]],[6,"G",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]]]],[6,[[4,null,null,[]],[4,null,null,[]],[4,null,null,[]],[4,null,null,[]],[4,null,null,[]],[4,null,null,[]]]]],[],["A","B","E"]]
-					, title, octave, fingerpos);*/
+					// Update the permlink in the gameController
 					if(url) {
 						L2P.gameController.permlink	= url.match(/\/game\/([^\/]+)/g)[0].substr(6);
 					} else {
@@ -363,6 +407,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					}
 
 					if(generate) {
+						// Subscribe to soundInput
 						tuner	= new SoundInput(function (e) {
 							// console.log(e);
 						}, $.proxy(L2P.gameController.soundInput, L2P.gameController), $.proxy(L2P.gameController.expectedTone, L2P.gameController));
@@ -374,6 +419,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					state.is_game	= true;
 					fM.link.navigated(url, title, state);
 
+					// State comes from the playlist and describe some options for the game
 					if(state) {
 						if(state.autostart) {
 							L2P.gameController.useCountdown	= state.use_countdown || state.use_countdown === undefined;
@@ -384,6 +430,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						}
 					}
 
+					// If we should edit
 					if(urlItems[3] === 'edit') {
 						L2P.create();
 					}
@@ -396,6 +443,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 		},
 		facebook:	{
 			login:	function (callback) {
+				// Will login or ask for permissions
 				FB.login(function (response) {
 					fbUser	= response;
 					callback(fbUser);
@@ -405,6 +453,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 		},
 		form:	{
 			inputValidation:	{
+				// Will show validation errors for a form
 				error:	function (inputName, context) {
 					$('input[data-content][data-content!=""]' + (inputName ? '[name="'+inputName+'"]' : ''), context || 'body').each(function () {
 						var	that		= this,
@@ -430,16 +479,19 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 				}
 			}
 		},
+		// Will reset a container to its original text
 		resetBoxText:	function ($box) {
 			$box.html($box.attr('data-default-text'));
 		},
 		navigate:	{
+			// Navigate to frontpage
 			home:	function (e) {
 				var	$body_container		= $('body'),
 					$CenteringContainer	= $('#CenteringContainer'),
 					title				= $CenteringContainer.attr('data-default-title');
 
 				require(['fM'], function (fM) {
+					// Reset some titles
 					L2P.resetBoxText($('#song_title'));
 					L2P.resetBoxText($('#scale_title'));
 					$body_container.removeClass('ShowGame');
@@ -451,12 +503,14 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					});
 				});
 
+				// Stop or continue the tour
 				if(tour && !tour.callback('/')) {
 					tour.kill();
 				} else if(tour && tour.tour) {
 					tour.tour.next();
 				}
 			},
+			// Start guided tour
 			guided_tour:	function (e) {
 				var	$body_container		= $('body');
 
@@ -497,6 +551,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 									tour.kill();
 								}
 
+								// Crappy hack for adding a song to the playlist instead of playing it now
 								if(that && that.nodeName === 'IMG') {
 									L2P.get.playlist(null, function () {
 										playlist.addGame(url, data.title, data.data, data.type);
@@ -505,7 +560,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 									L2P.dialog.game(url, data.title, data.data, data.type, data.octave);
 								}
 								break;
-							case 'redirect':
+							case 'redirect': // This is sent after a ajax-post and will update userinfo (or reload the page)
 								if(L2P_global.language_code !== data.user.language_code || data.force_reload) {
 									location.href	= data.url;
 									return;
@@ -516,6 +571,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 										L2P_global[key]	= value;
 									});
 
+									// Reload the tones, if our convert pitch has changed
 									if(concert_pitch) {
 										options.generateTones();
 									}
@@ -535,6 +591,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 				done		= false,
 				countdown	= {
 					kill:	function () {
+						// Make sure we can't kill it multiple times
 						if(done) {
 							return;
 						}
@@ -545,6 +602,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 							})
 							.addClass('hide');
 					},
+					// Reset the countdown
 					reload:	function () {
 						$overlay
 							.find('div.number')
@@ -559,27 +617,35 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 
 			options	= options || {};
 
+			// Change the background color
 			if(options.background_color) {
 				$overlay
 					.css('background-color', options.background_color);
 			}
+
+			// Set some CSS info
 			if(options.css) {
 				$.each(options.css, function (name, value) {
 					$countdown.css(name, value);
 				});
 			}
+
+			// Set some classes
 			if(options.classList && options.classList.length > 0) {
 				options.classList.forEach(function (className) {
 					$countdown.addClass(className);
 				});
 			}
 
+			// Generate the seconds
 			for(var i = sec; i > 0; i -= 1) {
 				items.push({
 					text:	i,
 					sec:	1
 				});
 			}
+
+			// We got some different ways to call this function - here we do the right ting
 			if($.isArray(text)) {
 				items	= items.concat(text);
 			} else if(text && text.text) {
@@ -591,6 +657,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 				});
 			}
 
+			// Insert all the countdown-elements
 			items.forEach(function (item, i) {
 				var	$elem;
 
@@ -605,6 +672,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						.css('-webkit-transition-duration', item.sec+'s')
 						.appendTo($countdown);
 
+				// Set the correct countdown-type (animation-type)
 				if(item.type) {
 					$elem.addClass('countdown-type--'+item.type);
 				}
@@ -613,6 +681,8 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						$elem.css(name, value);
 					});
 				}
+
+				// If this is the last element, we subscribe for its animation-end
 				if(i === items.length - 1) {
 					$elem.on('webkitAnimationEnd', function () {
 						done	= true;
@@ -631,12 +701,14 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 				delay	+= item.sec;
 			});
 
+			// Insert the "next"-text (above the countdown)
 			if(next) {
 				if(next.text) {
 					var	$elem	=
 						$('<div class="next"></div>')
 							.text(next.text)
 							.appendTo($countdown);
+
 					if(next.css) {
 						$.each(next.css, function (name, value) {
 							$elem.css(name, value);
@@ -653,29 +725,35 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						.appendTo($countdown);
 				}
 			}
+
+			// Insert the "bottom"-text
 			if(options.bottom) {
 				$('<div class="bottom"></div>')
 					.html(options.bottom)
 					.appendTo($countdown);
 			}
 
+			// Insert the illustration
 			if(illustration) {
 				$('<div class="illustration"></div>')
 					.html(illustration)
 					.appendTo($countdown);
 			}
 
+			// Insert the countdown
 			$overlay
 				.empty()
 				.append($countdown)
 				.removeClass('hide');
 
+			// Start the countdown
 			countdown.reload();
 
 			return countdown;
 		},
 		funcs:	{
 			tones:	{
+				// Will return the difference between a freq and a tone
 				freqDiffToTone: function (tone, freq, rel) {
 					var	diff		= tone.hz - freq,
 						diffAbs		= Math.abs(diff),
@@ -700,6 +778,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						ratioRel:	ratioRel
 					}
 				},
+				// Will return the closest tone next to a tone
 				getClosestTone:	function (tone, higher) {
 					var	pos	= options.tones.all.indexOf(tone),
 						t;
@@ -726,13 +805,16 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 
 					return t;
 				},
+				// Will return the tone in the octave closest to provided freq
 				getCloseTone:	function (freq, defTone, tone) {
 					var	octav, tempTone, diff, closestTone, closestDiff, closestFreq, newTone, newFreq, octavDiff, defToneType, defTonePos, defToneClose;
 
+					// If we haven't the correct tone, but instead a sharp/flat tone, we find a base-tone
 					if(defTone && tone && defTone.name !== tone.name && defTone.name.length === 2) {
-						defToneType	= defTone.name.substr(1, 1);
+						defToneType	= defTone.name.substr(1, 1); // sharp/flat
 						defTonePos	= options.tones.all.indexOf(defTone);
 
+						// Will find the correct base-tone
 						if(defToneType === '#') {
 							defToneClose	= options.tones.all[defTonePos + 1];
 						} else if(defToneType === 'b') {
@@ -744,6 +826,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						}
 					}
 
+					// Loop through the octaves and find the closest tone
 					for(octav = 3; octav <= 6; octav += 1) {
 						tempTone	= options.tones.names[octav][tone.name];
 						if(tempTone) {
@@ -769,6 +852,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						freq:	newFreq || freq
 					}
 				},
+				// Will return the stepFactor (percent-step)
 				getStepFactor:	function (percent) {
 					var	stepFactor;
 					L2P.steps.forEach(function (step) {
@@ -785,6 +869,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 			var	containers	= {},
 				lastPing	= 0;
 
+			// Check for updates
 			function ping() {
 				var	namespaces	= [],
 					namespace;
@@ -799,9 +884,12 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						namespaces:	namespaces
 					}, function (data) {
 						var	name;
+
+						// Loop through the data
 						for(namespace in data) {
 							if(data.hasOwnProperty(namespace)) {
 								for(name in data[namespace]) {
+									// Set the data
 									containers[namespace][0][0].set(name, data[namespace][name], true);
 								}
 							}
@@ -828,12 +916,15 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					this._storage[name]		= value;
 				}
 
+				// If we came from ping and didn't have any change, we just return
 				if(fromPing && localStorage.getItem(this.namespace) === JSON.stringify(this._storage)) {
 					return;
 				}
-				// console.log('save', fromPing, this._storage);
+
+				// Else set the data in localstorage
 				localStorage.setItem(this.namespace, JSON.stringify(this._storage));
 
+				// Update the containers
 				containers[this.namespace].forEach(function ($storage, i) {
 					if($storage !== that.$this || fromPing) {
 						$storage[0].reload();
@@ -841,6 +932,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					}
 				});
 
+				// Save to MySQL (if we didn't get this data from MySQL ;-)
 				if(!fromPing) {
 					$.post('/api/save.storage.php', {
 						namespace:	this.namespace,
@@ -901,13 +993,16 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						var	$this	= $(this),
 							game	= $this.parents('tr').data('game');
 
+						// If we are on a tour, we are not allowed to remove games from the playlist
 						if($this.parents('.tour-step-backdrop').length > 0) {
 							return;
 						}
 
+						// Remove the game from the playlist
 						playlist.removeGame(game);
 					});
 
+					// Generate the "loops" select firled
 					var	$loops	= this.$container.find('[name="loops"]');
 					for(var loop_no = 1; loop_no <= 10; loop_no += 1) {
 						$('<option></option>')
@@ -916,6 +1011,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 							.appendTo($loops);
 					}
 
+					// Update text with localized text
 					api.get.lang(function (lang) {
 						that.lang			= lang;
 
@@ -928,7 +1024,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					that.reloadProxy	= $.proxy(that.reload, that);
 
 					playlist.$this.on('update', this.reloadProxy);
-				}, function () {
+				}, function () { // Update-function (called on first render and on update to the playlist)
 					var	that	= this;
 					this.$tbody.empty();
 
@@ -936,6 +1032,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						.find('div > div')
 						.text(playlist.name);
 
+					// Render the games
 					playlist.games.forEach(function (game) {
 						var	urlInfo	= game.url.split('/'),
 							octave	= urlInfo[3] || 0;
@@ -965,12 +1062,13 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 							.attr('title', that.lang.global_delete)
 							.end();
 					});
-				}, function () {
+				}, function () { // Kill-functions (called on modal-close)
 					playlist.$this.off('update', this.reloadProxy);
 				});
 			}
 		},
 		click:	{
+			// The default click-method for game-items (handles goto game and add game to playlist)
 			on:		function (e) {
 				e.preventDefault();
 				e.stopPropagation();
@@ -1001,16 +1099,21 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 		},
 		get:	{
 			playlist:	function (id, callback, name) {
+				// Returns a playlist
 				require(['playlist'], function (Playlist) {
+					// If we don't have a playlist, or we got an id
 					if(!playlist || id) {
+						// If the id is "new" (hack!), create a new one
 						if(id === 'new') {
 							id	= undefined;
-						} else if(!playlist) {
+						} else if(!playlist) { // else load the playlist with our id
 							var	playlists	= L2P.get.playlists();
 							for(id in playlists) {
 								break;
 							}
 						}
+
+						// Create the playlist-object
 						playlist	= new Playlist({}, id, name);
 					}
 
@@ -1023,6 +1126,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 				return storage.getAll(true);
 			}
 		},
+		// NOT IN USE
 		io:		function () {
 			if(!socket) {
 				socket	= io.connect('http://l2p.fmads.dk:10001');
@@ -1030,6 +1134,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 
 			return socket;
 		},
+		// Stepfactors
 		steps: [
 			{
 				percent:	95,
@@ -1076,22 +1181,25 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 		],
 		guided_tour:	function () {
 			require(['fM', 'tour', 'json!lang/guided_tour.php'], function (fM, Tour, lang) {
+				// Only initialize one tour-object
 				if(tour && tour.tour) {
 					tour.tour.start();
 					return;
 				}
 				tour	= (function () {
-					var	empty		= function (url) {
+					var	empty		= function (url) { // helper function for url-loads
 							return url === '/guided_tour/';
 						},
 						controller	= {};
 
+					// Helper-function for loading the tuner
 					function tourGame(tuner) {
 						tuner.$tuner.one('noise_ok', function () {
 							controller.tour.removeState('end');
 							controller.tour.start(true);
 						});
 					}
+					// Helper-function for waiting for a tick with sound
 					function tourGameTick(e, freq) {
 						if(freq !== -1) {
 							$(tuner).off('tick', tourGameTick);
@@ -1100,6 +1208,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						}
 					}
 
+					// Helper functions
 					controller.callback	= empty;
 					controller.kill		= function () {
 						if(controller.tour) {
@@ -1107,10 +1216,12 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 							controller.tour	= null;
 						}
 					};
+
+					// Generate the tour
 					controller.tour		= new Tour({
-						useLocalStorage:	true,
+						useLocalStorage:	true,	// Save our state in localStorage (this is JUST for keeping the tour from saving in cookie)
 						container:			'body',
-						debug:				true,
+						debug:				false,
 						labels:		{
 							next:	'<button class="btn btn-primary">'+lang.tour_button_got_it+'</button>',
 							prev:	'',
@@ -1118,6 +1229,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						},
 						keyboard:	false,
 						template:	function (i, step) {
+							// Two templates - one without labels and one with
 							if(step.labelsOff) {
 								return [
 									'<div class="popover tour">',
@@ -1173,6 +1285,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						backdrop:	true,
 						labelsOff:	true,
 						onShow:		function (tour) {
+							// When navigation, we wan't to keep the tour-object, if we navigated to the correct url (else exit the tour)
 							controller.callback	= function (url) {
 								if(url === '/user/settings/') {
 									tour.hideStep(tour._current);
@@ -1184,6 +1297,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						}
 					});
 
+					// Generate tour-steps for all settings
 					(function (tour) {
 						[null, 'concert_pitch', 'color_nodes', 'language', 'kiddie_mode', 'countdown_time', 'metronome', 'blind_mode'].forEach(function (name, i) {
 							if(name) {
@@ -1208,8 +1322,8 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						backdrop:	true,
 						labelsOff:	true,
 						onShow:		function (tour) {
+							// When navigation, we wan't to keep the tour-object, if we navigated to the correct url (else exit the tour)
 							controller.callback	= function (url) {
-								// console.log('callback test', url, url === '/');
 								if(url === '/') {
 									return true;
 								}
@@ -1226,11 +1340,12 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						backdrop:	true,
 						labelsOff:	true,
 						onShow:		function (tour) {
+							// When navigation, we wan't to keep the tour-object, if we navigated to the correct url (else exit the tour)
 							controller.callback	= function (url) {
 								if(url === '/browse/scales/position1/') {
 									tour.hideStep(tour._current);
-									L2P.get.playlist('new', function (playlist) {
-									}, lang.tour_0_0_title);
+									// Generate a new playlist for the tour
+									L2P.get.playlist('new', function () {}, lang.tour_0_0_title);
 
 									return true;
 								}
@@ -1249,6 +1364,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						labelsOff:	true,
 						onShow:		function (tour) {
 							L2P.get.playlist(null, function (playlist) {
+								// Wait for the added game to the playlist, before continuing the tour
 								playlist.$this.one('addgame', function () {
 									controller.tour.next();
 								});
@@ -1263,6 +1379,8 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						placement:	'left',
 						container:	'.modal-info.in',
 						backdrop:	true,
+
+						// Fix for background (backdrop)
 						onShow:		function () {
 							$('.modal-info.in #PlaylistContainer #PlaylistInfoContainerInner').addClass('tour-step-backdrop');
 						},
@@ -1290,6 +1408,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						labelsOff:	true,
 						onShow:		function (tour) {
 							L2P.get.playlist(null, function (playlist) {
+								// Wait for the added game to the playlist, before continuing the tour
 								playlist.$this.one('addgame', function () {
 									controller.tour.next();
 								});
@@ -1307,13 +1426,17 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						labelsOff:	true,
 						onShow:		function (tour) {
 							$('.modal-info.in #PlaylistItems [name="loops"]').val(1);
+
+							// When navigation, we wan't to keep the tour-object, if we navigated to the correct url (else exit the tour)
 							controller.callback = function (url) {
 								if(url === '/game/a-major/4/1/') {
+									// If we already got a the tuner (SoundInput) just continue - else wait for the tuner to be initialized
 									if(tuner) {
 										controller.tour.next();
 									} else {
 										controller.tour.end();
 
+										// When we got the tuner, continue the tour
 										$(L2P).one('got_tuner', function (e, tuner) {
 											tourGame(tuner);
 										});
@@ -1335,6 +1458,8 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						labelsOff:	true,
 						onShow:		function (tour) {
 							var	current		= tour.current;
+
+							// Show more info after 4 sec
 							setTimeout(function () {
 								if(tour.current === current) {
 									$('div.ContentBoxGameCompass')
@@ -1345,6 +1470,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 								}
 							}, 4000);
 
+							// Wait for a tick before continuing the tour
 							$(tuner).on('tick', tourGameTick);
 						}
 					});
@@ -1365,6 +1491,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 						backdrop:	true
 					});
 
+					// Make sure the tour always starts from first step
 					controller.tour.removeState('end');
 					controller.tour.setCurrentStep(0);
 					controller.tour.start(true);
@@ -1375,7 +1502,8 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 		},
 		create: function () {
 			require(['game/edit'], function (Edit) {
-				var	edit	= new Edit(L2P.gameController);
+				// Start the edit mode
+				new Edit(L2P.gameController);
 			});
 		}
 	};
@@ -1383,12 +1511,16 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 	function login(e) {
 		e.preventDefault();
 
+		// Allow autologin
 		sessionStorage.removeItem('l2p_fb_autologin');
 
+		// Start the login-process
 		L2P.facebook.login(function (user) {
 			L2P.$modal.off('hide');
 		});
 	}
+
+	// Login-box
 	$('#frontpage_container [name="facebook_login"]').on('click', function (e) {
 		e.preventDefault();
 
