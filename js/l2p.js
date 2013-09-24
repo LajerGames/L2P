@@ -299,6 +299,7 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					}
 
 					L2P.gameController.isEdit	= false;
+					L2P.gameController.edit		= null;
 
 					compass.setTone(options.tones.names[4]['A']);
 					compass.enable();
@@ -316,12 +317,16 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 							gameEnd:	function (e, gameInfo) {
 								var	currentState	= fM.link.getCurrent() || {};
 
-								if(!currentState || !currentState.from_playlist) {
-									api.get.statistic_uuid(function (data) {
-										fM.link.navigate('/user/'+L2P_global.username+'/statistics/'+data.uuid+'/');
-									}, {
-										game_history_ids:	gameInfo.game_history_id
-									});
+								if(L2P.gameController.isEdit) {
+									L2P.gameController.moveToTact(-1);
+								} else {
+									if(!currentState || !currentState.from_playlist) {
+										api.get.statistic_uuid(function (data) {
+											fM.link.navigate('/user/'+L2P_global.username+'/statistics/'+data.uuid+'/');
+										}, {
+											game_history_ids:	gameInfo.game_history_id
+										});
+									}
 								}
 								ControllerSet('restart');
 							},
@@ -348,6 +353,9 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					ControllerSet('play');
 
 					L2P.gameController.importGame(data, title, octave, fingerpos);
+					/*L2P.gameController.importGame(
+						[120,[4],[[6,[[6,"G",0,[3]],[6,"C",0,[3]],[8,"E",0,[3]],[8,"F",0,[3]],[6,"G",0,[3]],[6,"C",0,[3]],[8,"E",0,[3]],[8,"F",0,[3]],[6,"G",0,[3]],[6,"C",0,[3]],[8,"E",0,[3]],[8,"F",0,[3]],[6,"G",0,[3]],[6,"C",0,[3]],[8,"E",0,[3]],[8,"F",0,[3]]]],[6,[[6,"G",0,[3]],[6,"C",0,[3]],[8,"E",0,[3,0]],[8,"F",0,[3]],[6,"G",0,[3]],[6,"C",0,[3]],[8,"E",0,[3]],[8,"F",0,[3]],[6,"G",0,[3]],[6,"C",0,[3]],[8,"E",0,[3]],[8,"F",0,[3]],[6,"G",0,[3]],[6,"C",0,[3]],[8,"E",0,[3]],[8,"F",0,[3]]]],[6,[[1,"G",-1,[1]],[2,"G",-1,[2]]]],[6,[[6,"D",0,[3]],[6,"G",-1,[3]],[8,"B",-1,[3]],[8,"C",0,[3]],[6,"D",0,[3]],[6,"G",-1,[3]],[8,"B",-1,[3]],[8,"C",0,[3]],[6,"D",0,[3]],[6,"G",-1,[3]],[8,"B",-1,[3]],[8,"C",0,[3]],[6,"D",0,[3]],[6,"G",-1,[3]],[8,"B",-1,[3]],[8,"C",0,[3]]]],[6,[[1,"F",0,[1]],[2,"F",0,[2]]]],[6,[[6,"C",1,[3]],[6,"F",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]],[6,"C",1,[3]],[6,"F",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]],[6,"C",1,[3]],[6,"F",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]],[6,"C",1,[3]],[6,"F",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]]]],[6,[[1,"G",-1,[1]],[2,"G",-1,[2]]]],[6,[[6,"D",0,[3]],[6,"G",-1,[3]],[8,"B",-1,[3]],[8,"C",0,[3]],[6,"D",0,[3]],[6,"G",-1,[3]],[8,"B",-1,[3]],[8,"C",0,[3]],[6,"D",0,[3]],[6,"G",-1,[3]],[8,"B",-1,[3]],[8,"C",0,[3]],[6,"D",0,[3]],[6,"G",-1,[3]],[8,"B",-1,[3]],[8,"C",0,[3]]]],[6,[[1,"F",0,[1]],[2,"F",0,[2]]]],[6,[[6,"C",1,[3]],[6,"F",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]],[6,"C",1,[3]],[6,"F",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]],[6,"C",1,[3]],[6,"F",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]],[6,"C",1,[3]],[6,"F",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]]]],[6,[[5,"G",0,[]],[5,"C",0,[]],[8,"E",0,[3]],[8,"F",0,[3]],[4,"G",0,[]],[4,"C",0,[]],[8,"E",0,[3]],[8,"F",0,[3]]]],[6,[[1,"D",0,[1]],[2,"D",0,[2]]]],[6,[[5,"F",0,[]],[5,"B",-1,[]],[7,"D",0,[3]],[7,"E",0,[3]],[7,"D",0,[3]],[7,"B",-1,[3]]]],[6,[[1,"C",0,[1]],[2,"C",0,[2]]]],[6,[[6,"C",1,[3]],[6,"G",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]],[6,"C",1,[3]],[6,"G",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]],[6,"B",0,[3]],[6,"E",0,[3]],[8,"G",0,[3]],[8,"A",0,[3]],[6,"B",0,[3]],[6,"E",0,[3]],[8,"G",0,[3]],[8,"A",0,[3]]]],[6,[[6,"F",0,[3]],[6,"B",-1,[3]],[8,"D",0,[3]],[8,"E",0,[3]],[6,"F",0,[3]],[6,"B",-1,[3]],[8,"D",0,[3]],[8,"E",0,[3]],[6,"G",0,[3]],[6,"C",0,[3]],[8,"E",0,[3]],[8,"F",0,[3]],[6,"G",0,[3]],[6,"C",0,[3]],[8,"E",0,[3]],[8,"F",0,[3]]]],[6,[[6,"A",0,[3]],[6,"E",0,[3]],[8,"F",0,[3]],[8,"G",0,[3]],[6,"A",0,[3]],[6,"E",0,[3]],[8,"F",0,[3]],[8,"G",0,[3]],[6,"E",0,[3]],[6,"A",-1,[3]],[8,"C",0,[3]],[8,"D",0,[3]],[6,"B",0,[3]],[6,"F",0,[3]],[8,"G",0,[3]],[8,"A",0,[3]]]],[6,[[6,"C",1,[3]],[6,"G",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]],[6,"C",1,[3]],[6,"G",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]],[6,"C",1,[3]],[6,"G",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]],[6,"C",1,[3]],[6,"G",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]]]],[6,[[3,"C",1,[]],[3,"B",0,[]]]],[6,[[3,"F",0,[]],[3,"G",0,[]]]],[6,[[3,"A",-1,[]],[5,"E",0,[]],[5,"D",0,[]]]],[6,[[6,"C",1,[3]],[6,"G",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]],[6,"C",1,[3]],[6,"G",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]],[6,"C",1,[3]],[6,"G",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]],[6,"C",1,[3]],[6,"G",0,[3]],[8,"A",0,[3]],[8,"B",0,[3]]]],[6,[[4,null,null,[]],[4,null,null,[]],[4,null,null,[]],[4,null,null,[]],[4,null,null,[]],[4,null,null,[]]]]],[],["A","B","E"]]
+					, title, octave, fingerpos);*/
 					if(url) {
 						L2P.gameController.permlink	= url.match(/\/game\/([^\/]+)/g)[0].substr(6);
 					} else {
@@ -1366,302 +1374,8 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 			});
 		},
 		create: function () {
-			require(['game/game', 'game/tact', 'game/note', 'game/options'], function (Game, Tact, Note, options) {
-				var gameController	= L2P.gameController,
-					game			= gameController.game,
-					octave			= game.startOctave;
-
-				gameController.isEdit	= true;
-
-				function createNote(type, octave, nodeName, isRemoveKey, isSlur) {
-					return new Note(options.nodes.types[type], options.tones.names[octave][nodeName], isRemoveKey ? true : false, isSlur ? true : false);
-				}
-				function createRest(type) {
-					return new Note(options.nodes.types.rest[type], options.tones.rest);
-				}
-				function addTact(notes) {
-					var	tact	= new Tact(options.tacts.types.quarter);
-					notes.forEach(function (note) {
-						tact.addNode(note);
-					});
-					tact.fill();
-
-					game.addTact(tact);
-				}
-
-				var	currentTact	= game.tacts[0],
-					currentNote,
-					currentInfo	= [
-						octave + 0,
-						'A'
-					];
-
-				function updateNote(relPos) {
-					var	toneI	= options.tones.all.indexOf(currentNote.tone),
-						newTone	= options.tones.all[toneI - relPos],
-						newNote	= createNote(currentNote.type.name, newTone.octav, newTone.name, currentNote.isRemoveKey, currentNote.isSlur);
-
-					replaceNote(newNote);
-				}
-				function replaceNote(newNote) {
-					var	newTact		= new Tact(currentTact.type),
-						hasReplaced	= false,
-						restNotes	= [],
-						resetFocus	= false;
-
-					currentTact.nodes.forEach(function (note, i) {
-						var	thisReplace	= false,
-							added;
-						if(note === currentNote) {
-							note		= newNote;
-							hasReplaced	= true;
-							thisReplace	= true;
-						}
-
-						if(!thisReplace && hasReplaced && note.isRest) {
-							restNotes.push(note);
-						} else {
-							if(hasReplaced) {
-								restNotes.forEach(function (note) {
-									newTact.addNode(note);
-								});
-								restNotes	= [];
-							}
-							added	= newTact.addNode(note);
-						}
-
-						if(thisReplace && !added) {
-							resetFocus	= true;
-						}
-					});
-
-					newTact.fill();
-
-					game.tacts.splice(game.tacts.indexOf(currentTact), 1, newTact);
-
-					newNote.isFocus	= true;
-					currentNote	= newNote;
-					currentTact	= newTact;
-
-					if(!currentNote.isRest) {
-						currentInfo	= [currentNote.tone.octav, currentNote.tone.name];
-					}
-
-					if(resetFocus) {
-						setFocus(currentTact.nodes[currentTact.nodes.length - 1]);
-					}
-
-					gameController.initView(true);
-				}
-				function updateNoteSize(bigger) {
-					var	noteI			= currentTact.nodes.indexOf(currentNote),
-						newTact			= new Tact(currentTact.type),
-						newNote,
-						types			= [
-							'whole',
-							'halfPeriod',
-							'half',
-							'quarterPeriod',
-							'quarter',
-							'eighthPeriod',
-							'eighth',
-							//'sixteenthPeriod',
-							'sixteenth'
-						],
-						typesRest		= [
-							'restQuarter',
-							'restEighth',
-							'restSixteenth'
-						],
-						typesRestConverted	= [
-							'quarter',
-							'eighth',
-							'sixteenth'
-						],
-						currentTypeI	= currentNote.isRest ? typesRest.indexOf(currentNote.type.name) : types.indexOf(currentNote.type.name),
-						lastNote		= true;
-
-					if(bigger) {
-						if(currentTypeI > 0) {
-							if(currentNote.isRest) {
-								newNote	= createRest(typesRestConverted[currentTypeI - 1]);
-							} else {
-								newNote	= createNote(types[currentTypeI - 1], currentNote.tone.octav, currentNote.tone.name, currentNote.isRemoveKey, currentNote.isSlur);
-							}
-						}
-					} else {
-						if(currentNote.isRest) {
-							if(currentTypeI < (typesRest.length - 1)) {
-								newNote	= createRest(typesRestConverted[currentTypeI + 1]);
-							}
-						} else {
-							if(currentTypeI < (types.length - 1)) {
-								newNote	= createNote(types[currentTypeI + 1], currentNote.tone.octav, currentNote.tone.name, currentNote.isRemoveKey, currentNote.isSlur);
-							}
-						}
-					}
-
-					if(newNote) {
-						replaceNote(newNote);
-					}
-				}
-				function setRest() {
-					var	name;
-
-					if(!currentNote.isRest) {
-						replaceNote(createRest(currentNote.type.name));
-					} else {
-						name	= currentNote.type.name.substr(4).split('').map(function (s, i) {
-							if(i === 0) {
-								s	= s.toLowerCase();
-							}
-							return s;
-						}).join('');
-						replaceNote(createNote(name, currentInfo[0], currentInfo[1], false, false));
-					}
-				}
-				function setFocus(note) {
-					if(currentNote) {
-						currentNote.isFocus	= false;
-					}
-					note.isFocus	= true;
-					currentNote		= note;
-
-					if(!note.isRest) {
-						currentInfo	= [note.tone.octav, note.tone.name];
-					}
-
-					gameController.initView(true);
-				}
-				function moveFocus(right) {
-					var	noteI	= currentTact.nodes.indexOf(currentNote),
-						tactI,
-						focusNote,
-						tactUpdate	= false;
-					if(right) {
-						if(noteI >= (currentTact.nodes.length - 1)) {
-							tactI	= game.tacts.indexOf(currentTact);
-							if(tactI >= (game.tacts.length - 1)) {
-								addTact([]);
-							}
-							currentTact	= game.tacts[tactI + 1];
-							tactUpdate	= true;
-
-							noteI		= -1;
-						}
-						focusNote	= currentTact.nodes[noteI + 1];
-					} else {
-						if(noteI === 0) {
-							tactI	= game.tacts.indexOf(currentTact);
-							if(tactI > 0) {
-								currentTact	= game.tacts[tactI - 1];
-								tactUpdate	= true;
-								noteI		= currentTact.nodes.length;
-							}
-						}
-						focusNote	= currentTact.nodes[noteI - 1];
-					}
-
-					if(focusNote) {
-						setFocus(focusNote);
-					}
-					if(tactUpdate) {
-						gameController.moveToTact(currentTact);
-					}
-				}
-				function setSlur() {
-					if(!currentNote.isRest) {
-						replaceNote(createNote(currentNote.type.name, currentNote.tone.octav, currentNote.tone.name, currentNote.isRemoveKey, !currentNote.isSlur));
-					}
-				}
-				function setSharp() {
-					if(!currentNote.isRest) {
-						var	toneName	= currentNote.tone.name.substr(0, 1);
-
-						game.setSharp(toneName, 'toggle');
-
-						gameController.initView(true);
-					}
-				}
-				function setFlat() {
-					if(!currentNote.isRest) {
-						var	toneName	= currentNote.tone.name.substr(0, 1);
-
-						game.setFlat(toneName, 'toggle');
-
-						gameController.initView(true);
-					}
-				}
-
-				setFocus(currentTact.nodes[0]);
-
-				function onKeydown(e) {
-					switch(e.which) {
-					case 37:	// ArrowLeft
-						e.preventDefault();
-						moveFocus(false);
-						break;
-					case 38:	// ArrowUp
-						e.preventDefault();
-						updateNote(-1);
-						break;
-					case 39:	// ArrowRight
-						e.preventDefault();
-						moveFocus(true);
-						break;
-					case 40:	// ArrowDown
-						e.preventDefault();
-						updateNote(1);
-						break;
-					case 107:	// NumPad+
-					case 187:	// +
-						e.preventDefault();
-						updateNoteSize(true);
-						break;
-					case 109:	// NumPad-
-					case 189:	// -
-						e.preventDefault();
-						updateNoteSize(false);
-						break;
-					case 70:	// f
-						e.preventDefault();
-						setFlat();
-						break;
-					case 76:	// l
-						e.preventDefault();
-						setSlur();
-						break;
-					case 82:	// r
-						e.preventDefault();
-						setRest();
-						break;
-					case 83:	// s
-						e.preventDefault();
-						setSharp();
-						break;
-					case 88:	// x
-						e.preventDefault();
-
-						require(['fM'], function (fM) {
-							$(window).off('keydown', onKeydown);
-							fM.link.navigate('/game/'+gameController.permlink+'/save/', 'Magic Tune', {
-								title:	'Magic Tune',
-								data:	{
-									data:	JSON.stringify(gameController.exportGame())
-								}
-							});
-						});
-						// console.log(JSON.stringify(gameController.exportGame()));
-						break;
-					default:
-						// console.log(e.which);
-						break;
-					}
-				}
-
-				$(window).on('keydown', onKeydown);
-
-				gameController.moveToTact(0);
+			require(['game/edit'], function (Edit) {
+				var	edit	= new Edit(L2P.gameController);
 			});
 		}
 	};

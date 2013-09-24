@@ -13,7 +13,7 @@ if($iOctave === 0)
 if($strPermlink === 'create')
 {
 	$strTitle	= 'Create';
-	$arrData	= json_decode('[80,[4],[[1,[[4,null,null,0,0],[4,null,null,0,0],[4,null,null,0,0],[4,null,null,0,0]]]],[],[]]');
+	$arrData	= json_decode('[80,[4],[[1,[[4,null,null,[]],[4,null,null,[]],[4,null,null,[]],[4,null,null,[]]]]],[],[]]');
 	$strType	= 'song';
 }
 else
@@ -39,7 +39,7 @@ $strDialog	= $oPageRenderer->RenderDialogGame($oTemplate, $strTitle, $arrData, $
 
 if(IS_DIALOG)
 {
-	header('Content-type: application/json');
+	header('Content-Type: application/json; charset=utf-8');
 	echo $strDialog;
 }
 ?>

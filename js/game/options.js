@@ -39,31 +39,43 @@ define(function () {
 					name:	'quarter',
 					length:	1,
 					nodes:	4,
-					id:		1
+					id:		1,
+					text:	'4/4'
 				},
 				threeForth:	{
 					name:	'threeForth',
 					length:	3/4,
 					nodes:	3,
-					id:		2
+					id:		2,
+					text:	'3/4'
 				},
 				fiveForth:	{
 					name:	'fiveForth',
 					length:	5/4,
 					nodes:	5,
-					id:		3
+					id:		3,
+					text:	'5/4'
 				},
 				sixForth:	{
 					name:	'sixForth',
 					length:	6/4,
 					nodes:	6,
-					id:		4
+					id:		4,
+					text:	'6/4'
 				},
 				twoForth:	{
 					name:	'twoForth',
 					length:	2/4,
 					nodes:	2,
-					id:		5
+					id:		5,
+					text:	'2/4'
+				},
+				twelveEights:	{
+					name:	'twelveEights',
+					length:	12/8,
+					nodes:	12,
+					id:		6,
+					text:	'12/8'
 				}
 			}
 		},
@@ -143,6 +155,24 @@ define(function () {
 				},
 				rest:	{}
 			}
+		},
+		noteOptions:	{
+			removekey:		0,
+			slurstart:		1,
+			slurend:		2,
+			join:			3,
+			crescendo:		4,
+			decrescendo:	5,
+			thrill:			6,
+			staccato:		7,
+			fermata:		8,
+			triplets:		9,
+			mp:				10,
+			p:				11,
+			pp:				12,
+			mf:				13,
+			f:				14,
+			ff:				15
 		},
 		generateTones:	function () {
 			options.tones	= {

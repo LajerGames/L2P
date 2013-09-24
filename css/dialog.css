@@ -23,6 +23,14 @@
 	opacity: 1;
 }
 
+.modal-edit {
+    width: 26vw;
+    margin-left: 37vw;
+}
+.modal-edit .modal-body {
+    height: 25vh;
+}
+
 .modal-header,
 .modal-footer {
     height: 8vh;

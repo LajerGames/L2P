@@ -18,9 +18,20 @@ class MySQLWrapper
 	* @param string $strQuery
 	* @return resource $rResource
 	*/
-	public function Select($strQuery)
+	public function Select($strQuery, $bPrint)
 	{
-		return $this->oSql->query($strQuery);
+		if($bPrint)
+		{
+			echo '<pre style="tab-size: 4;">'.str_replace("\n", '<br>', $strQuery).'</pre>';
+		}
+
+		$rResource	= $this->oSql->query($strQuery);
+		if($rResource === false)
+		{
+			reportError('SQL Error!<br>'.$this->oSql->error, '');
+		}
+
+		return $rResource;
 	}
 
 	/**
@@ -30,9 +41,9 @@ class MySQLWrapper
 	* @param string $strClassName
 	* @return object $oObject
 	*/
-	public function SelectSingleObject($strQuery)
+	public function SelectSingleObject($strQuery, $bPrint = false)
 	{
-		$rResource	= $this->Select($strQuery);
+		$rResource	= $this->Select($strQuery, $bPrint);
 		if($rResource->num_rows === 0 || !$rResource)
 		{
 			return null;

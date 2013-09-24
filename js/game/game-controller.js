@@ -8,7 +8,11 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		if(note.isRest) {
 			path	+= note.type.name.substr(4, 1).toLowerCase() + note.type.name.substr(5) + 'rest';
 		} else if(note.isPeriod) {
-			path	+= note.type.name.substr(0, note.type.name.length - 6) + 'note-period';
+			if(connect) {
+				path	+= 'quarternote';
+			} else {
+				path	+= note.type.name.substr(0, note.type.name.length - 6) + 'note';
+			}
 		} else {
 			if(connect) {
 				path	+= 'quarternote';
@@ -29,14 +33,87 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		return path + colorName + options.gameImageType;
 	}
 	function flipNote(note) {
-		note.svgElement.setPos(note.svgElement.getX(), -175 - note.svgElement.getY() + 2 * 4);
-		note.svgElement.node.style.webkitTransform	= 'scaleY(-1)';
+		note.svgElement.node.style.webkitTransform	+= ' scaleY(-1)';
 		note.svgElement.options.flip				= true;
 	}
-	function unFlipNote(note) {
-		note.svgElement.setPos(note.svgElement.getX(), note.svgElement.options.defY);
-		note.svgElement.node.style.webkitTransform	= 'scaleY(1)';
-		note.svgElement.options.flip				= false;
+	function makeConnections(tact, connections) {
+		if(connections.length > 0) {
+			var	note1	= connections[0],
+				note2	= connections[connections.length - 1],
+
+				flipped	= note1.svgElement.options.flip,
+
+				y		= (flipped ? 2 * 84 : 16 + 2) - 8,
+
+				y1		= note1.svgElement.y + y,
+
+				x1		= note1.svgElement.x + 25 - 1,
+				x2		= note2.svgElement.x + 25 + 1,
+
+				deltaX	= x2 - x1,
+
+				moveY	= 0,
+				lastNote;
+
+			connections.forEach(function (note) {
+				var	diffY	= note1.svgElement.y - note.svgElement.y;
+
+				if(flipped && diffY < 0 && diffY < -moveY) {
+					moveY	= -diffY;
+				} else if(!flipped && diffY > 0 && diffY > -moveY) {
+					moveY	= -diffY;
+				}
+			});
+
+			new	SVGElement('line')
+				.setRef(connections)
+				.setLine(x1, y1 + moveY, x2, y1 + moveY)
+				.setStroke('#000', 5)
+				.appendTo(tact.svgElement.node);
+
+			connections.forEach(function (note, i) {
+				if(note.svgElement.y !== note1.svgElement.y + moveY) {
+					new SVGElement('line')
+						.setLine(note.svgElement.x + 25, note.svgElement.y + y, note.svgElement.x + 25, y1 + moveY)
+						.setStroke('#000', 2)
+						.appendTo(tact.svgElement.node);
+				}
+
+				if(note.type.length <= 1/16 * 1.5) {
+					if(lastNote && lastNote.type.length <= 1/16 * 1.5) {
+						new	SVGElement('line')
+							.setRef(connections)
+							.setLine(lastNote.svgElement.x + 24, y1 + moveY + (flipped ? -10 : 10), note.svgElement.x + 26, y1 + moveY + (flipped ? -10 : 10))
+							.setStroke('#000', 5)
+							.appendTo(tact.svgElement.node);
+					} else if(lastNote && i === connections.length - 1) {
+						new	SVGElement('line')
+							.setRef(connections)
+							.setLine(note.svgElement.x + 4, y1 + moveY + (flipped ? -10 : 10), note.svgElement.x + 26, y1 + moveY + (flipped ? -10 : 10))
+							.setStroke('#000', 5)
+							.appendTo(tact.svgElement.node);
+					}
+				} else if(lastNote && lastNote.type.length <= 1/16 * 1.5) {
+					if(i === 1) {
+						new	SVGElement('line')
+							.setRef(connections)
+							.setLine(lastNote.svgElement.x + 25, y1 + moveY + (flipped ? -10 : 10), lastNote.svgElement.x + 2 * 25 - 4, y1 + moveY + (flipped ? -10 : 10))
+							.setStroke('#000', 5)
+							.appendTo(tact.svgElement.node);
+					} else {
+						new	SVGElement('line')
+							.setRef(connections)
+							.setLine(lastNote.svgElement.x + 4, y1 + moveY + (flipped ? -10 : 10), lastNote.svgElement.x + 26, y1 + moveY + (flipped ? -10 : 10))
+							.setStroke('#000', 5)
+							.appendTo(tact.svgElement.node);
+					}
+				}
+
+				lastNote	= note;
+			});
+
+			connections.splice(0);
+		}
 	}
 
 	var	GameController	= function (svg) {
@@ -158,7 +235,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		// console.log(this.game);
 		this.game.reset();
 
-		this.SVGNotes.animateAbs(0, -505, 0);
+		this.SVGNotes.animateAbs(0, 0, 0);
 
 		// console.log('reset-pos', this.SVGNotes.node.style.webkitTransition, this.SVGNotes.node.style.webkitTransform);
 		this.initView();
@@ -170,6 +247,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 			firstNote;
 
 		if(this.game) {
+			this.game.softReset();
 			this.game.tacts.forEach(function (tact) {
 				if(firstNote) {
 					return;
@@ -228,7 +306,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 
 		gameController.SVGNotes.node.style.width	= (totalWidth + gameController.defWidth / 4)+'px';
 
-		gameController.SVGNotes.animateAbs(-totalWidth, -505, relativeDuration, this.gameDone.bind(this));
+		gameController.SVGNotes.animateAbs(-totalWidth, 0, relativeDuration, this.gameDone.bind(this));
 
 		$(gameController.svgLine.node).on('webkitAnimationEnd', function () {
 			gameController.svgLine.node.classList.remove('pulse');
@@ -259,9 +337,9 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 	};
 	GameController.prototype.pauseGame	= function () {
 		if(L2P_global.kiddie_mode) {
-			this.SVGNotes.animateAbs(-this.currentLeft() + 30, -505, 0);
+			this.SVGNotes.animateAbs(-this.currentLeft() + 30, 0, 0);
 		} else {
-			this.SVGNotes.animateAbs((-Math.floor(this.currentLeft() / (this.defWidth / 4)) + 0.5) * (this.defWidth / 4) - 20, -505, 0);
+			this.SVGNotes.animateAbs((-Math.floor(this.currentLeft() / (this.defWidth / 4)) + 0.5) * (this.defWidth / 4) - 20, 0, 0);
 		}
 		this.paused	= true;
 	};
@@ -278,29 +356,28 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		}
 	};
 	GameController.prototype.drawSlur	= function (from, to) {
-		var	fromPos	= from.svgElement.getAbsolutePos(),
-			toPos	= to.svgElement.getAbsolutePos();
+		var	fromX	= options.noteSlurPos.x + from.svgElement.x + 25,
+			fromY	= options.noteSlurPos.y + from.svgElement.y + 84 + (from.svgElement.options.flip ? -16 : 16),
 
-		if(from.svgElement.options.flip && !to.svgElement.options.flip) {
-			fromPos.yc	= -fromPos.yc - 45;
-		}
+			deltaX	= to.svgElement.x - from.svgElement.x,
+			deltaY	= to.svgElement.y - from.svgElement.y;
 
 		var	slur	=
 			new SVGElement('path')
-				.setPath('M '+(fromPos.xc + options.noteSlurPos.x)+' '+(fromPos.yb + options.noteSlurPos.y)+' q '+((toPos.xc - fromPos.xc) / 2)+' '+options.noteSlurPos.z+' '+(toPos.xc - fromPos.xc)+' '+(toPos.yc - fromPos.yc))
+				.setPath('M '+fromX+' '+fromY+' q '+(deltaX / 2)+' '+(options.noteSlurPos.z * (from.svgElement.options.flip ? -1 : 1))+' '+deltaX+' '+deltaY)
 				.setStroke('#000', 2)
 				.setFill('none')
 				.appendTo(from.tact.svgElement.node);
-
-		if(from.svgElement.options.flip) {
-			slur.node.style.webkitTransform			= 'scaleY(-1)';
-		}
 	};
 	GameController.prototype.initView	= function (dontResetPos) {
-		var	that		= this,
+		this.initViewSheet(dontResetPos);
+	};
+	GameController.prototype.initViewSheet	= function (dontResetPos) {
+		var	that			= this,
 			gameController	= this,
-			game		= this.game,
-			tactLeftPos	= 0,
+			game			= this.game,
+			tactLeftPos		= 0,
+			noteopt			= options.noteOptions,
 			firstSlur,
 			lastSlur,
 			svgStartContainerPos	= 0;
@@ -328,7 +405,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		});
 
 		if(dontResetPos !== true) {
-			this.SVGNotes.animateAbs(0, -505, 0);
+			this.SVGNotes.animateAbs(0, 0, 0);
 		}
 		this.SVGNotes.removeChildNodes();
 
@@ -353,12 +430,15 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		}
 
 		if(this.game) {
-			var	lastNote;
-			this.game.tacts.forEach(function (tact) {
+			var	lastTact,
+				lastNote,
+				slurNote,
+				crescendoStartNote,
+				decrescendoStartNote;
+			this.game.tacts.forEach(function (tact, tactNo) {
 				var tactWidth	= tact.type.length * that.defWidth,
 					tactPos		= that.startPos + tactLeftPos,
 					noteLeftPos	= 0,
-					lastNote	= null,
 					noteTime	= 0,
 					connections	= [];
 
@@ -370,163 +450,249 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 					.setStroke('#000', 2)
 					.appendTo(tact.svgElement.node);
 
+				if(!lastTact || lastTact.type.id !== tact.type.id) {
+					var	texts	= tact.type.text.split('/');
+
+					new	SVGElement('text')
+						.setInnerText(texts[0], 36, 'bold')
+						.setPos(tactPos - 15, 401 - 13)
+						.addClass('music-text')
+						.appendTo(tact.svgElement.node);
+					new	SVGElement('text')
+						.setInnerText(texts[1], 36, 'bold')
+						.setPos(tactPos - 15, 401 + 13)
+						.addClass('music-text')
+						.appendTo(tact.svgElement.node);
+				}
+				if(gameController.isEdit) {
+					new	SVGElement('text')
+						.setInnerText(tactNo + 1, 20)
+						.setPos(tactPos, 50 + options.topPos)
+						.appendTo(tact.svgElement.node);
+				}
+
 				tact.nodes.forEach(function (note) {
 					var noteWidth	= note.type.length * that.defWidth,
 						notePos		= tactPos + that.defWidth / 16 + noteLeftPos - 20,
 						tonePos 	= (note.tone.pos + 11) * options.lineHeight / 2 + 4,
-						connect		= false;
-
-					noteTime	+= note.type.length;
+						connect		= note.is(noteopt.join);
 
 					noteLeftPos	+= noteWidth;
-					svgElement	= null;
 
-					if(note.type.img) {
-						if(note.length <= 1/8 && !note.isRest) {
-							connections.push(note);
+					note.svgElement	=
+						new SVGElement(options.gameImageNodeType)
+							.setRef(note)
+							.setLink('/'+getImagePath(note, connect, coloredNotes, note.isFocus ? '-green' : ''))
+							.setPos(notePos, tonePos)
+							.setDimensions(50, 100)
+							.addClass('note')
+							.appendTo(tact.svgElement.node);
+
+					if(note.isSharp || note.isFlat || note.is(noteopt.removekey)) {
+						var	text	= '',
+							y		= 95;
+						if(note.isSharp) {
+							text	= '\u266F';
+						} else if(note.isFlat) {
+							text	= '\u266D';
+							y		= 90;
+						} else if(note.is(noteopt.removekey)) {
+							text	= '\u266E';
 						}
+						new SVGElement('text')
+							.setInnerText(text, 36, 'bold')
+							.setPos(notePos - 22, tonePos + y)
+							.appendTo(tact.svgElement.node);
+					}
+					if(note.isPeriod) {
+						new	SVGElement('circle')
+							.setCircle(notePos + 25 + 10, tonePos + 84, 3)
+							.appendTo(tact.svgElement.node);
+					}
 
-						note.svgElement	= new SVGElement(options.gameImageNodeType)
-											.setRef(note)
-											.setLink('/'+getImagePath(note, connect, coloredNotes, note.isFocus ? '-green' : ''))
-											.setPos(notePos, tonePos)
-											.setDimensions(50, 100)
-											.appendTo(tact.svgElement.node);
-
-						note.svgElement.options.defY	= tonePos;
-
-						if(note.isSharp || note.isFlat || note.isRemoveKey) {
-							var	text	= '',
-								y		= 95;
-							if(note.isSharp) {
-								text	= '\u266F';
-							} else if(note.isFlat) {
-								text	= '\u266D';
-								y		= 90;
-							} else if(note.isRemoveKey) {
-								text	= '\u266E';
-							}
-							new SVGElement('text')
-								.setInnerText(text, 36, 'bold')
-								.setPos(notePos - 25, tonePos + y)
-								.appendTo(tact.svgElement.node);
+					if(note.is(noteopt.join) && connections.length > 0) {
+						if(connections[0].svgElement.options.flip) {
+							flipNote(note);
 						}
-						if(note.isPeriod) {
-							new	SVGElement('circle')
-								.setCircle(notePos + 25 + 10, tonePos + 90 - 8, 3)
-								.appendTo(tact.svgElement.node);
-								/*
-							new SVGElement('text')
-								.setInnerText('◘', 36, 'bold')
-								.setPos(notePos + 25, tonePos + 90)
-								.appendTo(tact.svgElement.node);*/
-						}
-
+					} else {
 						if(note.tone.pos <= 0) {
 							flipNote(note);
 						}
+					}
 
-						var	extraLine;
+					// Extra Lines
+					(function () {
+						var	extraLine,
+							y;
 						for(extraLine = -6; extraLine >= note.tone.pos; extraLine -= 2) {
-							var	y	= options.topPos + (extraLine / 2 + 5) * options.lineHeight;
+							y	= options.topPos + (extraLine / 2 + 5) * options.lineHeight;
 							new SVGElement('line')
 								.setLine(notePos - 5, y, notePos + 32, y)
 								.setStroke('#000')
 								.appendTo(tact.svgElement.node)
 						}
+
 						for(extraLine = 6; extraLine <= note.tone.pos; extraLine += 2) {
-							var	y	= options.topPos + (extraLine / 2 + 5) * options.lineHeight;
+							y	= options.topPos + (extraLine / 2 + 5) * options.lineHeight;
 							new SVGElement('line')
 								.setLine(notePos - 5, y, notePos + 32, y)
 								.setStroke('#000')
 								.appendTo(tact.svgElement.node)
 						}
-					}
-					if(note.isSlur) {
-						lastSlur	= note;
-					} else {
-						if(lastSlur) {
-							that.drawSlur(firstSlur, lastSlur);
-							lastSlur	= null;
+					}());
+
+					if(note.is(noteopt.slurend)) {
+						if(slurNote) {
+							that.drawSlur(slurNote, note);
+							slurNote	= null;
 						}
-						firstSlur	= note;
+					}
+					if(note.is(noteopt.slurstart)) {
+						slurNote	= note;
 					}
 
-					while(noteTime >= 1/4) {
-						if(connections.length > 1) {
-							(function (connections) {
-								var	first	= connections[0],
-									last	= connections[connections.length - 1],
-									flip	= first.svgElement.options.flip;
+					if(note.is(noteopt.join)) {
+						connections.push(note);
+					}
 
-								connections.forEach(function (note) {
-									note.svgElement.setLink('/'+getImagePath(note, true, coloredNotes, note.isFocus ? '-green' : ''));
-									if(note !== first) {
-										if(flip && !note.svgElement.options.flip) {
-											flipNote(note);
-										} else if(!flip && note.svgElement.options.flip) {
-											unFlipNote(note);
-										}
-									}
-								});
-
-								var	y1		= first.svgElement.options.defY + 11 + (flip ? 147 : 0),
-									y2		= last.svgElement.options.defY + 11 + (flip ? 147 : 0),
-									x		= last.length - first.length,
-									a		= (y2 - y1) / x,
-									moveY	= 0;
-
-								if(connections.length > 2) {
-									var	notePos		= 0 - first.length;
-									connections.forEach(function (note) {
-										var	realY	= note.svgElement.options.defY + 11 + (flip ? 147 : 0),
-											diffY	= y1 - realY;
-
-										if(flip && diffY < 0 && diffY < -moveY) {
-											moveY	= -diffY;
-										} else if(!flip && diffY > 0 && diffY > -moveY) {
-											moveY	= -diffY;
-										}
-
-										notePos	+= note.length;
-									});
-
-									connections.forEach(function (note) {
-										if(note.svgElement.getY() !== y1 + moveY) {
-											new SVGElement('line')
-												.setLine(note.svgElement.getX() + 25, note.svgElement.options.defY + 11 + (flip ? 147 : 0), note.svgElement.getX() + 25, y1 + moveY)
-												.setStroke('#000', 2)
-												.appendTo(tact.svgElement.node);
-										}
-									});
-
-									y2	= y1;
-								}
-
-								var	lastNote	= null;
-								connections.forEach(function (note) {
-									if(lastNote) {
-										if(lastNote.length === 1/16 && note.length === 1/16) {
-											new	SVGElement('line')
-												.setRef(connections)
-												.setLine(lastNote.svgElement.getX() + 24, y1 + moveY + (flip ? -10 : +10), note.svgElement.getX() + 26, y2 + moveY + (flip ? -10 : +10))
-												.setStroke('#000', 5)
-												.appendTo(tact.svgElement.node);
-										}
-										new	SVGElement('line')
-											.setRef(connections)
-											.setLine(lastNote.svgElement.getX() + 24, y1 + moveY, note.svgElement.getX() + 26, y2 + moveY)
-											.setStroke('#000', 5)
-											.appendTo(tact.svgElement.node);
-									}
-									lastNote	= note;
-								});
-							}(connections));
+					if(note.is(noteopt.crescendo)) {
+						if(!crescendoStartNote) {
+							crescendoStartNote	= note;
 						}
-						connections	= [];
-						noteTime	-= 1/4;
 					}
+					else if(crescendoStartNote) {
+						var	x1	= crescendoStartNote.svgElement.x,
+							x2	= lastNote.svgElement.x + lastNote.length * that.defWidth - 10,
+							y	= 390;
+
+						new	SVGElement('line')
+							.setLine(x1, y, x2, y - 10)
+							.setStroke('#000', 2)
+							.appendTo(crescendoStartNote.tact.svgElement.node);
+
+						new	SVGElement('line')
+							.setLine(x1, y, x2, y + 10)
+							.setStroke('#000', 2)
+							.appendTo(crescendoStartNote.tact.svgElement.node);
+
+						crescendoStartNote	= null;
+					}
+
+					if(note.is(noteopt.decrescendo)) {
+						if(!decrescendoStartNote) {
+							decrescendoStartNote	= note;
+						}
+					}
+					else if(decrescendoStartNote) {
+						var	x1	= decrescendoStartNote.svgElement.x,
+							x2	= lastNote.svgElement.x + lastNote.length * that.defWidth - 10,
+							y	= 390;
+
+						new	SVGElement('line')
+							.setLine(x1, y - 10, x2, y)
+							.setStroke('#000', 2)
+							.appendTo(decrescendoStartNote.tact.svgElement.node);
+
+						new	SVGElement('line')
+							.setLine(x1, y + 10, x2, y)
+							.setStroke('#000', 2)
+							.appendTo(decrescendoStartNote.tact.svgElement.node);
+
+						decrescendoStartNote	= null;
+					}
+
+					if(note.is(noteopt.mf)) {
+						new	SVGElement('image')
+							.setLink('/img/game/mezzo.svg')
+							.setPos(note.svgElement.x - 28, 390 - 55 / 2 + 10)
+							.setDimensions(50, 45)
+							.appendTo(tact.svgElement.node);
+						new	SVGElement('image')
+							.setLink('/img/game/forte.svg')
+							.setPos(note.svgElement.x + 10, 390 - 55 / 2)
+							.setDimensions(41, 55)
+							.appendTo(tact.svgElement.node);
+					}
+					if(note.is(noteopt.f)) {
+						new	SVGElement('image')
+							.setLink('/img/game/forte.svg')
+							.setPos(note.svgElement.x, 390 - 55 / 2)
+							.setDimensions(41, 55)
+							.appendTo(tact.svgElement.node);
+					}
+					if(note.is(noteopt.ff)) {
+						new	SVGElement('image')
+							.setLink('/img/game/forte.svg')
+							.setPos(note.svgElement.x - 10, 390 - 55 / 2)
+							.setDimensions(41, 55)
+							.appendTo(tact.svgElement.node);
+						new	SVGElement('image')
+							.setLink('/img/game/forte.svg')
+							.setPos(note.svgElement.x + 10, 390 - 55 / 2)
+							.setDimensions(41, 55)
+							.appendTo(tact.svgElement.node);
+					}
+					if(note.is(noteopt.mp)) {
+						new	SVGElement('image')
+							.setLink('/img/game/mezzo.svg')
+							.setPos(note.svgElement.x - 25, 390 - 55 / 2 + 10)
+							.setDimensions(50, 45)
+							.appendTo(tact.svgElement.node);
+						new	SVGElement('image')
+							.setLink('/img/game/piano.svg')
+							.setPos(note.svgElement.x + 13, 390 - 55 / 2 + 9)
+							.setDimensions(41, 45)
+							.appendTo(tact.svgElement.node);
+					}
+					if(note.is(noteopt.p)) {
+						new	SVGElement('image')
+							.setLink('/img/game/piano.svg')
+							.setPos(note.svgElement.x, 390 - 55 / 2 + 9)
+							.setDimensions(41, 45)
+							.appendTo(tact.svgElement.node);
+					}
+					if(note.is(noteopt.pp)) {
+						new	SVGElement('image')
+							.setLink('/img/game/piano.svg')
+							.setPos(note.svgElement.x - 11, 390 - 55 / 2 + 9)
+							.setDimensions(41, 45)
+							.appendTo(tact.svgElement.node);
+						new	SVGElement('image')
+							.setLink('/img/game/piano.svg')
+							.setPos(note.svgElement.x + 11, 390 - 55 / 2 + 9)
+							.setDimensions(41, 45)
+							.appendTo(tact.svgElement.node);
+					}
+
+					if(note.is(noteopt.staccato)) {
+						new	SVGElement('circle')
+							.setCircle(note.svgElement.x + 15, note.svgElement.y + 100 + (note.svgElement.options.flip ? -35 : 3), 3)
+							.appendTo(tact.svgElement.node);
+					}
+					if(note.is(noteopt.fermata)) {
+						var	fermataY	= note.svgElement.y + (note.svgElement.options.flip ? 45 : -17.5);
+						if(fermataY > 149) {
+							fermataY	= 149;
+						}
+
+						new	SVGElement('image')
+							.setLink('/img/game/fermata.svg')
+							.setPos(note.svgElement.x - 3.75, fermataY)
+							.setDimensions(32.5, 17.5)
+							.appendTo(tact.svgElement.node);
+					}
+
+					// Insert joins
+					if(!note.is(noteopt.join) || connections.length >= 4) {
+						makeConnections(tact, connections);
+					}
+
+					lastNote	= note;
 				});
+
+				makeConnections(tact, connections);
+
+				lastTact	= tact;
 			});
 		}
 
@@ -581,8 +747,8 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 				}
 			}
 
-			function createNote(id, octave, nodeName, isRemoveKey, isSlur) {
-				return new Node(findInObject(options.nodes.types, id), options.tones.names[octave][nodeName], isRemoveKey === 1 ? true : false, isSlur === 1 ? true : false);
+			function createNote(id, octave, nodeName, noteOptions) {
+				return new Node(findInObject(options.nodes.types, id), options.tones.names[octave][nodeName], noteOptions);
 			}
 			function createRest(id) {
 				return new Node(findInObject(options.nodes.types.rest, id), options.tones.rest);
@@ -594,7 +760,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 					if(!noteInfo[1]) {
 						tact.addNode(createRest(noteInfo[0]));
 					} else {
-						tact.addNode(createNote(noteInfo[0], noteInfo[2] + octave, noteInfo[1], noteInfo[3], noteInfo[4]));
+						tact.addNode(createNote(noteInfo[0], noteInfo[2] + octave, noteInfo[1], noteInfo[3]));
 					}
 				});
 
@@ -634,10 +800,9 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 			tact.nodes.forEach(function (node) {
 				var exNode  = [
 					node.type.id,
-					node.tone.name,
-					node.tone.octav - ex[1][0],
-					node.isRemoveKey ? 1 : 0,
-					node.isSlur ? 1: 0
+					node.orgTone.name,
+					node.orgTone.octav - ex[1][0],
+					node.options
 				];
 				exTact[1].push(exNode);
 			});
@@ -682,10 +847,10 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 		var	gameController	= this;
 
 		if(tact === -1) {
-			gameController.SVGNotes.animateAbs(0, -505, 0);
+			gameController.SVGNotes.animateAbs(0, 0, 0);
 		} else {
 			gameController.getTactX(tact, function (x) {
-				gameController.SVGNotes.animateAbs(-x, -505, 0);
+				gameController.SVGNotes.animateAbs(-x, 0, 0);
 			});
 		}
 	};
@@ -694,7 +859,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 
 		gameController.getNoteX(note, function (noteX) {
 			gameController.getTactX(note.tact, function (tactX) {
-				gameController.SVGNotes.animateAbs(-(noteX + tactX), -505, 0);
+				gameController.SVGNotes.animateAbs(-(noteX + tactX), 0, 0);
 			});
 		});
 	};
@@ -761,7 +926,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 				tact.nodes.forEach(function (note) {
 					var	relWidth		= (750 / 4) * (gameController.game.speed / 60) * 0.1,
 
-						noteLeftPos		= note.svgElement.getX() - newPos + 20,
+						noteLeftPos		= note.svgElement.x - newPos + 20,
 						noteLeftPosRel	= noteLeftPos + relWidth,
 
 						noteRightPos	= noteLeftPos + note.type.length * that.defWidth,
@@ -952,6 +1117,10 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 
 		this.stopGame();
 
+		if(this.isEdit) {
+			this.moveToTact(this.edit.currentTact);
+			return;
+		}
 		if(L2P_global.kiddie_mode) {
 			return;
 		}

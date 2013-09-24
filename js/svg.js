@@ -64,8 +64,10 @@ define(function () {
 		}
 	};
 	SVGElement.prototype.setPos	= function (x, y) {
-		this.node.setAttributeNS(null, 'x', x);
-		this.node.setAttributeNS(null, 'y', y);
+		this.node.style.webkitTransform	= 'translate('+x+'px, '+y+'px)';
+
+		/*this.node.setAttributeNS(null, 'x', x);
+		this.node.setAttributeNS(null, 'y', y);*/
 
 		this.x	= x;
 		this.y	= y;
@@ -291,15 +293,15 @@ define(function () {
 		};
 	};
 	SVGElement.prototype.getAbsolutePos	= function () {
-		var BBox	= this.node.getBBox();
+		var BBox	= this.node.getBoundingClientRect();
 
 		return {
-			x:	BBox.x,
-			y:	BBox.y,
-			xr:	BBox.x + BBox.width,
-			yb:	BBox.y + BBox.height,
-			xc:	BBox.x + BBox.width / 2,
-			yc:	BBox.y + BBox.height / 2
+			x:	BBox.left,
+			y:	BBox.top,
+			xr:	BBox.right,
+			yb:	BBox.bottom,
+			xc:	BBox.left + BBox.width / 2,
+			yc:	BBox.top + BBox.height / 2
 		};
 	};
 	SVGElement.prototype.addClass	= function (className) {

@@ -7,6 +7,9 @@ body, div, p, span, td, a, button {
 	font-family: 'Open Sans', Verdana;
 	color :#FFF
 }
+body.modal-open {
+	margin-right: 0;
+}
 h2 {
 	font-size: 4vh;
 }
@@ -827,4 +830,46 @@ select:focus:invalid:focus {
   -webkit-box-shadow: 0 0 6px #f8b9b7;
      -moz-box-shadow: 0 0 6px #f8b9b7;
           box-shadow: 0 0 6px #f8b9b7;
+}
+
+
+svg rect,
+svg line,
+svg image,
+svg text,
+svg circle {
+	-webkit-transform-origin: 50% 50%;
+}
+svg .note {
+	-webkit-transform-origin-y: 84px;
+}
+svg .music-text {
+	font-family: 'Archivo Black';
+}
+#game_container_div svg {
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+.modal-edit table {
+	width: 100%;
+}
+.modal-edit td {
+	width: 33%;
+	text-align: center;
+}
+.modal-edit input[type="checkbox"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 40px;
+    border: 1px solid #000;
+    margin: 0;
+    text-align: center;
+}
+.modal-edit input[type="checkbox"]:after {
+    content: attr(data-text);
+}
+.modal-edit input[type="checkbox"]:checked {
+    background-color: #71C211;
 }

@@ -2,13 +2,13 @@ define(['game/options', 'fM'], function (options, fM) {
 	var	Game	= function (speed) {
 		this.defaultSpeed	= speed;
 		this.startOctave	= 4;
-		this.factor		= 1;
-		this.defWidth	= 750 * this.factor;
-		this.startPos	= options.leftMargin + this.defWidth;
-		this.tacts		= [];
-		this.running	= false;
-		this.frame		= -1;
-		this.length		= 0;
+		this.factor			= 1;
+		this.defWidth		= 750 * this.factor;
+		this.startPos		= options.leftMargin + this.defWidth;
+		this.tacts			= [];
+		this.running		= false;
+		this.frame			= -1;
+		this.length			= 0;
 		this.speed;
 		this.secPrNode;
 		this.startTime;
@@ -18,12 +18,12 @@ define(['game/options', 'fM'], function (options, fM) {
 		this.nodePlaying;
 		this.stopTimeout;
 		this.controller;
-		this.title		= '';
-		this.duration	= -1;
-		this.width		= -1;
+		this.title			= '';
+		this.duration		= -1;
+		this.width			= -1;
 
-		this.sharps		= {};
-		this.flats		= {};
+		this.sharps			= {};
+		this.flats			= {};
 
 		this.setSpeed(speed);
 	}
@@ -37,6 +37,7 @@ define(['game/options', 'fM'], function (options, fM) {
 		if(!this.running) {
 			this.speed		= speed;
 			this.secPrNode	= 60 / this.speed;
+			this.duration	= -1;
 		}
 	};
 	Game.prototype.addTact = function(tact) {
@@ -47,15 +48,41 @@ define(['game/options', 'fM'], function (options, fM) {
 		this.width	= -1;
 	};
 	Game.prototype.reset = function () {
+		var	isSlur	= false;
 		this.tacts.forEach(function (tact) {
 			tact.svgElement	= null;
 			tact.hasPlayed	= false;
 			tact.nodes.forEach(function (note) {
-				note.svgElement	= null;
-				note.hasPlayed  = false;
-				note.img        = note.type.img;
-				note.ticks		= [];
+				note.svgElement			= null;
+				note.hasPlayed  		= false;
+				note.img        		= note.type.img;
+				note.ticks				= [];
+				note.isSlur				= isSlur;
 				note.kiddieModeAccepted	= false;
+
+				if(note.is(options.noteOptions.slurstart)) {
+					isSlur	= true;
+				}
+				if(note.is(options.noteOptions.slurend)) {
+					isSlur	= false;
+				}
+			});
+		});
+	};
+	Game.prototype.softReset = function () {
+		var	isSlur	= false;
+		this.tacts.forEach(function (tact) {
+			tact.hasPlayed	= false;
+			tact.nodes.forEach(function (note) {
+				note.hasPlayed  		= false;
+				note.isSlur				= isSlur;
+
+				if(note.is(options.noteOptions.slurstart)) {
+					isSlur	= true;
+				}
+				if(note.is(options.noteOptions.slurend)) {
+					isSlur	= false;
+				}
 			});
 		});
 	};
@@ -91,8 +118,6 @@ define(['game/options', 'fM'], function (options, fM) {
 				duration	+= tact.type.nodes * that.secPrNode;
 			});
 
-			// console.log(this.secPrNode, duration);
-
 			this.duration	= duration;
 		}
 
@@ -120,7 +145,6 @@ define(['game/options', 'fM'], function (options, fM) {
 		} else {
 			this.nodePlaying.img = images.nodes[this.nodePlaying.type.name+'False'];
 		}
-		// console.log(this.nodePlaying.tone.hz, feq);
 	};
 
 	return Game;

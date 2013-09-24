@@ -363,7 +363,7 @@ function FindLoadFile(MySQLWrapper $oSql, $bReturn404 = false)
 			{
 				$oPathGame	= $oSql->SelectSingleObject('
 					SELECT
-						game.id		AS iGameID
+						games.id		AS iGameID
 					FROM
 						games
 					WHERE
@@ -371,6 +371,7 @@ function FindLoadFile(MySQLWrapper $oSql, $bReturn404 = false)
 					 &&	games.permlink	= "'.$oSql->RealEscape($strUsername).'"
 				');
 			}
+
 			$bPageLoaded = false;
 			if(!empty($oPathGame))
 			{

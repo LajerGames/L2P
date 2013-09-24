@@ -40,21 +40,23 @@ define(['jquery', 'game/options', 'game/note'], function ($, options, Node) {
 			if(node.type.isRest) {
 				return;
 			}
-			if(node.isRemoveKey) {
-				delete sharps[node.tone.name];
-				delete flats[node.tone.name];
+			node.tone	= node.orgTone;
+
+			if(node.is(options.noteOptions.removekey)) {
+				delete sharps[node.orgTone.name];
+				delete flats[node.orgTone.name];
 			} else {
 				if(node.isSharp) {
-					sharps[node.tone.name.substr(0,1)]	= true;
+					sharps[node.orgTone.name.substr(0,1)]	= true;
 				}
 				if(node.isFlat) {
-					flats[node.tone.name.substr(0,1)]	= true;
+					flats[node.orgTone.name.substr(0,1)]	= true;
 				}
-				if(!node.isSharp && sharps[node.tone.name]) {
-					node.tone	= options.tones.names[node.tone.octav][node.tone.name+'#'];
+				if(!node.isSharp && sharps[node.orgTone.name]) {
+					node.tone	= options.tones.names[node.orgTone.octav][node.orgTone.name+'#'];
 				}
-				if(!node.isFlat && flats[node.tone.name]) {
-					node.tone	= options.tones.names[node.tone.octav][node.tone.name+'b'];
+				if(!node.isFlat && flats[node.orgTone.name]) {
+					node.tone	= options.tones.names[node.orgTone.octav][node.orgTone.name+'b'];
 				}
 			}
 		});
