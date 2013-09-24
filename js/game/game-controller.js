@@ -74,7 +74,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 			connections.forEach(function (note, i) {
 				if(note.svgElement.y !== note1.svgElement.y + moveY) {
 					new SVGElement('line')
-						.setLine(note.svgElement.x + 25, note.svgElement.y + y, note.svgElement.x + 25, y1 + moveY)
+						.setLine(note.svgElement.x + 25, note.svgElement.y + y + (flipped ? -10 : 10), note.svgElement.x + 25, y1 + moveY)
 						.setStroke('#000', 2)
 						.appendTo(tact.svgElement.node);
 				}
@@ -382,6 +382,8 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 			lastSlur,
 			svgStartContainerPos	= 0;
 
+		this.game.updateJoins();
+
 		this.svgStartContainer.removeChildNodes();
 		options.svgStartContainerPosSharp.forEach(function (toneName) {
 			if(game.sharps[toneName]) {
@@ -683,7 +685,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 					}
 
 					// Insert joins
-					if(!note.is(noteopt.join) || connections.length >= 4) {
+					if(!note.is(noteopt.join) || connections.length >= tact.type.max) {
 						makeConnections(tact, connections);
 					}
 
@@ -738,7 +740,7 @@ define(['jquery', 'svg', 'game/options', 'fM', 'api', 'l2p', 'game/tick'], funct
 			}
 
 			function findInObject(obj, id) {
-				var valud;
+				var value;
 				for(name in obj) {
 					value = obj[name];
 					if(value.id === id) {

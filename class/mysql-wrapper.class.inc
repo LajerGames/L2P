@@ -13,12 +13,13 @@ class MySQLWrapper
 	}
 
 	/**
-	* A Select query is a normal T-Sql syntax
-	*
-	* @param string $strQuery
-	* @return resource $rResource
-	*/
-	public function Select($strQuery, $bPrint)
+	 * A Select query is a normal T-Sql syntax
+	 *
+	 * @param string $strQuery
+	 * @param bool   $bPrint
+	 * @return resource $rResource
+	 */
+	public function Select($strQuery, $bPrint = false)
 	{
 		if($bPrint)
 		{

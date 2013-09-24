@@ -111,6 +111,11 @@ class PageRenderer
             'server_time'		=> intval(microtime(true) * 1000)
 		);
 
+		if($_SESSION['UserObject']->is_god == 1)
+		{
+			$arrL2PGlobals['is_god']	= true;
+		}
+
 		return '
 		<!DOCTYPE html>
 		<html>

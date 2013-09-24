@@ -433,11 +433,24 @@ define(['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, 
 					// If we should edit
 					if(urlItems[3] === 'edit') {
 						L2P.create();
+					} else if(L2P_global.is_god) {
+						$(window)
+							.off('keyup', L2P.game_key)
+							.on('keyup', L2P.game_key);
 					}
 
 					if(callback) {
 						callback(L2P.gameController);
 					}
+				});
+			}
+		},
+		game_key:	function (e) {
+			if(e.altKey && e.ctrlKey && e.which === 69) {
+				$(window).off('keyup', L2P.game_key);
+
+				require(['fM'], function (fM) {
+					fM.link.navigate('/game/'+L2P.gameController.permlink+'/edit/');
 				});
 			}
 		},

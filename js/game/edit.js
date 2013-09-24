@@ -25,6 +25,7 @@ define(['jquery', 'game/note', 'game/tact', 'game/options', 'text!templates/info
 
 		this.setFocus(this.currentTact.nodes[0]);
 		this.gameController.moveToTact(0);
+		this.gameController.initView(true);
 
 		this.proxyOnKeyDown	= $.proxy(this.onKeyDown, this);
 
@@ -369,10 +370,6 @@ define(['jquery', 'game/note', 'game/tact', 'game/options', 'text!templates/info
 			case 70:	// f
 				e.preventDefault();
 				edit.setFlat();
-				break;
-			case 74:	// j
-				e.preventDefault();
-				edit.toggle(noteopt.join);
 				break;
 			case 76:	// l
 				e.preventDefault();

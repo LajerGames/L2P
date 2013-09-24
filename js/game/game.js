@@ -68,9 +68,12 @@ define(['game/options', 'fM'], function (options, fM) {
 				}
 			});
 		});
+
+		this.updateJoins();
 	};
 	Game.prototype.softReset = function () {
 		var	isSlur	= false;
+
 		this.tacts.forEach(function (tact) {
 			tact.hasPlayed	= false;
 			tact.nodes.forEach(function (note) {
@@ -82,6 +85,38 @@ define(['game/options', 'fM'], function (options, fM) {
 				}
 				if(note.is(options.noteOptions.slurend)) {
 					isSlur	= false;
+				}
+			});
+		});
+	};
+	Game.prototype.updateJoins	= function () {
+		var	join,
+			noteLength,
+			onSplit;
+
+		this.tacts.forEach(function (tact) {
+			join		= false;
+			noteLength	= 0;
+			onSplit		= 0;
+
+			tact.nodes.forEach(function (note) {
+				noteLength	+= note.length;
+
+				note.rm(options.noteOptions.join);
+
+				if(noteLength > tact.type.split[onSplit]) {
+					noteLength	-= tact.type.split[onSplit];
+					onSplit		+= 1;
+					join		= null;
+				}
+				if(note.length < 1/4 && !note.isRest) {
+					if(join) {
+						join.add(options.noteOptions.join);
+						note.add(options.noteOptions.join);
+					}
+					join	= note;
+				} else {
+					join	= null;
 				}
 			});
 		});

@@ -40,42 +40,54 @@ define(function () {
 					length:	1,
 					nodes:	4,
 					id:		1,
-					text:	'4/4'
+					text:	'4/4',
+					max:	4,
+					split:	[1/8 * 4, 1/8 * 4]
 				},
 				threeForth:	{
 					name:	'threeForth',
 					length:	3/4,
 					nodes:	3,
 					id:		2,
-					text:	'3/4'
+					text:	'3/4',
+					max:	3,
+					split:	[1/8 * 3, 1/8 * 3]
 				},
 				fiveForth:	{
 					name:	'fiveForth',
 					length:	5/4,
 					nodes:	5,
 					id:		3,
-					text:	'5/4'
+					text:	'5/4',
+					max:	4,
+					split:	[1/8 * 4, 1/8 * 4, 1/8 * 2]
 				},
 				sixForth:	{
 					name:	'sixForth',
 					length:	6/4,
 					nodes:	6,
 					id:		4,
-					text:	'6/4'
+					text:	'6/4',
+					max:	4,
+					split:	[1/8 * 4, 1/8 * 4, 1/8 * 4]
 				},
 				twoForth:	{
 					name:	'twoForth',
 					length:	2/4,
 					nodes:	2,
 					id:		5,
-					text:	'2/4'
+					text:	'2/4',
+					max:	4,
+					split:	[1/8 * 4]
 				},
 				twelveEights:	{
 					name:	'twelveEights',
 					length:	12/8,
 					nodes:	12,
 					id:		6,
-					text:	'12/8'
+					text:	'12/8',
+					max:	4,
+					split:	[1/8 * 4, 1/8 * 4, 1/8 * 4]
 				}
 			}
 		},

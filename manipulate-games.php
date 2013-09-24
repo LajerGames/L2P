@@ -13,20 +13,63 @@ while($oGames = mysqli_fetch_object($rGames))
     $iGameID    = $oGames->id;
     $arrGame    = json_decode($oGames->game);
 
-    foreach($arrGame[2] as $arrTacts)
+	$arrSlurStart	= null;
+	$arrSlurEnd		= null;
+
+    foreach($arrGame[2] as $iTactNo => $arrTacts)
     {
-        foreach($arrTacts[1] as $arrNote)
+        foreach($arrTacts[1] as $iNoteNo => $arrNote)
         {
             if($arrNote[1] !== null)
             {
-                $strStartingNote = $arrNote[1];
-                break;
+				$arrOptions	= array();
+				if($arrNote[3] == 1)
+				{
+					$arrOptions[]	= 0;
+				}
+
+				if($arrNote[4] == 1)
+				{
+					$arrSlurEnd	= array(
+						$iTactNo,
+						$iNoteNo
+					);
+					if($arrSlurStart)
+					{
+						$arrGame[2][$arrSlurStart[0]][1][$arrSlurStart[1]][3][]	= 1;
+						$arrSlurStart	= null;
+					}
+				}
+				else
+				{
+					if($arrSlurEnd)
+					{
+						$arrGame[2][$arrSlurEnd[0]][1][$arrSlurEnd[1]][3][]	= 2;
+						$arrSlurEnd	= null;
+					}
+					$arrSlurStart	= array(
+						$iTactNo,
+						$iNoteNo
+					);
+				}
+
+				$arrGame[2][$iTactNo][1][$iNoteNo]	= array(
+					$arrNote[0],
+					$arrNote[1],
+					$arrNote[2],
+					$arrOptions
+				);
             }
         }
-        break;
     }
 
-    $oSql->Update('games', array('start_tone' => $strStartingNote), $iGameID);
+	if($arrSlurEnd)
+	{
+		$arrGame[2][$arrSlurEnd[0]][1][$arrSlurEnd[1]][3][]	= 2;
+		$arrSlurEnd	= null;
+	}
+
+    $oSql->Update('games', array('game' => json_encode($arrGame)), $iGameID);
 }
 exit;
 // Now put game titles into the new language table
