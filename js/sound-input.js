@@ -138,7 +138,6 @@ define(['jquery', 'dsp', 'game/options', 'l2p'], function ($, dsp, options, L2P)
 			})
 		};
 
-		/*
 		countdown = L2P.countdown(0, [
 			{
 				text:	L2P_global.lang.game_permission_ask_initial,
@@ -185,7 +184,7 @@ define(['jquery', 'dsp', 'game/options', 'l2p'], function ($, dsp, options, L2P)
 				'microphone-permission'
 			]
 		});
-		*/
+		
 		return navigator.getUserMedia({
 			audio: true
 		}, success, error);

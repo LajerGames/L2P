@@ -9733,31 +9733,55 @@ define('game/options',[],function () {
 					name:	'quarter',
 					length:	1,
 					nodes:	4,
-					id:		1
+					id:		1,
+					text:	'4/4',
+					max:	4,
+					split:	[1/8 * 4, 1/8 * 4]
 				},
 				threeForth:	{
 					name:	'threeForth',
 					length:	3/4,
 					nodes:	3,
-					id:		2
+					id:		2,
+					text:	'3/4',
+					max:	3,
+					split:	[1/8 * 3, 1/8 * 3]
 				},
 				fiveForth:	{
 					name:	'fiveForth',
 					length:	5/4,
 					nodes:	5,
-					id:		3
+					id:		3,
+					text:	'5/4',
+					max:	4,
+					split:	[1/8 * 4, 1/8 * 4, 1/8 * 2]
 				},
 				sixForth:	{
 					name:	'sixForth',
 					length:	6/4,
 					nodes:	6,
-					id:		4
+					id:		4,
+					text:	'6/4',
+					max:	4,
+					split:	[1/8 * 4, 1/8 * 4, 1/8 * 4]
 				},
 				twoForth:	{
 					name:	'twoForth',
 					length:	2/4,
 					nodes:	2,
-					id:		5
+					id:		5,
+					text:	'2/4',
+					max:	4,
+					split:	[1/8 * 4]
+				},
+				twelveEights:	{
+					name:	'twelveEights',
+					length:	12/8,
+					nodes:	12,
+					id:		6,
+					text:	'12/8',
+					max:	4,
+					split:	[1/8 * 4, 1/8 * 4, 1/8 * 4]
 				}
 			}
 		},
@@ -9837,6 +9861,24 @@ define('game/options',[],function () {
 				},
 				rest:	{}
 			}
+		},
+		noteOptions:	{
+			removekey:		0,
+			slurstart:		1,
+			slurend:		2,
+			join:			3,
+			crescendo:		4,
+			decrescendo:	5,
+			thrill:			6,
+			staccato:		7,
+			fermata:		8,
+			triplets:		9,
+			mp:				10,
+			p:				11,
+			pp:				12,
+			mf:				13,
+			f:				14,
+			ff:				15
 		},
 		generateTones:	function () {
 			options.tones	= {
@@ -10034,8 +10076,10 @@ define('svg',[],function () {
 		}
 	};
 	SVGElement.prototype.setPos	= function (x, y) {
-		this.node.setAttributeNS(null, 'x', x);
-		this.node.setAttributeNS(null, 'y', y);
+		this.node.style.webkitTransform	= 'translate('+x+'px, '+y+'px)';
+
+		/*this.node.setAttributeNS(null, 'x', x);
+		this.node.setAttributeNS(null, 'y', y);*/
 
 		this.x	= x;
 		this.y	= y;
@@ -10261,15 +10305,15 @@ define('svg',[],function () {
 		};
 	};
 	SVGElement.prototype.getAbsolutePos	= function () {
-		var BBox	= this.node.getBBox();
+		var BBox	= this.node.getBoundingClientRect();
 
 		return {
-			x:	BBox.x,
-			y:	BBox.y,
-			xr:	BBox.x + BBox.width,
-			yb:	BBox.y + BBox.height,
-			xc:	BBox.x + BBox.width / 2,
-			yc:	BBox.y + BBox.height / 2
+			x:	BBox.left,
+			y:	BBox.top,
+			xr:	BBox.right,
+			yb:	BBox.bottom,
+			xc:	BBox.left + BBox.width / 2,
+			yc:	BBox.top + BBox.height / 2
 		};
 	};
 	SVGElement.prototype.addClass	= function (className) {
@@ -10326,13 +10370,13 @@ define('game/game',['game/options', 'fM'], function (options, fM) {
 	var	Game	= function (speed) {
 		this.defaultSpeed	= speed;
 		this.startOctave	= 4;
-		this.factor		= 1;
-		this.defWidth	= 750 * this.factor;
-		this.startPos	= options.leftMargin + this.defWidth;
-		this.tacts		= [];
-		this.running	= false;
-		this.frame		= -1;
-		this.length		= 0;
+		this.factor			= 1;
+		this.defWidth		= 750 * this.factor;
+		this.startPos		= options.leftMargin + this.defWidth;
+		this.tacts			= [];
+		this.running		= false;
+		this.frame			= -1;
+		this.length			= 0;
 		this.speed;
 		this.secPrNode;
 		this.startTime;
@@ -10342,12 +10386,12 @@ define('game/game',['game/options', 'fM'], function (options, fM) {
 		this.nodePlaying;
 		this.stopTimeout;
 		this.controller;
-		this.title		= '';
-		this.duration	= -1;
-		this.width		= -1;
+		this.title			= '';
+		this.duration		= -1;
+		this.width			= -1;
 
-		this.sharps		= {};
-		this.flats		= {};
+		this.sharps			= {};
+		this.flats			= {};
 
 		this.setSpeed(speed);
 	}
@@ -10361,6 +10405,7 @@ define('game/game',['game/options', 'fM'], function (options, fM) {
 		if(!this.running) {
 			this.speed		= speed;
 			this.secPrNode	= 60 / this.speed;
+			this.duration	= -1;
 		}
 	};
 	Game.prototype.addTact = function(tact) {
@@ -10371,15 +10416,76 @@ define('game/game',['game/options', 'fM'], function (options, fM) {
 		this.width	= -1;
 	};
 	Game.prototype.reset = function () {
+		var	isSlur	= false;
 		this.tacts.forEach(function (tact) {
 			tact.svgElement	= null;
 			tact.hasPlayed	= false;
 			tact.nodes.forEach(function (note) {
-				note.svgElement	= null;
-				note.hasPlayed  = false;
-				note.img        = note.type.img;
-				note.ticks		= [];
+				note.svgElement			= null;
+				note.hasPlayed  		= false;
+				note.img        		= note.type.img;
+				note.ticks				= [];
+				note.isSlur				= isSlur;
 				note.kiddieModeAccepted	= false;
+
+				if(note.is(options.noteOptions.slurstart)) {
+					isSlur	= true;
+				}
+				if(note.is(options.noteOptions.slurend)) {
+					isSlur	= false;
+				}
+			});
+		});
+
+		this.updateJoins();
+	};
+	Game.prototype.softReset = function () {
+		var	isSlur	= false;
+
+		this.tacts.forEach(function (tact) {
+			tact.hasPlayed	= false;
+			tact.nodes.forEach(function (note) {
+				note.hasPlayed  		= false;
+				note.isSlur				= isSlur;
+
+				if(note.is(options.noteOptions.slurstart)) {
+					isSlur	= true;
+				}
+				if(note.is(options.noteOptions.slurend)) {
+					isSlur	= false;
+				}
+			});
+		});
+	};
+	Game.prototype.updateJoins	= function () {
+		var	join,
+			noteLength,
+			onSplit;
+
+		this.tacts.forEach(function (tact) {
+			join		= false;
+			noteLength	= 0;
+			onSplit		= 0;
+
+			tact.nodes.forEach(function (note) {
+				noteLength	+= note.length;
+
+				note.rm(options.noteOptions.join);
+
+				if(noteLength > tact.type.split[onSplit]) {
+					noteLength	-= tact.type.split[onSplit];
+					onSplit		+= 1;
+					join		= null;
+				}
+				if(note.length < 1/4 && !note.isRest) {
+					if(join) {
+						join.add(options.noteOptions.join);
+						note.add(options.noteOptions.join);
+					}
+					join	= note;
+				} else {
+					join	= null;
+				}
 			});
 		});
 	};
@@ -10415,8 +10521,6 @@ define('game/game',['game/options', 'fM'], function (options, fM) {
 				duration	+= tact.type.nodes * that.secPrNode;
 			});
 
-			// console.log(this.secPrNode, duration);
-
 			this.duration	= duration;
 		}
 
@@ -10444,103 +10548,148 @@ define('game/game',['game/options', 'fM'], function (options, fM) {
 		} else {
 			this.nodePlaying.img = images.nodes[this.nodePlaying.type.name+'False'];
 		}
-		// console.log(this.nodePlaying.tone.hz, feq);
 	};
 
 	return Game;
 });
 define('game/note',[],function() {
-	var Note = (function () {
-		var	steps	= [
-			{
-				percent:	95,
-				factor:		1,
-				text:		'Perfect',
-				color:		'#090'
-			},
-			{
-				percent:	80,
-				factor:		0.95,
-				text:		'Good',
-				color:		'#0D0'
-			},
-			{
-				percent:	60,
-				factor:		0.9,
-				text:		'Fair',
-				color:		'#FF0'
-			},
-			{
-				percent:	45,
-				factor:		0.8,
-				text:		'Average',
-				color:		'#990'
-			},
-			{
-				percent:	30,
-				factor:		0.65,
-				text:		'Poor',
-				color:		'#F90'
-			},
-			{
-				percent:	10,
-				factor:		0.65,
-				text:		'Rubbish',
-				color:		'#C60'
-			},
-			{
-				percent:	0,
-				factor:		0.65,
-				text:		'Miserable',
-				color:		'#900'
-			}
-		];
-		function Note(type, tone, isRemoveKey, isSlur) {
-			if (typeof isRemoveKey === "undefined") { isRemoveKey = false; }
-			if (typeof isSlur === "undefined") { isSlur = false; }
-			this.type			= type;
-			this.tone			= tone;
-			this.isRemoveKey	= isRemoveKey;
-			this.isSlur			= isSlur;
-			this.hasPlayed		= false;
-			this.length			= this.type.length;
-			this.img			= this.type.img;
-			this.isSharp		= this.tone.name && this.tone.name.substr(1) === '#';
-			this.isFlat			= this.tone.name && this.tone.name.substr(1) === 'b';
-			this.isPeriod		= this.type.name.indexOf('Period') !== -1;
-			this.isRest 		= this.type.isRest;
-			this.ticks			= [];
-			this.stepPercent	= 0;
-			this.stepFactor;
-			this.points			= 0;
-			this.kiddieModeAccepted	= false;
-			this.isFocus		= false;
+	var	steps	= [
+		{
+			percent:	95,
+			factor:		1,
+			text:		'Perfect',
+			color:		'#090'
+		},
+		{
+			percent:	80,
+			factor:		0.95,
+			text:		'Good',
+			color:		'#0D0'
+		},
+		{
+			percent:	60,
+			factor:		0.9,
+			text:		'Fair',
+			color:		'#FF0'
+		},
+		{
+			percent:	45,
+			factor:		0.8,
+			text:		'Average',
+			color:		'#990'
+		},
+		{
+			percent:	30,
+			factor:		0.65,
+			text:		'Poor',
+			color:		'#F90'
+		},
+		{
+			percent:	10,
+			factor:		0.65,
+			text:		'Rubbish',
+			color:		'#C60'
+		},
+		{
+			percent:	0,
+			factor:		0.65,
+			text:		'Miserable',
+			color:		'#900'
 		}
-		Note.prototype.calculatePoints	= function (gameController) {
-			var	that			= this,
-				totalPercent	= 0,
-				speedFactor		= 1 + (gameController.game.speed - gameController.game.defaultSpeed) / 200,
-				factor;
+	];
+	function Note(type, tone, noteOptions) {
+		noteOptions	= noteOptions || [];
 
-			this.ticks.forEach(function (tick) {
-				totalPercent	+= Math.max(tick.percent, 0);
-			});
+		this.type			= type;
+		this.tone			= tone;
+		this.orgTone		= this.tone;
+		this.options		= noteOptions;
+		this.isRemoveKey	= noteOptions.indexOf(0) !== -1;
+		this.hasPlayed		= false;
+		this.length			= this.type.length;
+		this.img			= this.type.img;
+		this.isSharp		= this.tone.name && this.tone.name.substr(1) === '#';
+		this.isFlat			= this.tone.name && this.tone.name.substr(1) === 'b';
+		this.isPeriod		= this.type.name.indexOf('Period') !== -1;
+		this.isRest 		= this.type.isRest;
+		this.isSlur			= false;
+		this.ticks			= [];
+		this.stepPercent	= 0;
+		this.stepFactor;
+		this.points			= 0;
+		this.kiddieModeAccepted	= false;
+		this.isFocus		= false;
+	}
+	Note.prototype.is		= function (i) {
+		return this.options.indexOf(i) !== -1;
+	};
+	Note.prototype.add		= function (id) {
+		if(!this.is(id)) {
+			this.options.push(id);
 
-			this.stepPercent	= totalPercent / this.ticks.length;
+			return true;
+		}
 
-			steps.forEach(function (step) {
-				if(!that.stepFactor && that.stepPercent >= step.percent) {
-					that.stepFactor	= step;
-				}
-			});
+		return false;
+	};
+	Note.prototype.rm		= function (id) {
+		if(this.is(id)) {
+			this.options.splice(this.options.indexOf(id), 1);
 
-			factor	= this.stepFactor && this.stepFactor.factor || 0;
+			return true;
+		}
 
-			this.points	= +((this.stepPercent * 100).toFixed(0) * factor * speedFactor * this.type.factor * 0.1).toFixed(0) || 0;
-			$(gameController).trigger('notePoints', [this]);
-		};
-		return Note;
-	})();
+		return false;
+	};
+	Note.prototype.toggle	= function (id) {
+		if(this.is(id)) {
+			this.rm(id);
+		} else {
+			this.add(id);
+		}
+
+		return this;
+	};
+	Note.prototype.calculatePoints	= function (gameController) {
+		var	that			= this,
+			totalPercent	= 0,
+			speedFactor		= 1 + (gameController.game.speed - gameController.game.defaultSpeed) / 200,
+			factor;
+
+		this.ticks.forEach(function (tick) {
+			totalPercent	+= Math.max(tick.percent, 0);
+		});
+
+		this.stepPercent	= totalPercent / this.ticks.length;
+
+		steps.forEach(function (step) {
+			if(!that.stepFactor && that.stepPercent >= step.percent) {
+				that.stepFactor	= step;
+			}
+		});
+
+		factor	= this.stepFactor && this.stepFactor.factor || 0;
+
+		this.points	= +((this.stepPercent * 100).toFixed(0) * factor * speedFactor * this.type.factor * 0.1).toFixed(0) || 0;
+		$(gameController).trigger('notePoints', [this]);
+	};
+	Note.prototype.setThisFocus	= function () {
+		this.isFocus	= true;
+		if(this.svgElement) {
+			this.svgElement.setLink(this.svgElement.link.href.substr(0, this.svgElement.link.href.length - 4) + '-green.svg');
+		}
+
+		return this;
+	};
+	Note.prototype.unsetThisFocus	= function () {
+		this.isFocus	= false;
+		if(this.svgElement) {
+			this.svgElement.setLink(this.svgElement.link.href.replace('-green', ''));
+		}
+
+		return this;
+	};
+
 	return Note;
 });
 
@@ -10586,21 +10735,23 @@ define('game/tact',['jquery', 'game/options', 'game/note'], function ($, options
 			if(node.type.isRest) {
 				return;
 			}
-			if(node.isRemoveKey) {
-				delete sharps[node.tone.name];
-				delete flats[node.tone.name];
+			node.tone	= node.orgTone;
+
+			if(node.is(options.noteOptions.removekey)) {
+				delete sharps[node.orgTone.name];
+				delete flats[node.orgTone.name];
 			} else {
 				if(node.isSharp) {
-					sharps[node.tone.name.substr(0,1)]	= true;
+					sharps[node.orgTone.name.substr(0,1)]	= true;
 				}
 				if(node.isFlat) {
-					flats[node.tone.name.substr(0,1)]	= true;
+					flats[node.orgTone.name.substr(0,1)]	= true;
 				}
-				if(!node.isSharp && sharps[node.tone.name]) {
-					node.tone	= options.tones.names[node.tone.octav][node.tone.name+'#'];
+				if(!node.isSharp && sharps[node.orgTone.name]) {
+					node.tone	= options.tones.names[node.orgTone.octav][node.orgTone.name+'#'];
 				}
-				if(!node.isFlat && flats[node.tone.name]) {
-					node.tone	= options.tones.names[node.tone.octav][node.tone.name+'b'];
+				if(!node.isFlat && flats[node.orgTone.name]) {
+					node.tone	= options.tones.names[node.orgTone.octav][node.orgTone.name+'b'];
 				}
 			}
 		});
@@ -10637,7 +10788,11 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 		if(note.isRest) {
 			path	+= note.type.name.substr(4, 1).toLowerCase() + note.type.name.substr(5) + 'rest';
 		} else if(note.isPeriod) {
-			path	+= note.type.name.substr(0, note.type.name.length - 6) + 'note-period';
+			if(connect) {
+				path	+= 'quarternote';
+			} else {
+				path	+= note.type.name.substr(0, note.type.name.length - 6) + 'note';
+			}
 		} else {
 			if(connect) {
 				path	+= 'quarternote';
@@ -10658,14 +10813,87 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 		return path + colorName + options.gameImageType;
 	}
 	function flipNote(note) {
-		note.svgElement.setPos(note.svgElement.getX(), -175 - note.svgElement.getY() + 2 * 4);
-		note.svgElement.node.style.webkitTransform	= 'scaleY(-1)';
+		note.svgElement.node.style.webkitTransform	+= ' scaleY(-1)';
 		note.svgElement.options.flip				= true;
 	}
-	function unFlipNote(note) {
-		note.svgElement.setPos(note.svgElement.getX(), note.svgElement.options.defY);
-		note.svgElement.node.style.webkitTransform	= 'scaleY(1)';
-		note.svgElement.options.flip				= false;
+	function makeConnections(tact, connections) {
+		if(connections.length > 0) {
+			var	note1	= connections[0],
+				note2	= connections[connections.length - 1],
+
+				flipped	= note1.svgElement.options.flip,
+
+				y		= (flipped ? 2 * 84 : 16 + 2) - 8,
+
+				y1		= note1.svgElement.y + y,
+
+				x1		= note1.svgElement.x + 25 - 1,
+				x2		= note2.svgElement.x + 25 + 1,
+
+				deltaX	= x2 - x1,
+
+				moveY	= 0,
+				lastNote;
+
+			connections.forEach(function (note) {
+				var	diffY	= note1.svgElement.y - note.svgElement.y;
+
+				if(flipped && diffY < 0 && diffY < -moveY) {
+					moveY	= -diffY;
+				} else if(!flipped && diffY > 0 && diffY > -moveY) {
+					moveY	= -diffY;
+				}
+			});
+
+			new	SVGElement('line')
+				.setRef(connections)
+				.setLine(x1, y1 + moveY, x2, y1 + moveY)
+				.setStroke('#000', 5)
+				.appendTo(tact.svgElement.node);
+
+			connections.forEach(function (note, i) {
+				if(note.svgElement.y !== note1.svgElement.y + moveY) {
+					new SVGElement('line')
+						.setLine(note.svgElement.x + 25, note.svgElement.y + y + (flipped ? -10 : 10), note.svgElement.x + 25, y1 + moveY)
+						.setStroke('#000', 2)
+						.appendTo(tact.svgElement.node);
+				}
+
+				if(note.type.length <= 1/16 * 1.5) {
+					if(lastNote && lastNote.type.length <= 1/16 * 1.5) {
+						new	SVGElement('line')
+							.setRef(connections)
+							.setLine(lastNote.svgElement.x + 24, y1 + moveY + (flipped ? -10 : 10), note.svgElement.x + 26, y1 + moveY + (flipped ? -10 : 10))
+							.setStroke('#000', 5)
+							.appendTo(tact.svgElement.node);
+					} else if(lastNote && i === connections.length - 1) {
+						new	SVGElement('line')
+							.setRef(connections)
+							.setLine(note.svgElement.x + 4, y1 + moveY + (flipped ? -10 : 10), note.svgElement.x + 26, y1 + moveY + (flipped ? -10 : 10))
+							.setStroke('#000', 5)
+							.appendTo(tact.svgElement.node);
+					}
+				} else if(lastNote && lastNote.type.length <= 1/16 * 1.5) {
+					if(i === 1) {
+						new	SVGElement('line')
+							.setRef(connections)
+							.setLine(lastNote.svgElement.x + 25, y1 + moveY + (flipped ? -10 : 10), lastNote.svgElement.x + 2 * 25 - 4, y1 + moveY + (flipped ? -10 : 10))
+							.setStroke('#000', 5)
+							.appendTo(tact.svgElement.node);
+					} else {
+						new	SVGElement('line')
+							.setRef(connections)
+							.setLine(lastNote.svgElement.x + 4, y1 + moveY + (flipped ? -10 : 10), lastNote.svgElement.x + 26, y1 + moveY + (flipped ? -10 : 10))
+							.setStroke('#000', 5)
+							.appendTo(tact.svgElement.node);
+					}
+				}
+
+				lastNote	= note;
+			});
+
+			connections.splice(0);
+		}
 	}
 
 	var	GameController	= function (svg) {
@@ -10787,7 +11015,7 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 		// console.log(this.game);
 		this.game.reset();
 
-		this.SVGNotes.animateAbs(0, -505, 0);
+		this.SVGNotes.animateAbs(0, 0, 0);
 
 		// console.log('reset-pos', this.SVGNotes.node.style.webkitTransition, this.SVGNotes.node.style.webkitTransform);
 		this.initView();
@@ -10799,6 +11027,7 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 			firstNote;
 
 		if(this.game) {
+			this.game.softReset();
 			this.game.tacts.forEach(function (tact) {
 				if(firstNote) {
 					return;
@@ -10857,7 +11086,7 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 
 		gameController.SVGNotes.node.style.width	= (totalWidth + gameController.defWidth / 4)+'px';
 
-		gameController.SVGNotes.animateAbs(-totalWidth, -505, relativeDuration, this.gameDone.bind(this));
+		gameController.SVGNotes.animateAbs(-totalWidth, 0, relativeDuration, this.gameDone.bind(this));
 
 		$(gameController.svgLine.node).on('webkitAnimationEnd', function () {
 			gameController.svgLine.node.classList.remove('pulse');
@@ -10888,9 +11117,9 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 	};
 	GameController.prototype.pauseGame	= function () {
 		if(L2P_global.kiddie_mode) {
-			this.SVGNotes.animateAbs(-this.currentLeft() + 30, -505, 0);
+			this.SVGNotes.animateAbs(-this.currentLeft() + 30, 0, 0);
 		} else {
-			this.SVGNotes.animateAbs((-Math.floor(this.currentLeft() / (this.defWidth / 4)) + 0.5) * (this.defWidth / 4) - 20, -505, 0);
+			this.SVGNotes.animateAbs((-Math.floor(this.currentLeft() / (this.defWidth / 4)) + 0.5) * (this.defWidth / 4) - 20, 0, 0);
 		}
 		this.paused	= true;
 	};
@@ -10907,32 +11136,33 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 		}
 	};
 	GameController.prototype.drawSlur	= function (from, to) {
-		var	fromPos	= from.svgElement.getAbsolutePos(),
-			toPos	= to.svgElement.getAbsolutePos();
+		var	fromX	= options.noteSlurPos.x + from.svgElement.x + 25,
+			fromY	= options.noteSlurPos.y + from.svgElement.y + 84 + (from.svgElement.options.flip ? -16 : 16),
 
-		if(from.svgElement.options.flip && !to.svgElement.options.flip) {
-			fromPos.yc	= -fromPos.yc - 45;
-		}
+			deltaX	= to.svgElement.x - from.svgElement.x,
+			deltaY	= to.svgElement.y - from.svgElement.y;
 
 		var	slur	=
 			new SVGElement('path')
-				.setPath('M '+(fromPos.xc + options.noteSlurPos.x)+' '+(fromPos.yb + options.noteSlurPos.y)+' q '+((toPos.xc - fromPos.xc) / 2)+' '+options.noteSlurPos.z+' '+(toPos.xc - fromPos.xc)+' '+(toPos.yc - fromPos.yc))
+				.setPath('M '+fromX+' '+fromY+' q '+(deltaX / 2)+' '+(options.noteSlurPos.z * (from.svgElement.options.flip ? -1 : 1))+' '+deltaX+' '+deltaY)
 				.setStroke('#000', 2)
 				.setFill('none')
 				.appendTo(from.tact.svgElement.node);
-
-		if(from.svgElement.options.flip) {
-			slur.node.style.webkitTransform			= 'scaleY(-1)';
-		}
 	};
 	GameController.prototype.initView	= function (dontResetPos) {
-		var	that		= this,
+		this.initViewSheet(dontResetPos);
+	};
+	GameController.prototype.initViewSheet	= function (dontResetPos) {
+		var	that			= this,
 			gameController	= this,
-			game		= this.game,
-			tactLeftPos	= 0,
+			game			= this.game,
+			tactLeftPos		= 0,
+			noteopt			= options.noteOptions,
 			firstSlur,
 			lastSlur,
 			svgStartContainerPos	= 0;
+
+		this.game.updateJoins();
 
 		this.svgStartContainer.removeChildNodes();
 		options.svgStartContainerPosSharp.forEach(function (toneName) {
@@ -10957,7 +11187,7 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 		});
 
 		if(dontResetPos !== true) {
-			this.SVGNotes.animateAbs(0, -505, 0);
+			this.SVGNotes.animateAbs(0, 0, 0);
 		}
 		this.SVGNotes.removeChildNodes();
 
@@ -10982,12 +11212,15 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 		}
 
 		if(this.game) {
-			var	lastNote;
-			this.game.tacts.forEach(function (tact) {
+			var	lastTact,
+				lastNote,
+				slurNote,
+				crescendoStartNote,
+				decrescendoStartNote;
+			this.game.tacts.forEach(function (tact, tactNo) {
 				var tactWidth	= tact.type.length * that.defWidth,
 					tactPos		= that.startPos + tactLeftPos,
 					noteLeftPos	= 0,
-					lastNote	= null,
 					noteTime	= 0,
 					connections	= [];
 
@@ -10999,163 +11232,249 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 					.setStroke('#000', 2)
 					.appendTo(tact.svgElement.node);
 
+				if(!lastTact || lastTact.type.id !== tact.type.id) {
+					var	texts	= tact.type.text.split('/');
+
+					new	SVGElement('text')
+						.setInnerText(texts[0], 36, 'bold')
+						.setPos(tactPos - 15, 401 - 13)
+						.addClass('music-text')
+						.appendTo(tact.svgElement.node);
+					new	SVGElement('text')
+						.setInnerText(texts[1], 36, 'bold')
+						.setPos(tactPos - 15, 401 + 13)
+						.addClass('music-text')
+						.appendTo(tact.svgElement.node);
+				}
+				if(gameController.isEdit) {
+					new	SVGElement('text')
+						.setInnerText(tactNo + 1, 20)
+						.setPos(tactPos, 50 + options.topPos)
+						.appendTo(tact.svgElement.node);
+				}
+
 				tact.nodes.forEach(function (note) {
 					var noteWidth	= note.type.length * that.defWidth,
 						notePos		= tactPos + that.defWidth / 16 + noteLeftPos - 20,
 						tonePos 	= (note.tone.pos + 11) * options.lineHeight / 2 + 4,
-						connect		= false;
-
-					noteTime	+= note.type.length;
+						connect		= note.is(noteopt.join);
 
 					noteLeftPos	+= noteWidth;
-					svgElement	= null;
 
-					if(note.type.img) {
-						if(note.length <= 1/8 && !note.isRest) {
-							connections.push(note);
+					note.svgElement	=
+						new SVGElement(options.gameImageNodeType)
+							.setRef(note)
+							.setLink('/'+getImagePath(note, connect, coloredNotes, note.isFocus ? '-green' : ''))
+							.setPos(notePos, tonePos)
+							.setDimensions(50, 100)
+							.addClass('note')
+							.appendTo(tact.svgElement.node);
+
+					if(note.isSharp || note.isFlat || note.is(noteopt.removekey)) {
+						var	text	= '',
+							y		= 95;
+						if(note.isSharp) {
+							text	= '\u266F';
+						} else if(note.isFlat) {
+							text	= '\u266D';
+							y		= 90;
+						} else if(note.is(noteopt.removekey)) {
+							text	= '\u266E';
 						}
+						new SVGElement('text')
+							.setInnerText(text, 36, 'bold')
+							.setPos(notePos - 22, tonePos + y)
+							.appendTo(tact.svgElement.node);
+					}
+					if(note.isPeriod) {
+						new	SVGElement('circle')
+							.setCircle(notePos + 25 + 10, tonePos + 84, 3)
+							.appendTo(tact.svgElement.node);
+					}
 
-						note.svgElement	= new SVGElement(options.gameImageNodeType)
-											.setRef(note)
-											.setLink('/'+getImagePath(note, connect, coloredNotes, note.isFocus ? '-green' : ''))
-											.setPos(notePos, tonePos)
-											.setDimensions(50, 100)
-											.appendTo(tact.svgElement.node);
-
-						note.svgElement.options.defY	= tonePos;
-
-						if(note.isSharp || note.isFlat || note.isRemoveKey) {
-							var	text	= '',
-								y		= 95;
-							if(note.isSharp) {
-								text	= '\u266F';
-							} else if(note.isFlat) {
-								text	= '\u266D';
-								y		= 90;
-							} else if(note.isRemoveKey) {
-								text	= '\u266E';
-							}
-							new SVGElement('text')
-								.setInnerText(text, 36, 'bold')
-								.setPos(notePos - 25, tonePos + y)
-								.appendTo(tact.svgElement.node);
+					if(note.is(noteopt.join) && connections.length > 0) {
+						if(connections[0].svgElement.options.flip) {
+							flipNote(note);
 						}
-						if(note.isPeriod) {
-							new	SVGElement('circle')
-								.setCircle(notePos + 25 + 10, tonePos + 90 - 8, 3)
-								.appendTo(tact.svgElement.node);
-								/*
-							new SVGElement('text')
-								.setInnerText('◘', 36, 'bold')
-								.setPos(notePos + 25, tonePos + 90)
-								.appendTo(tact.svgElement.node);*/
-						}
-
+					} else {
 						if(note.tone.pos <= 0) {
 							flipNote(note);
 						}
+					}
 
-						var	extraLine;
+					// Extra Lines
+					(function () {
+						var	extraLine,
+							y;
 						for(extraLine = -6; extraLine >= note.tone.pos; extraLine -= 2) {
-							var	y	= options.topPos + (extraLine / 2 + 5) * options.lineHeight;
+							y	= options.topPos + (extraLine / 2 + 5) * options.lineHeight;
 							new SVGElement('line')
 								.setLine(notePos - 5, y, notePos + 32, y)
 								.setStroke('#000')
 								.appendTo(tact.svgElement.node)
 						}
+
 						for(extraLine = 6; extraLine <= note.tone.pos; extraLine += 2) {
-							var	y	= options.topPos + (extraLine / 2 + 5) * options.lineHeight;
+							y	= options.topPos + (extraLine / 2 + 5) * options.lineHeight;
 							new SVGElement('line')
 								.setLine(notePos - 5, y, notePos + 32, y)
 								.setStroke('#000')
 								.appendTo(tact.svgElement.node)
 						}
-					}
-					if(note.isSlur) {
-						lastSlur	= note;
-					} else {
-						if(lastSlur) {
-							that.drawSlur(firstSlur, lastSlur);
-							lastSlur	= null;
+					}());
+
+					if(note.is(noteopt.slurend)) {
+						if(slurNote) {
+							that.drawSlur(slurNote, note);
+							slurNote	= null;
 						}
-						firstSlur	= note;
+					}
+					if(note.is(noteopt.slurstart)) {
+						slurNote	= note;
 					}
 
-					while(noteTime >= 1/4) {
-						if(connections.length > 1) {
-							(function (connections) {
-								var	first	= connections[0],
-									last	= connections[connections.length - 1],
-									flip	= first.svgElement.options.flip;
+					if(note.is(noteopt.join)) {
+						connections.push(note);
+					}
 
-								connections.forEach(function (note) {
-									note.svgElement.setLink('/'+getImagePath(note, true, coloredNotes, note.isFocus ? '-green' : ''));
-									if(note !== first) {
-										if(flip && !note.svgElement.options.flip) {
-											flipNote(note);
-										} else if(!flip && note.svgElement.options.flip) {
-											unFlipNote(note);
-										}
-									}
-								});
-
-								var	y1		= first.svgElement.options.defY + 11 + (flip ? 147 : 0),
-									y2		= last.svgElement.options.defY + 11 + (flip ? 147 : 0),
-									x		= last.length - first.length,
-									a		= (y2 - y1) / x,
-									moveY	= 0;
-
-								if(connections.length > 2) {
-									var	notePos		= 0 - first.length;
-									connections.forEach(function (note) {
-										var	realY	= note.svgElement.options.defY + 11 + (flip ? 147 : 0),
-											diffY	= y1 - realY;
-
-										if(flip && diffY < 0 && diffY < -moveY) {
-											moveY	= -diffY;
-										} else if(!flip && diffY > 0 && diffY > -moveY) {
-											moveY	= -diffY;
-										}
-
-										notePos	+= note.length;
-									});
-
-									connections.forEach(function (note) {
-										if(note.svgElement.getY() !== y1 + moveY) {
-											new SVGElement('line')
-												.setLine(note.svgElement.getX() + 25, note.svgElement.options.defY + 11 + (flip ? 147 : 0), note.svgElement.getX() + 25, y1 + moveY)
-												.setStroke('#000', 2)
-												.appendTo(tact.svgElement.node);
-										}
-									});
-
-									y2	= y1;
-								}
-
-								var	lastNote	= null;
-								connections.forEach(function (note) {
-									if(lastNote) {
-										if(lastNote.length === 1/16 && note.length === 1/16) {
-											new	SVGElement('line')
-												.setRef(connections)
-												.setLine(lastNote.svgElement.getX() + 24, y1 + moveY + (flip ? -10 : +10), note.svgElement.getX() + 26, y2 + moveY + (flip ? -10 : +10))
-												.setStroke('#000', 5)
-												.appendTo(tact.svgElement.node);
-										}
-										new	SVGElement('line')
-											.setRef(connections)
-											.setLine(lastNote.svgElement.getX() + 24, y1 + moveY, note.svgElement.getX() + 26, y2 + moveY)
-											.setStroke('#000', 5)
-											.appendTo(tact.svgElement.node);
-									}
-									lastNote	= note;
-								});
-							}(connections));
+					if(note.is(noteopt.crescendo)) {
+						if(!crescendoStartNote) {
+							crescendoStartNote	= note;
 						}
-						connections	= [];
-						noteTime	-= 1/4;
 					}
+					else if(crescendoStartNote) {
+						var	x1	= crescendoStartNote.svgElement.x,
+							x2	= lastNote.svgElement.x + lastNote.length * that.defWidth - 10,
+							y	= 390;
+
+						new	SVGElement('line')
+							.setLine(x1, y, x2, y - 10)
+							.setStroke('#000', 2)
+							.appendTo(crescendoStartNote.tact.svgElement.node);
+
+						new	SVGElement('line')
+							.setLine(x1, y, x2, y + 10)
+							.setStroke('#000', 2)
+							.appendTo(crescendoStartNote.tact.svgElement.node);
+
+						crescendoStartNote	= null;
+					}
+
+					if(note.is(noteopt.decrescendo)) {
+						if(!decrescendoStartNote) {
+							decrescendoStartNote	= note;
+						}
+					}
+					else if(decrescendoStartNote) {
+						var	x1	= decrescendoStartNote.svgElement.x,
+							x2	= lastNote.svgElement.x + lastNote.length * that.defWidth - 10,
+							y	= 390;
+
+						new	SVGElement('line')
+							.setLine(x1, y - 10, x2, y)
+							.setStroke('#000', 2)
+							.appendTo(decrescendoStartNote.tact.svgElement.node);
+
+						new	SVGElement('line')
+							.setLine(x1, y + 10, x2, y)
+							.setStroke('#000', 2)
+							.appendTo(decrescendoStartNote.tact.svgElement.node);
+
+						decrescendoStartNote	= null;
+					}
+
+					if(note.is(noteopt.mf)) {
+						new	SVGElement('image')
+							.setLink('/img/game/mezzo.svg')
+							.setPos(note.svgElement.x - 28, 390 - 55 / 2 + 10)
+							.setDimensions(50, 45)
+							.appendTo(tact.svgElement.node);
+						new	SVGElement('image')
+							.setLink('/img/game/forte.svg')
+							.setPos(note.svgElement.x + 10, 390 - 55 / 2)
+							.setDimensions(41, 55)
+							.appendTo(tact.svgElement.node);
+					}
+					if(note.is(noteopt.f)) {
+						new	SVGElement('image')
+							.setLink('/img/game/forte.svg')
+							.setPos(note.svgElement.x, 390 - 55 / 2)
+							.setDimensions(41, 55)
+							.appendTo(tact.svgElement.node);
+					}
+					if(note.is(noteopt.ff)) {
+						new	SVGElement('image')
+							.setLink('/img/game/forte.svg')
+							.setPos(note.svgElement.x - 10, 390 - 55 / 2)
+							.setDimensions(41, 55)
+							.appendTo(tact.svgElement.node);
+						new	SVGElement('image')
+							.setLink('/img/game/forte.svg')
+							.setPos(note.svgElement.x + 10, 390 - 55 / 2)
+							.setDimensions(41, 55)
+							.appendTo(tact.svgElement.node);
+					}
+					if(note.is(noteopt.mp)) {
+						new	SVGElement('image')
+							.setLink('/img/game/mezzo.svg')
+							.setPos(note.svgElement.x - 25, 390 - 55 / 2 + 10)
+							.setDimensions(50, 45)
+							.appendTo(tact.svgElement.node);
+						new	SVGElement('image')
+							.setLink('/img/game/piano.svg')
+							.setPos(note.svgElement.x + 13, 390 - 55 / 2 + 9)
+							.setDimensions(41, 45)
+							.appendTo(tact.svgElement.node);
+					}
+					if(note.is(noteopt.p)) {
+						new	SVGElement('image')
+							.setLink('/img/game/piano.svg')
+							.setPos(note.svgElement.x, 390 - 55 / 2 + 9)
+							.setDimensions(41, 45)
+							.appendTo(tact.svgElement.node);
+					}
+					if(note.is(noteopt.pp)) {
+						new	SVGElement('image')
+							.setLink('/img/game/piano.svg')
+							.setPos(note.svgElement.x - 11, 390 - 55 / 2 + 9)
+							.setDimensions(41, 45)
+							.appendTo(tact.svgElement.node);
+						new	SVGElement('image')
+							.setLink('/img/game/piano.svg')
+							.setPos(note.svgElement.x + 11, 390 - 55 / 2 + 9)
+							.setDimensions(41, 45)
+							.appendTo(tact.svgElement.node);
+					}
+
+					if(note.is(noteopt.staccato)) {
+						new	SVGElement('circle')
+							.setCircle(note.svgElement.x + 15, note.svgElement.y + 100 + (note.svgElement.options.flip ? -35 : 3), 3)
+							.appendTo(tact.svgElement.node);
+					}
+					if(note.is(noteopt.fermata)) {
+						var	fermataY	= note.svgElement.y + (note.svgElement.options.flip ? 45 : -17.5);
+						if(fermataY > 149) {
+							fermataY	= 149;
+						}
+
+						new	SVGElement('image')
+							.setLink('/img/game/fermata.svg')
+							.setPos(note.svgElement.x - 3.75, fermataY)
+							.setDimensions(32.5, 17.5)
+							.appendTo(tact.svgElement.node);
+					}
+
+					// Insert joins
+					if(!note.is(noteopt.join) || connections.length >= tact.type.max) {
+						makeConnections(tact, connections);
+					}
+
+					lastNote	= note;
 				});
+
+				makeConnections(tact, connections);
+
+				lastTact	= tact;
 			});
 		}
 
@@ -11201,7 +11520,7 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 			}
 
 			function findInObject(obj, id) {
-				var valud;
+				var value;
 				for(name in obj) {
 					value = obj[name];
 					if(value.id === id) {
@@ -11210,8 +11529,8 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 				}
 			}
 
-			function createNote(id, octave, nodeName, isRemoveKey, isSlur) {
-				return new Node(findInObject(options.nodes.types, id), options.tones.names[octave][nodeName], isRemoveKey === 1 ? true : false, isSlur === 1 ? true : false);
+			function createNote(id, octave, nodeName, noteOptions) {
+				return new Node(findInObject(options.nodes.types, id), options.tones.names[octave][nodeName], noteOptions);
 			}
 			function createRest(id) {
 				return new Node(findInObject(options.nodes.types.rest, id), options.tones.rest);
@@ -11223,7 +11542,7 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 					if(!noteInfo[1]) {
 						tact.addNode(createRest(noteInfo[0]));
 					} else {
-						tact.addNode(createNote(noteInfo[0], noteInfo[2] + octave, noteInfo[1], noteInfo[3], noteInfo[4]));
+						tact.addNode(createNote(noteInfo[0], noteInfo[2] + octave, noteInfo[1], noteInfo[3]));
 					}
 				});
 
@@ -11263,10 +11582,9 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 			tact.nodes.forEach(function (node) {
 				var exNode  = [
 					node.type.id,
-					node.tone.name,
-					node.tone.octav - ex[1][0],
-					node.isRemoveKey ? 1 : 0,
-					node.isSlur ? 1: 0
+					node.orgTone.name,
+					node.orgTone.octav - ex[1][0],
+					node.options
 				];
 				exTact[1].push(exNode);
 			});
@@ -11311,10 +11629,10 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 		var	gameController	= this;
 
 		if(tact === -1) {
-			gameController.SVGNotes.animateAbs(0, -505, 0);
+			gameController.SVGNotes.animateAbs(0, 0, 0);
 		} else {
 			gameController.getTactX(tact, function (x) {
-				gameController.SVGNotes.animateAbs(-x, -505, 0);
+				gameController.SVGNotes.animateAbs(-x, 0, 0);
 			});
 		}
 	};
@@ -11323,7 +11641,7 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 
 		gameController.getNoteX(note, function (noteX) {
 			gameController.getTactX(note.tact, function (tactX) {
-				gameController.SVGNotes.animateAbs(-(noteX + tactX), -505, 0);
+				gameController.SVGNotes.animateAbs(-(noteX + tactX), 0, 0);
 			});
 		});
 	};
@@ -11390,7 +11708,7 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 				tact.nodes.forEach(function (note) {
 					var	relWidth		= (750 / 4) * (gameController.game.speed / 60) * 0.1,
 
-						noteLeftPos		= note.svgElement.getX() - newPos + 20,
+						noteLeftPos		= note.svgElement.x - newPos + 20,
 						noteLeftPosRel	= noteLeftPos + relWidth,
 
 						noteRightPos	= noteLeftPos + note.type.length * that.defWidth,
@@ -11581,6 +11899,10 @@ define('game/game-controller',['jquery', 'svg', 'game/options', 'fM', 'api', 'l2
 
 		this.stopGame();
 
+		if(this.isEdit) {
+			this.moveToTact(this.edit.currentTact);
+			return;
+		}
 		if(L2P_global.kiddie_mode) {
 			return;
 		}
@@ -14161,6 +14483,7 @@ define('sound-input',['jquery', 'dsp', 'game/options', 'l2p'], function ($, dsp,
 				'microphone-permission'
 			]
 		});
+		
 		return navigator.getUserMedia({
 			audio: true
 		}, success, error);
@@ -14321,6 +14644,9 @@ define('sound-input',['jquery', 'dsp', 'game/options', 'l2p'], function ($, dsp,
 	};
 	Tuner.prototype.resetNoise	= function () {
 		var	tuner	= this;
+
+		tuner.$tuner.trigger('noise_ok', []);
+		return;
 
 		L2P.countdown(0, [
 			{
@@ -15130,6 +15456,423 @@ define("tour", (function (global) {
     };
 }(this)));
 
+define('text!templates/info.html',[],function () { return '<div class="modal">\n\t<div class="modal-header">\n\t\t<img src="/img/icons/back.svg" class="modal-header-back-icon" />\n\t\t<h2></h2>\n\t</div>\n\t<div class="modal-body"></div>\n\t<div class="modal-footer">\n\t\t<button class="btn btn-default" data-dismiss="modal"></button>\n\t</div>\n</div>';});
+
+define('text!templates/edit_properties.html',[],function () { return '<table>\n\t<tr>\n\t\t<td><input type="checkbox" name="slurstart" value="1" data-text="Slur Start" /></td>\n\t\t<td><input type="checkbox" name="slurend" value="2" data-text="Slur End" /></td>\n\t\t<td><input type="checkbox" name="removekey" value="0" data-text="Remove Key" /></td>\n\t</tr>\n\t<tr>\n\t\t<td><input type="checkbox" name="crescendo" value="1" data-text="Crescendo" /></td>\n\t\t<td><input type="checkbox" name="decrescendo" value="2" data-text="Decrescendo" /></td>\n\t</tr>\n\t<tr>\n\t\t<td><input type="checkbox" name="staccato" value="0" data-text="Staccato" /></td>\n\t\t<td><input type="checkbox" name="fermata" value="1" data-text="Fermata" /></td>\n\t\t<td><input type="checkbox" name="triplets" value="2" data-text="Triplets" /></td>\n\t</tr>\n\t<tr>\n\t\t<td><input type="checkbox" name="mp" value="0" data-text="MP" /></td>\n\t\t<td><input type="checkbox" name="p" value="0" data-text="P" /></td>\n\t\t<td><input type="checkbox" name="pp" value="1" data-text="PP" /></td>\n\t</tr>\n\t<tr>\n\t\t<td><input type="checkbox" name="mf" value="0" data-text="MF" /></td>\n\t\t<td><input type="checkbox" name="f" value="0" data-text="F" /></td>\n\t\t<td><input type="checkbox" name="ff" value="1" data-text="FF" /></td>\n\t</tr>\n</table>';});
+
+define('game/edit',['jquery', 'game/note', 'game/tact', 'game/options', 'text!templates/info.html', 'text!templates/edit_properties.html'], function ($, Note, Tact, options, dialog, dialogText) {
+	var	noteopt	= options.noteOptions;
+
+	function Edit(gameController) {
+		this.gameController	= gameController;
+		this.game			= this.gameController.game;
+		this.octave			= this.game.startOctave;
+
+		this.currentTact	= this.game.tacts[0];
+		this.currentNote;
+		this.currentInfo	= [
+			this.octave,
+			'A'
+		];
+
+		this.gameController.edit		= this;
+		this.gameController.isEdit		= true;
+		this.gameController.playSound	= true;
+		this.$dialog					= $(dialog).addClass('modal-edit');
+		this.$dialog.find('.modal-header').css('background-color', '#B73535').find('h2').text('Properties');
+		this.$dialog.find('.modal-header').find('img').remove();
+		this.$dialog.find('.modal-body').html(dialogText);
+		this.$dialog.find('.modal-footer').remove();
+		this.$dialog.on('hide.bs.modal', $.proxy(this.propertiesSave, this));
+
+		this.setFocus(this.currentTact.nodes[0]);
+		this.gameController.moveToTact(0);
+		this.gameController.initView(true);
+
+		this.proxyOnKeyDown	= $.proxy(this.onKeyDown, this);
+
+		$(window).on('keydown', this.proxyOnKeyDown);
+	}
+	Edit.prototype.createNote		= function (type, octave, nodeName, noteOptions) {
+		return new Note(options.nodes.types[type], options.tones.names[octave][nodeName], noteOptions);
+	};
+	Edit.prototype.createRest		= function (type) {
+		return new Note(options.nodes.types.rest[type], options.tones.rest);
+	};
+	Edit.prototype.addTact			= function (notes) {
+		var	edit	= this,
+			tact	= new Tact(options.tacts.types.quarter);
+		notes.forEach(function (note) {
+			tact.addNode(note);
+		});
+		tact.fill();
+
+		edit.game.addTact(tact);
+	};
+	Edit.prototype.replaceNote		= function (newNote) {
+		var	edit		= this,
+			newTact		= new Tact(edit.currentTact.type),
+			hasReplaced	= false,
+			restNotes	= [],
+			resetFocus	= false;
+
+		edit.currentTact.nodes.forEach(function (note, i) {
+			var	thisReplace	= false,
+				added;
+			if(note === edit.currentNote) {
+				note		= newNote;
+				hasReplaced	= true;
+				thisReplace	= true;
+			}
+
+			if(!thisReplace && hasReplaced && note.isRest) {
+				restNotes.push(note);
+			} else {
+				if(hasReplaced) {
+					restNotes.forEach(function (note) {
+						newTact.addNode(note);
+					});
+					restNotes	= [];
+				}
+				added	= newTact.addNode(note);
+			}
+
+			if(thisReplace && !added) {
+				resetFocus	= true;
+			}
+		});
+
+		newTact.fill();
+		newTact.setKeys(edit.game.sharps, edit.game.flats);
+
+		edit.game.tacts.splice(edit.game.tacts.indexOf(edit.currentTact), 1, newTact);
+
+		newNote.setThisFocus();
+		edit.currentNote	= newNote;
+		edit.currentTact	= newTact;
+
+		if(!edit.currentNote.isRest) {
+			edit.currentInfo	= [edit.currentNote.orgTone.octav, edit.currentNote.orgTone.name];
+		}
+
+		if(resetFocus) {
+			edit.setFocus(edit.currentTact.nodes[edit.currentTact.nodes.length - 1]);
+		}
+
+		edit.gameController.initView(true);
+	};
+	Edit.prototype.updateNote		= function (relPos) {
+		var	edit	= this,
+			toneI	= options.tones.all.indexOf(edit.currentNote.orgTone),
+			newTone	= options.tones.all[toneI - relPos],
+			newNote	= edit.createNote(edit.currentNote.type.name, newTone.octav, newTone.name, edit.currentNote.options);
+
+		edit.replaceNote(newNote);
+	};
+	Edit.prototype.updateNoteSize	= function (bigger) {
+		var	edit			= this,
+			noteI			= edit.currentTact.nodes.indexOf(edit.currentNote),
+			newTact			= new Tact(edit.currentTact.type),
+			newNote,
+			types			= [
+				'whole',
+				'halfPeriod',
+				'half',
+				'quarterPeriod',
+				'quarter',
+				'eighthPeriod',
+				'eighth',
+				//'sixteenthPeriod',
+				'sixteenth'
+			],
+			typesRest		= [
+				'restQuarter',
+				'restEighth',
+				'restSixteenth'
+			],
+			typesRestConverted	= [
+				'quarter',
+				'eighth',
+				'sixteenth'
+			],
+			currentTypeI	= edit.currentNote.isRest ? typesRest.indexOf(edit.currentNote.type.name) : types.indexOf(edit.currentNote.type.name),
+			lastNote		= true;
+
+		if(bigger) {
+			if(currentTypeI > 0) {
+				if(edit.currentNote.isRest) {
+					newNote	= edit.createRest(typesRestConverted[currentTypeI - 1]);
+				} else {
+					newNote	= edit.createNote(types[currentTypeI - 1], edit.currentNote.orgTone.octav, edit.currentNote.orgTone.name, edit.currentNote.options);
+				}
+			}
+		} else {
+			if(edit.currentNote.isRest) {
+				if(currentTypeI < (typesRest.length - 1)) {
+					newNote	= edit.createRest(typesRestConverted[currentTypeI + 1]);
+				}
+			} else {
+				if(currentTypeI < (types.length - 1)) {
+					newNote	= edit.createNote(types[currentTypeI + 1], edit.currentNote.orgTone.octav, edit.currentNote.orgTone.name, edit.currentNote.options);
+				}
+			}
+		}
+
+		if(newNote) {
+			edit.replaceNote(newNote);
+		}
+	};
+	Edit.prototype.setRest			= function () {
+		var	edit	= this,
+			name;
+
+		if(!edit.currentNote.isRest) {
+			edit.replaceNote(edit.createRest(edit.currentNote.type.name));
+		} else {
+			name	= edit.currentNote.type.name.substr(4).split('').map(function (s, i) {
+				if(i === 0) {
+					s	= s.toLowerCase();
+				}
+				return s;
+			}).join('');
+			edit.replaceNote(edit.createNote(name, edit.currentInfo[0], edit.currentInfo[1]));
+		}
+	};
+	Edit.prototype.setFocus			= function (note) {
+		var	edit	= this;
+
+		if(edit.currentNote) {
+			edit.currentNote.unsetThisFocus();
+		}
+		note.setThisFocus();
+		edit.currentNote	= note;
+
+		if(!note.isRest) {
+			edit.currentInfo	= [note.orgTone.octav, note.orgTone.name];
+		}
+	};
+	Edit.prototype.moveFocus		= function (right, toTact) {
+		var	edit	= this,
+			noteI	= toTact ? (right ? edit.currentTact.nodes.length - 1 : 0) : edit.currentTact.nodes.indexOf(edit.currentNote),
+			tactI,
+			focusNote,
+			tactUpdate	= false,
+			reloadView	= false;
+
+		if(right) {
+			if(noteI >= (edit.currentTact.nodes.length - 1)) {
+				tactI	= edit.game.tacts.indexOf(edit.currentTact);
+				if(tactI >= (edit.game.tacts.length - 1)) {
+					edit.addTact([]);
+					reloadView	= true;
+				}
+				edit.currentTact	= edit.game.tacts[tactI + 1];
+				tactUpdate	= true;
+
+				noteI		= -1;
+			}
+			focusNote	= edit.currentTact.nodes[noteI + 1];
+		} else {
+			if(noteI === 0) {
+				tactI	= edit.game.tacts.indexOf(edit.currentTact);
+				if(tactI > 0) {
+					edit.currentTact	= edit.game.tacts[tactI - 1];
+					tactUpdate	= true;
+					noteI		= toTact ? 1 : edit.currentTact.nodes.length;
+				}
+			}
+			focusNote	= edit.currentTact.nodes[noteI - 1];
+		}
+
+		if(focusNote) {
+			edit.setFocus(focusNote);
+		}
+		if(reloadView) {
+			edit.gameController.initView(true);
+		}
+		if(tactUpdate) {
+			edit.gameController.moveToTact(edit.currentTact);
+		}
+	};
+	Edit.prototype.toggle			= function (id) {
+		var	edit	= this;
+
+		if(!edit.currentNote.isRest) {
+			edit.currentNote.toggle(id);
+
+			if(id === noteopt.removekey) {
+				edit.currentTact.setKeys(edit.game.sharps, edit.game.flats);
+			}
+
+			edit.gameController.initView(true);
+		}
+	};
+	Edit.prototype.setSharp			= function () {
+		var	edit	= this;
+
+		if(!edit.currentNote.isRest) {
+			var	toneName	= edit.currentNote.orgTone.name.substr(0, 1);
+
+			edit.game.setSharp(toneName, 'toggle');
+
+			edit.game.tacts.forEach(function (tact) {
+				tact.setKeys(edit.game.sharps, edit.game.flats);
+			});
+
+			edit.gameController.initView(true);
+		}
+	};
+	Edit.prototype.setFlat			= function () {
+		var	edit	= this;
+
+		if(!edit.currentNote.isRest) {
+			var	toneName	= edit.currentNote.orgTone.name.substr(0, 1);
+
+			edit.game.setFlat(toneName, 'toggle');
+
+			edit.game.tacts.forEach(function (tact) {
+				tact.setKeys(edit.game.sharps, edit.game.flats);
+			});
+
+			edit.gameController.initView(true);
+		}
+	};
+	Edit.prototype.toggleProperties	= function () {
+		var	edit	= this,
+			optName,
+			$elem;
+
+		if(this.$dialog.is(':visible')) {
+			edit.$dialog.modal('hide');
+		} else {
+			for(optName in noteopt) {
+				$elem	= edit.$dialog.find('[name="'+optName+'"]');
+				if($elem.length > 0) {
+					$elem[0].checked	= edit.currentNote.is(noteopt[optName]);
+				}
+			}
+			edit.$dialog.modal('show');
+		}
+	};
+	Edit.prototype.propertiesSave	= function () {
+		var	edit	= this,
+			changed	= false;
+
+		for(optName in noteopt) {
+			$elem	= edit.$dialog.find('[name="'+optName+'"]');
+			if($elem.length > 0) {
+				if($elem[0].checked) {
+					if(edit.currentNote.add(noteopt[optName])) {
+						changed	= true;
+					}
+				} else {
+					if(edit.currentNote.rm(noteopt[optName])) {
+						changed	= true;
+					}
+				}
+			}
+		}
+
+		if(changed) {
+			edit.gameController.initView(true);
+		}
+	};
+	Edit.prototype.onKeyDown		= function (e) {
+		var	edit		= this,
+			dialogOpen	= this.$dialog.is(':visible');
+
+		if(!dialogOpen || e.which === 32 || (e.which === 82 && e.ctrlKey)) {
+			switch(e.which) {
+			case 32:	// Space
+				e.preventDefault();
+				edit.toggleProperties();
+				break;
+			case 35:	// End
+				e.preventDefault();
+				edit.currentTact	= edit.gameController.game.tacts[edit.gameController.game.tacts.length - 1];
+				edit.gameController.moveToTact(edit.currentTact);
+				edit.setFocus(edit.currentTact.nodes[edit.currentTact.nodes.length - 1]);
+				break;
+			case 36:	// Home
+				e.preventDefault();
+				edit.currentTact	= edit.gameController.game.tacts[0];
+				edit.gameController.moveToTact(edit.currentTact);
+				edit.setFocus(edit.currentTact.nodes[0]);
+				break;
+			case 37:	// ArrowLeft
+				e.preventDefault();
+				edit.moveFocus(false, e.ctrlKey);
+				break;
+			case 38:	// ArrowUp
+				e.preventDefault();
+				edit.updateNote(-1);
+				break;
+			case 39:	// ArrowRight
+				e.preventDefault();
+				edit.moveFocus(true, e.ctrlKey);
+				break;
+			case 40:	// ArrowDown
+				e.preventDefault();
+				edit.updateNote(1);
+				break;
+			case 107:	// NumPad+
+			case 187:	// +
+				e.preventDefault();
+				edit.updateNoteSize(true);
+				break;
+			case 109:	// NumPad-
+			case 189:	// -
+				e.preventDefault();
+				edit.updateNoteSize(false);
+				break;
+			case 69:	// e
+				e.preventDefault();
+				edit.toggle(noteopt.removekey);
+				break;
+			case 70:	// f
+				e.preventDefault();
+				edit.setFlat();
+				break;
+			case 76:	// l
+				e.preventDefault();
+				if(e.altKey) {
+					edit.toggle(noteopt.slurend);
+				} else {
+					edit.toggle(noteopt.slurstart);
+				}
+				break;
+			case 82:	// r
+				if(!e.ctrlKey) {
+					e.preventDefault();
+					edit.setRest();
+				}
+				break;
+			case 83:	// s
+				e.preventDefault();
+				edit.setSharp();
+				break;
+			case 88:	// x
+				e.preventDefault();
+
+				require(['fM'], function (fM) {
+					$(window).off('keydown', edit.proxyOnKeyDown);
+					fM.link.navigate('/game/'+edit.gameController.permlink+'/save/', 'Magic Tune', {
+						title:	'Magic Tune',
+						data:	{
+							data:	JSON.stringify(edit.gameController.exportGame())
+						}
+					});
+				});
+				break;
+			default:
+				console.log(e.which);
+				break;
+			}
+		}
+	};
+
+	return Edit;
+});
 define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], function ($, api, options) {
 	function goBack(e, doGoBack) {
 		if(doGoBack !== false) {
@@ -15145,15 +15888,20 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 	}
 
 	function FBAuth(response) {
-		// console.log('fbAuth', response);
 		fbUser	= response;
+
+		// If we are connected to Facebook
 		if(response.status === 'connected') {
+			// If the logged in FacebookUser is the same as the logged in MagicTune users
 			if(+response.authResponse.userID !== L2P_global.fb_id) {
+				// Only autologin once per session
 				var hasTriedAutologin	= sessionStorage.getItem('l2p_fb_autologin');
 				if(hasTriedAutologin !== 'true') {
 					require(['fM'], function (fM) {
+						// Get info about the user
 						FB.api('/me', function (user) {
-							// console.log('tryLogin', user);
+							// Redirect to the Login/UserCreate page
+							// We use the same page for both - if the user has given MagicTune access to Facebook, we know we are allowed to create a user
 							fM.link.navigate('/user/create/', 'Magic-Tune', {
 								title:	'Magic-Tune',
 								data:	{
@@ -15165,21 +15913,18 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 							});
 						});
 					});
-				} else {
-					// console.log('skipped autologin');
 				}
 
+				// Make sure we only autologin once
 				sessionStorage.setItem('l2p_fb_autologin', 'true');
-			} else {
-				FB.api('/me', function (user) {
-					// console.log('logged in', user);
-				});
 			}
 		}
 
+		// "Subscribe" to changes in the user logged in to facebook
 		FB.Event.subscribe('auth.authResponseChange', FBAuth);
 	}
 
+	// Initialize Facebook
 	FB.init({
     	appId      : '178214939022167',
     	channelUrl : '//magic-tune.com/channel.php',
@@ -15244,13 +15989,18 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 		dialog:	{
 			action:	function (url, title, html, color, submitText, script) {
 				var	requireScripts	= ['fM', 'text!templates/modal.html'];
+
+				// If this dialog has a js-file we need to include
 				if(script) {
 					requireScripts.push('dialog/action/'+script);
 				}
 				require(requireScripts, function (fM, modalText, infoScript) {
+					// Set up the Modal
 					L2P.$modal	= $(modalText).addClass('modal-action');
 					L2P.$modal.find('.modal-header').css('background-color', color).find(' h2').text(title);
 					L2P.$modal.find('.modal-body').html(html);
+
+					// Set the submit button
 					if(submitText === '') {
 						L2P.$modal.find('.modal-footer button.btn-primary').remove();
 					} else {
@@ -15258,8 +16008,10 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 					}
 					L2P.$modal.find('button.btn[data-dismiss]').text(L2P_global.lang.global_button_close);
 
+					// Parse the modal-content with some Facebook functions
 					FB.XFBML.parse(L2P.$modal.find('.modal-body')[0]);
 
+					// Crappy fix for correct posting of the form
 					var	action	= url || document.location.pathname;
 					if(location.search.substring(1) !== '')
 					{
@@ -15268,12 +16020,15 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 
 					L2P.$modal.attr('action', action).attr('method', 'post');
 
+					// Post the form via Ajax
 					function onSubmit(e) {
 						e.preventDefault();
 
 						var	data	= fM.form.getElements.call(this);
 
+						// Make sure we don't close the modal multiple times
 						L2P.$modal.off('hide.bs.modal');
+						// Post the form
 						fM.link.navigate(L2P.$modal.attr('action'), 'Magic Tune', {
 							title:	'Magic Tune',
 							data:	data
@@ -15283,7 +16038,7 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 					L2P.$modal
 						.on('submit', onSubmit);
 
-					var	pathname	= location.pathname;
+					// Fix/Hack for not opening/closing the modal multiple times
 					L2P.$modal
 						.on('hide.bs.modal', function (e) {
 							if(!$(e.target).hasClass('tour-step-backdrop')) {
@@ -15296,11 +16051,15 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 							});
 						});
 
+					// Autofocus first field
 					fM.form.autofocus(L2P.$modal);
 
+					// Update our history
 					fM.link.navigated(url, title, {
 						is_dialog:	true
 					});
+
+					// Set the back-button (if needed)
 					var	parent	= fM.link.getParent();
 					if(parent && parent.is_dialog) {
 						L2P.$modal
@@ -15311,13 +16070,18 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 								});
 					}
 
+					// Show the modal
 					L2P.$modal.modal('show');
 
+					// Show any validation errors
 					L2P.form.inputValidation.error(null, L2P.$modal);
+
+					// If we have an extra script, run it now
 					if(infoScript) {
 						infoScript(L2P.$modal);
 					}
 
+					// If we are on a tour, go to next step
 					if(tour && tour.tour) {
 						tour.tour.next();
 					}
@@ -15325,14 +16089,19 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 			},
 			info: function (url, title, html, color, buttons, script) {
 				var	requireScripts	= ['fM', 'text!templates/info.html'];
+
+				// If this dialog has a js-file we need to include
 				if(script) {
 					requireScripts.push('dialog/info/'+script);
 				}
 				require(requireScripts, function (fM, modalText, infoScript) {
+					// Set up the Modal
 					L2P.$modal	= $(modalText).addClass('modal-info');
 					L2P.$modal.find('.modal-header').css('background-color', color).find(' h2').text(title);
 					L2P.$modal.find('.modal-body').html(html);
 					var	$modalFooter	= L2P.$modal.find('.modal-footer');
+
+					// Set the buttons
 					if(buttons) {
 						buttons.forEach(function (button) {
 							$modalFooter.prepend('<button class="btn btn-default">'+button+'</button>');
@@ -15340,13 +16109,12 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 					}
 					L2P.$modal.find('button.btn[data-dismiss]').text(L2P_global.lang.global_button_close);
 
-					var	pathname	= location.pathname;
-
+					// Update our history
 					fM.link.navigated(url, title, {
 						is_dialog:	true
 					});
 
-					var	current	= fM.link.getCurrent();
+					// Fix/Hack for not opening/closing the modal multiple times
 					L2P.$modal
 						.on('hide.bs.modal', function (e) {
 							L2P.$modal.off('hide.bs.modal');
@@ -15361,6 +16129,7 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 							});
 						});
 
+					// Set the back-button (if needed)
 					var	parent	= fM.link.getParent();
 					if(parent && parent.is_dialog) {
 						L2P.$modal
@@ -15371,11 +16140,15 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 								});
 					}
 
+					// Show the modal
 					L2P.$modal.modal('show');
 
+					// If we have an extra script, run it now
 					if(infoScript) {
 						infoScript(L2P.$modal);
 					}
+
+					// If we are on a tour, go to next step
 					if(tour && tour.tour) {
 						tour.tour.next();
 					}
@@ -15391,21 +16164,28 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 						$compassBox	= $('div.ContentBoxGameCompass'),
 						compass		= new Compass($compassBox),
 						state		= fM.link.getCurrentNavigate() || {},
+						// Get some info from the url
 						urlItems	= (url || location.href).split('/'),
 						fingerpos	= urlItems.length >= 5 ? (/[0-9]+/.test(urlItems[4]) ? +/[0-9]+/.exec(urlItems[4])[0] : null) : null;
 
+					// Reset the text in the Song and Scale container-header
 					L2P.resetBoxText($('#song_title'));
 					L2P.resetBoxText($('#scale_title'));
 
+					// Mark our history as is_game
 					state.is_game	= true;
 
+					// Insert the svg-elements (if first time)
 					if(generate) {
 						$game_container.html(gameText);
 					}
+
+					// Update our html, so it will show the game
 					$body_container.addClass('ShowGame');
 					$body_container.addClass(type);
 					$body_container.removeClass(type === 'song' ? 'scale' : 'song');
 
+					// Find some elements
 					svgContainer	= $game_container.find('#svg_container')[0];
 					if($controller === undefined) {
 						$controller	= $('.ContentBoxGameControl');
@@ -15419,8 +16199,10 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 						$stopGame	= $game_container.find('#stopGame'),
 						$game_title	= type === 'song' ? $('#song_title') : $('#scale_title');
 
+					// Set the game-title
 					$game_title.html(title);
 
+					// Generate the gameController and Sound
 					if(generate) {
 						if(!sound) {
 							sound	= new Sound();
@@ -15430,8 +16212,11 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 						L2P.gameController.sound	= sound;
 					}
 
+					// Reset any edit-info on the gameController
 					L2P.gameController.isEdit	= false;
+					L2P.gameController.edit		= null;
 
+					// Reset our compass
 					compass.setTone(options.tones.names[4]['A']);
 					compass.enable();
 					L2P.gameController.compass	= compass;
@@ -15440,25 +16225,30 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 						L2P.gameController.setGameSpeed(+this.value);
 					});
 					if(generate) {
+						// Subscribe to some events
 						$(L2P.gameController).on({
+							// Update the speed in the visual box
 							gameLoadSpeedChange:	function (e, speed) {
 								$speed.val(speed).trigger('change');
 							},
-							gameStart:	function () {},
 							gameEnd:	function (e, gameInfo) {
 								var	currentState	= fM.link.getCurrent() || {};
 
-								if(!currentState || !currentState.from_playlist) {
-									api.get.statistic_uuid(function (data) {
-										fM.link.navigate('/user/'+L2P_global.username+'/statistics/'+data.uuid+'/');
-									}, {
-										game_history_ids:	gameInfo.game_history_id
-									});
+								if(L2P.gameController.isEdit) {
+									L2P.gameController.moveToTact(-1);
+								} else {
+									// If we didn't come from a playlist, we just go to statistics
+									if(!currentState || !currentState.from_playlist) {
+										api.get.statistic_uuid(function (data) {
+											fM.link.navigate('/user/'+L2P_global.username+'/statistics/'+data.uuid+'/');
+										}, {
+											game_history_ids:	gameInfo.game_history_id
+										});
+									}
 								}
-								ControllerSet('restart');
-							},
-							notePoints:	function (note) {
 
+								// Update the play/pause/restart button
+								ControllerSet('restart');
 							}
 						});
 
@@ -15468,18 +16258,23 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 							if(L2P.gameController.game && !L2P.gameController.game.running) {
 								L2P.gameController.startGame();
 
+								// Update the play/pause/restart button
 								ControllerSet('pause');
 							} else {
 								L2P.gameController.stopGame();
 
+								// Update the play/pause/restart button
 								ControllerSet('play');
 							}
 						});
 					}
 
+					// Update the play/pause/restart button
 					ControllerSet('play');
 
+					// Import the game into the gameController
 					L2P.gameController.importGame(data, title, octave, fingerpos);
+					// Update the permlink in the gameController
 					if(url) {
 						L2P.gameController.permlink	= url.match(/\/game\/([^\/]+)/g)[0].substr(6);
 					} else {
@@ -15487,6 +16282,7 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 					}
 
 					if(generate) {
+						// Subscribe to soundInput
 						tuner	= new SoundInput(function (e) {
 							// console.log(e);
 						}, $.proxy(L2P.gameController.soundInput, L2P.gameController), $.proxy(L2P.gameController.expectedTone, L2P.gameController));
@@ -15498,6 +16294,7 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 					state.is_game	= true;
 					fM.link.navigated(url, title, state);
 
+					// State comes from the playlist and describe some options for the game
 					if(state) {
 						if(state.autostart) {
 							L2P.gameController.useCountdown	= state.use_countdown || state.use_countdown === undefined;
@@ -15508,8 +16305,13 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 						}
 					}
 
+					// If we should edit
 					if(urlItems[3] === 'edit') {
 						L2P.create();
+					} else if(L2P_global.is_god) {
+						$(window)
+							.off('keyup', L2P.game_key)
+							.on('keyup', L2P.game_key);
 					}
 
 					if(callback) {
@@ -15518,8 +16320,18 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 				});
 			}
 		},
+		game_key:	function (e) {
+			if(e.altKey && e.ctrlKey && e.which === 69) {
+				$(window).off('keyup', L2P.game_key);
+
+				require(['fM'], function (fM) {
+					fM.link.navigate('/game/'+L2P.gameController.permlink+'/edit/');
+				});
+			}
+		},
 		facebook:	{
 			login:	function (callback) {
+				// Will login or ask for permissions
 				FB.login(function (response) {
 					fbUser	= response;
 					callback(fbUser);
@@ -15529,6 +16341,7 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 		},
 		form:	{
 			inputValidation:	{
+				// Will show validation errors for a form
 				error:	function (inputName, context) {
 					$('input[data-content][data-content!=""]' + (inputName ? '[name="'+inputName+'"]' : ''), context || 'body').each(function () {
 						var	that		= this,
@@ -15554,16 +16367,19 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 				}
 			}
 		},
+		// Will reset a container to its original text
 		resetBoxText:	function ($box) {
 			$box.html($box.attr('data-default-text'));
 		},
 		navigate:	{
+			// Navigate to frontpage
 			home:	function (e) {
 				var	$body_container		= $('body'),
 					$CenteringContainer	= $('#CenteringContainer'),
 					title				= $CenteringContainer.attr('data-default-title');
 
 				require(['fM'], function (fM) {
+					// Reset some titles
 					L2P.resetBoxText($('#song_title'));
 					L2P.resetBoxText($('#scale_title'));
 					$body_container.removeClass('ShowGame');
@@ -15575,12 +16391,14 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 					});
 				});
 
+				// Stop or continue the tour
 				if(tour && !tour.callback('/')) {
 					tour.kill();
 				} else if(tour && tour.tour) {
 					tour.tour.next();
 				}
 			},
+			// Start guided tour
 			guided_tour:	function (e) {
 				var	$body_container		= $('body');
 
@@ -15621,6 +16439,7 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 									tour.kill();
 								}
 
+								// Crappy hack for adding a song to the playlist instead of playing it now
 								if(that && that.nodeName === 'IMG') {
 									L2P.get.playlist(null, function () {
 										playlist.addGame(url, data.title, data.data, data.type);
@@ -15629,7 +16448,7 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 									L2P.dialog.game(url, data.title, data.data, data.type, data.octave);
 								}
 								break;
-							case 'redirect':
+							case 'redirect': // This is sent after a ajax-post and will update userinfo (or reload the page)
 								if(L2P_global.language_code !== data.user.language_code || data.force_reload) {
 									location.href	= data.url;
 									return;
@@ -15640,6 +16459,7 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 										L2P_global[key]	= value;
 									});
 
+									// Reload the tones, if our convert pitch has changed
 									if(concert_pitch) {
 										options.generateTones();
 									}
@@ -15659,6 +16479,7 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 				done		= false,
 				countdown	= {
 					kill:	function () {
+						// Make sure we can't kill it multiple times
 						if(done) {
 							return;
 						}
@@ -15669,6 +16490,7 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 							})
 							.addClass('hide');
 					},
+					// Reset the countdown
 					reload:	function () {
 						$overlay
 							.find('div.number')
@@ -15683,27 +16505,35 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 
 			options	= options || {};
 
+			// Change the background color
 			if(options.background_color) {
 				$overlay
 					.css('background-color', options.background_color);
 			}
+
+			// Set some CSS info
 			if(options.css) {
 				$.each(options.css, function (name, value) {
 					$countdown.css(name, value);
 				});
 			}
+
+			// Set some classes
 			if(options.classList && options.classList.length > 0) {
 				options.classList.forEach(function (className) {
 					$countdown.addClass(className);
 				});
 			}
 
+			// Generate the seconds
 			for(var i = sec; i > 0; i -= 1) {
 				items.push({
 					text:	i,
 					sec:	1
 				});
 			}
+
+			// We got some different ways to call this function - here we do the right ting
 			if($.isArray(text)) {
 				items	= items.concat(text);
 			} else if(text && text.text) {
@@ -15715,6 +16545,7 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 				});
 			}
 
+			// Insert all the countdown-elements
 			items.forEach(function (item, i) {
 				var	$elem;
 
@@ -15729,6 +16560,7 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 						.css('-webkit-transition-duration', item.sec+'s')
 						.appendTo($countdown);
 
+				// Set the correct countdown-type (animation-type)
 				if(item.type) {
 					$elem.addClass('countdown-type--'+item.type);
 				}
@@ -15737,6 +16569,8 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 						$elem.css(name, value);
 					});
 				}
+
+				// If this is the last element, we subscribe for its animation-end
 				if(i === items.length - 1) {
 					$elem.on('webkitAnimationEnd', function () {
 						done	= true;
@@ -15755,12 +16589,14 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 				delay	+= item.sec;
 			});
 
+			// Insert the "next"-text (above the countdown)
 			if(next) {
 				if(next.text) {
 					var	$elem	=
 						$('<div class="next"></div>')
 							.text(next.text)
 							.appendTo($countdown);
+
 					if(next.css) {
 						$.each(next.css, function (name, value) {
 							$elem.css(name, value);
@@ -15777,29 +16613,35 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 						.appendTo($countdown);
 				}
 			}
+
+			// Insert the "bottom"-text
 			if(options.bottom) {
 				$('<div class="bottom"></div>')
 					.html(options.bottom)
 					.appendTo($countdown);
 			}
 
+			// Insert the illustration
 			if(illustration) {
 				$('<div class="illustration"></div>')
 					.html(illustration)
 					.appendTo($countdown);
 			}
 
+			// Insert the countdown
 			$overlay
 				.empty()
 				.append($countdown)
 				.removeClass('hide');
 
+			// Start the countdown
 			countdown.reload();
 
 			return countdown;
 		},
 		funcs:	{
 			tones:	{
+				// Will return the difference between a freq and a tone
 				freqDiffToTone: function (tone, freq, rel) {
 					var	diff		= tone.hz - freq,
 						diffAbs		= Math.abs(diff),
@@ -15824,6 +16666,7 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 						ratioRel:	ratioRel
 					}
 				},
+				// Will return the closest tone next to a tone
 				getClosestTone:	function (tone, higher) {
 					var	pos	= options.tones.all.indexOf(tone),
 						t;
@@ -15850,13 +16693,16 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 
 					return t;
 				},
+				// Will return the tone in the octave closest to provided freq
 				getCloseTone:	function (freq, defTone, tone) {
 					var	octav, tempTone, diff, closestTone, closestDiff, closestFreq, newTone, newFreq, octavDiff, defToneType, defTonePos, defToneClose;
 
+					// If we haven't the correct tone, but instead a sharp/flat tone, we find a base-tone
 					if(defTone && tone && defTone.name !== tone.name && defTone.name.length === 2) {
-						defToneType	= defTone.name.substr(1, 1);
+						defToneType	= defTone.name.substr(1, 1); // sharp/flat
 						defTonePos	= options.tones.all.indexOf(defTone);
 
+						// Will find the correct base-tone
 						if(defToneType === '#') {
 							defToneClose	= options.tones.all[defTonePos + 1];
 						} else if(defToneType === 'b') {
@@ -15868,6 +16714,7 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 						}
 					}
 
+					// Loop through the octaves and find the closest tone
 					for(octav = 3; octav <= 6; octav += 1) {
 						tempTone	= options.tones.names[octav][tone.name];
 						if(tempTone) {
@@ -15893,6 +16740,7 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 						freq:	newFreq || freq
 					}
 				},
+				// Will return the stepFactor (percent-step)
 				getStepFactor:	function (percent) {
 					var	stepFactor;
 					L2P.steps.forEach(function (step) {
@@ -15909,6 +16757,7 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 			var	containers	= {},
 				lastPing	= 0;
 
+			// Check for updates
 			function ping() {
 				var	namespaces	= [],
 					namespace;
@@ -15923,9 +16772,12 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 						namespaces:	namespaces
 					}, function (data) {
 						var	name;
+
+						// Loop through the data
 						for(namespace in data) {
 							if(data.hasOwnProperty(namespace)) {
 								for(name in data[namespace]) {
+									// Set the data
 									containers[namespace][0][0].set(name, data[namespace][name], true);
 								}
 							}
@@ -15952,12 +16804,15 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 					this._storage[name]		= value;
 				}
 
+				// If we came from ping and didn't have any change, we just return
 				if(fromPing && localStorage.getItem(this.namespace) === JSON.stringify(this._storage)) {
 					return;
 				}
-				// console.log('save', fromPing, this._storage);
+
+				// Else set the data in localstorage
 				localStorage.setItem(this.namespace, JSON.stringify(this._storage));
 
+				// Update the containers
 				containers[this.namespace].forEach(function ($storage, i) {
 					if($storage !== that.$this || fromPing) {
 						$storage[0].reload();
@@ -15965,6 +16820,7 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 					}
 				});
 
+				// Save to MySQL (if we didn't get this data from MySQL ;-)
 				if(!fromPing) {
 					$.post('/api/save.storage.php', {
 						namespace:	this.namespace,
@@ -16025,13 +16881,16 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 						var	$this	= $(this),
 							game	= $this.parents('tr').data('game');
 
+						// If we are on a tour, we are not allowed to remove games from the playlist
 						if($this.parents('.tour-step-backdrop').length > 0) {
 							return;
 						}
 
+						// Remove the game from the playlist
 						playlist.removeGame(game);
 					});
 
+					// Generate the "loops" select firled
 					var	$loops	= this.$container.find('[name="loops"]');
 					for(var loop_no = 1; loop_no <= 10; loop_no += 1) {
 						$('<option></option>')
@@ -16040,6 +16899,7 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 							.appendTo($loops);
 					}
 
+					// Update text with localized text
 					api.get.lang(function (lang) {
 						that.lang			= lang;
 
@@ -16052,7 +16912,7 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 					that.reloadProxy	= $.proxy(that.reload, that);
 
 					playlist.$this.on('update', this.reloadProxy);
-				}, function () {
+				}, function () { // Update-function (called on first render and on update to the playlist)
 					var	that	= this;
 					this.$tbody.empty();
 
@@ -16060,6 +16920,7 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 						.find('div > div')
 						.text(playlist.name);
 
+					// Render the games
 					playlist.games.forEach(function (game) {
 						var	urlInfo	= game.url.split('/'),
 							octave	= urlInfo[3] || 0;
@@ -16089,12 +16950,13 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 							.attr('title', that.lang.global_delete)
 							.end();
 					});
-				}, function () {
+				}, function () { // Kill-functions (called on modal-close)
 					playlist.$this.off('update', this.reloadProxy);
 				});
 			}
 		},
 		click:	{
+			// The default click-method for game-items (handles goto game and add game to playlist)
 			on:		function (e) {
 				e.preventDefault();
 				e.stopPropagation();
@@ -16125,16 +16987,21 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 		},
 		get:	{
 			playlist:	function (id, callback, name) {
+				// Returns a playlist
 				require(['playlist'], function (Playlist) {
+					// If we don't have a playlist, or we got an id
 					if(!playlist || id) {
+						// If the id is "new" (hack!), create a new one
 						if(id === 'new') {
 							id	= undefined;
-						} else if(!playlist) {
+						} else if(!playlist) { // else load the playlist with our id
 							var	playlists	= L2P.get.playlists();
 							for(id in playlists) {
 								break;
 							}
 						}
+
+						// Create the playlist-object
 						playlist	= new Playlist({}, id, name);
 					}
 
@@ -16147,6 +17014,7 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 				return storage.getAll(true);
 			}
 		},
+		// NOT IN USE
 		io:		function () {
 			if(!socket) {
 				socket	= io.connect('http://l2p.fmads.dk:10001');
@@ -16154,6 +17022,7 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 
 			return socket;
 		},
+		// Stepfactors
 		steps: [
 			{
 				percent:	95,
@@ -16200,22 +17069,25 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 		],
 		guided_tour:	function () {
 			require(['fM', 'tour', 'json!lang/guided_tour.php'], function (fM, Tour, lang) {
+				// Only initialize one tour-object
 				if(tour && tour.tour) {
 					tour.tour.start();
 					return;
 				}
 				tour	= (function () {
-					var	empty		= function (url) {
+					var	empty		= function (url) { // helper function for url-loads
 							return url === '/guided_tour/';
 						},
 						controller	= {};
 
+					// Helper-function for loading the tuner
 					function tourGame(tuner) {
 						tuner.$tuner.one('noise_ok', function () {
 							controller.tour.removeState('end');
 							controller.tour.start(true);
 						});
 					}
+					// Helper-function for waiting for a tick with sound
 					function tourGameTick(e, freq) {
 						if(freq !== -1) {
 							$(tuner).off('tick', tourGameTick);
@@ -16224,6 +17096,7 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 						}
 					}
 
+					// Helper functions
 					controller.callback	= empty;
 					controller.kill		= function () {
 						if(controller.tour) {
@@ -16231,10 +17104,12 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 							controller.tour	= null;
 						}
 					};
+
+					// Generate the tour
 					controller.tour		= new Tour({
-						useLocalStorage:	true,
+						useLocalStorage:	true,	// Save our state in localStorage (this is JUST for keeping the tour from saving in cookie)
 						container:			'body',
-						debug:				true,
+						debug:				false,
 						labels:		{
 							next:	'<button class="btn btn-primary">'+lang.tour_button_got_it+'</button>',
 							prev:	'',
@@ -16242,6 +17117,7 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 						},
 						keyboard:	false,
 						template:	function (i, step) {
+							// Two templates - one without labels and one with
 							if(step.labelsOff) {
 								return [
 									'<div class="popover tour">',
@@ -16297,6 +17173,7 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 						backdrop:	true,
 						labelsOff:	true,
 						onShow:		function (tour) {
+							// When navigation, we wan't to keep the tour-object, if we navigated to the correct url (else exit the tour)
 							controller.callback	= function (url) {
 								if(url === '/user/settings/') {
 									tour.hideStep(tour._current);
@@ -16308,6 +17185,7 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 						}
 					});
 
+					// Generate tour-steps for all settings
 					(function (tour) {
 						[null, 'concert_pitch', 'color_nodes', 'language', 'kiddie_mode', 'countdown_time', 'metronome', 'blind_mode'].forEach(function (name, i) {
 							if(name) {
@@ -16332,8 +17210,8 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 						backdrop:	true,
 						labelsOff:	true,
 						onShow:		function (tour) {
+							// When navigation, we wan't to keep the tour-object, if we navigated to the correct url (else exit the tour)
 							controller.callback	= function (url) {
-								// console.log('callback test', url, url === '/');
 								if(url === '/') {
 									return true;
 								}
@@ -16350,11 +17228,12 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 						backdrop:	true,
 						labelsOff:	true,
 						onShow:		function (tour) {
+							// When navigation, we wan't to keep the tour-object, if we navigated to the correct url (else exit the tour)
 							controller.callback	= function (url) {
 								if(url === '/browse/scales/position1/') {
 									tour.hideStep(tour._current);
-									L2P.get.playlist('new', function (playlist) {
-									}, lang.tour_0_0_title);
+									// Generate a new playlist for the tour
+									L2P.get.playlist('new', function () {}, lang.tour_0_0_title);
 
 									return true;
 								}
@@ -16373,6 +17252,7 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 						labelsOff:	true,
 						onShow:		function (tour) {
 							L2P.get.playlist(null, function (playlist) {
+								// Wait for the added game to the playlist, before continuing the tour
 								playlist.$this.one('addgame', function () {
 									controller.tour.next();
 								});
@@ -16387,6 +17267,8 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 						placement:	'left',
 						container:	'.modal-info.in',
 						backdrop:	true,
+
+						// Fix for background (backdrop)
 						onShow:		function () {
 							$('.modal-info.in #PlaylistContainer #PlaylistInfoContainerInner').addClass('tour-step-backdrop');
 						},
@@ -16414,6 +17296,7 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 						labelsOff:	true,
 						onShow:		function (tour) {
 							L2P.get.playlist(null, function (playlist) {
+								// Wait for the added game to the playlist, before continuing the tour
 								playlist.$this.one('addgame', function () {
 									controller.tour.next();
 								});
@@ -16431,13 +17314,17 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 						labelsOff:	true,
 						onShow:		function (tour) {
 							$('.modal-info.in #PlaylistItems [name="loops"]').val(1);
+
+							// When navigation, we wan't to keep the tour-object, if we navigated to the correct url (else exit the tour)
 							controller.callback = function (url) {
 								if(url === '/game/a-major/4/1/') {
+									// If we already got a the tuner (SoundInput) just continue - else wait for the tuner to be initialized
 									if(tuner) {
 										controller.tour.next();
 									} else {
 										controller.tour.end();
 
+										// When we got the tuner, continue the tour
 										$(L2P).one('got_tuner', function (e, tuner) {
 											tourGame(tuner);
 										});
@@ -16459,6 +17346,8 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 						labelsOff:	true,
 						onShow:		function (tour) {
 							var	current		= tour.current;
+
+							// Show more info after 4 sec
 							setTimeout(function () {
 								if(tour.current === current) {
 									$('div.ContentBoxGameCompass')
@@ -16469,6 +17358,7 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 								}
 							}, 4000);
 
+							// Wait for a tick before continuing the tour
 							$(tuner).on('tick', tourGameTick);
 						}
 					});
@@ -16489,6 +17379,7 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 						backdrop:	true
 					});
 
+					// Make sure the tour always starts from first step
 					controller.tour.removeState('end');
 					controller.tour.setCurrentStep(0);
 					controller.tour.start(true);
@@ -16498,302 +17389,9 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 			});
 		},
 		create: function () {
-			require(['game/game', 'game/tact', 'game/note', 'game/options'], function (Game, Tact, Note, options) {
-				var gameController	= L2P.gameController,
-					game			= gameController.game,
-					octave			= game.startOctave;
-
-				gameController.isEdit	= true;
-
-				function createNote(type, octave, nodeName, isRemoveKey, isSlur) {
-					return new Note(options.nodes.types[type], options.tones.names[octave][nodeName], isRemoveKey ? true : false, isSlur ? true : false);
-				}
-				function createRest(type) {
-					return new Note(options.nodes.types.rest[type], options.tones.rest);
-				}
-				function addTact(notes) {
-					var	tact	= new Tact(options.tacts.types.quarter);
-					notes.forEach(function (note) {
-						tact.addNode(note);
-					});
-					tact.fill();
-
-					game.addTact(tact);
-				}
-
-				var	currentTact	= game.tacts[0],
-					currentNote,
-					currentInfo	= [
-						octave + 0,
-						'A'
-					];
-
-				function updateNote(relPos) {
-					var	toneI	= options.tones.all.indexOf(currentNote.tone),
-						newTone	= options.tones.all[toneI - relPos],
-						newNote	= createNote(currentNote.type.name, newTone.octav, newTone.name, currentNote.isRemoveKey, currentNote.isSlur);
-
-					replaceNote(newNote);
-				}
-				function replaceNote(newNote) {
-					var	newTact		= new Tact(currentTact.type),
-						hasReplaced	= false,
-						restNotes	= [],
-						resetFocus	= false;
-
-					currentTact.nodes.forEach(function (note, i) {
-						var	thisReplace	= false,
-							added;
-						if(note === currentNote) {
-							note		= newNote;
-							hasReplaced	= true;
-							thisReplace	= true;
-						}
-
-						if(!thisReplace && hasReplaced && note.isRest) {
-							restNotes.push(note);
-						} else {
-							if(hasReplaced) {
-								restNotes.forEach(function (note) {
-									newTact.addNode(note);
-								});
-								restNotes	= [];
-							}
-							added	= newTact.addNode(note);
-						}
-
-						if(thisReplace && !added) {
-							resetFocus	= true;
-						}
-					});
-
-					newTact.fill();
-
-					game.tacts.splice(game.tacts.indexOf(currentTact), 1, newTact);
-
-					newNote.isFocus	= true;
-					currentNote	= newNote;
-					currentTact	= newTact;
-
-					if(!currentNote.isRest) {
-						currentInfo	= [currentNote.tone.octav, currentNote.tone.name];
-					}
-
-					if(resetFocus) {
-						setFocus(currentTact.nodes[currentTact.nodes.length - 1]);
-					}
-
-					gameController.initView(true);
-				}
-				function updateNoteSize(bigger) {
-					var	noteI			= currentTact.nodes.indexOf(currentNote),
-						newTact			= new Tact(currentTact.type),
-						newNote,
-						types			= [
-							'whole',
-							'halfPeriod',
-							'half',
-							'quarterPeriod',
-							'quarter',
-							'eighthPeriod',
-							'eighth',
-							//'sixteenthPeriod',
-							'sixteenth'
-						],
-						typesRest		= [
-							'restQuarter',
-							'restEighth',
-							'restSixteenth'
-						],
-						typesRestConverted	= [
-							'quarter',
-							'eighth',
-							'sixteenth'
-						],
-						currentTypeI	= currentNote.isRest ? typesRest.indexOf(currentNote.type.name) : types.indexOf(currentNote.type.name),
-						lastNote		= true;
-
-					if(bigger) {
-						if(currentTypeI > 0) {
-							if(currentNote.isRest) {
-								newNote	= createRest(typesRestConverted[currentTypeI - 1]);
-							} else {
-								newNote	= createNote(types[currentTypeI - 1], currentNote.tone.octav, currentNote.tone.name, currentNote.isRemoveKey, currentNote.isSlur);
-							}
-						}
-					} else {
-						if(currentNote.isRest) {
-							if(currentTypeI < (typesRest.length - 1)) {
-								newNote	= createRest(typesRestConverted[currentTypeI + 1]);
-							}
-						} else {
-							if(currentTypeI < (types.length - 1)) {
-								newNote	= createNote(types[currentTypeI + 1], currentNote.tone.octav, currentNote.tone.name, currentNote.isRemoveKey, currentNote.isSlur);
-							}
-						}
-					}
-
-					if(newNote) {
-						replaceNote(newNote);
-					}
-				}
-				function setRest() {
-					var	name;
-
-					if(!currentNote.isRest) {
-						replaceNote(createRest(currentNote.type.name));
-					} else {
-						name	= currentNote.type.name.substr(4).split('').map(function (s, i) {
-							if(i === 0) {
-								s	= s.toLowerCase();
-							}
-							return s;
-						}).join('');
-						replaceNote(createNote(name, currentInfo[0], currentInfo[1], false, false));
-					}
-				}
-				function setFocus(note) {
-					if(currentNote) {
-						currentNote.isFocus	= false;
-					}
-					note.isFocus	= true;
-					currentNote		= note;
-
-					if(!note.isRest) {
-						currentInfo	= [note.tone.octav, note.tone.name];
-					}
-
-					gameController.initView(true);
-				}
-				function moveFocus(right) {
-					var	noteI	= currentTact.nodes.indexOf(currentNote),
-						tactI,
-						focusNote,
-						tactUpdate	= false;
-					if(right) {
-						if(noteI >= (currentTact.nodes.length - 1)) {
-							tactI	= game.tacts.indexOf(currentTact);
-							if(tactI >= (game.tacts.length - 1)) {
-								addTact([]);
-							}
-							currentTact	= game.tacts[tactI + 1];
-							tactUpdate	= true;
-
-							noteI		= -1;
-						}
-						focusNote	= currentTact.nodes[noteI + 1];
-					} else {
-						if(noteI === 0) {
-							tactI	= game.tacts.indexOf(currentTact);
-							if(tactI > 0) {
-								currentTact	= game.tacts[tactI - 1];
-								tactUpdate	= true;
-								noteI		= currentTact.nodes.length;
-							}
-						}
-						focusNote	= currentTact.nodes[noteI - 1];
-					}
-
-					if(focusNote) {
-						setFocus(focusNote);
-					}
-					if(tactUpdate) {
-						gameController.moveToTact(currentTact);
-					}
-				}
-				function setSlur() {
-					if(!currentNote.isRest) {
-						replaceNote(createNote(currentNote.type.name, currentNote.tone.octav, currentNote.tone.name, currentNote.isRemoveKey, !currentNote.isSlur));
-					}
-				}
-				function setSharp() {
-					if(!currentNote.isRest) {
-						var	toneName	= currentNote.tone.name.substr(0, 1);
-
-						game.setSharp(toneName, 'toggle');
-
-						gameController.initView(true);
-					}
-				}
-				function setFlat() {
-					if(!currentNote.isRest) {
-						var	toneName	= currentNote.tone.name.substr(0, 1);
-
-						game.setFlat(toneName, 'toggle');
-
-						gameController.initView(true);
-					}
-				}
-
-				setFocus(currentTact.nodes[0]);
-
-				function onKeydown(e) {
-					switch(e.which) {
-					case 37:	// ArrowLeft
-						e.preventDefault();
-						moveFocus(false);
-						break;
-					case 38:	// ArrowUp
-						e.preventDefault();
-						updateNote(-1);
-						break;
-					case 39:	// ArrowRight
-						e.preventDefault();
-						moveFocus(true);
-						break;
-					case 40:	// ArrowDown
-						e.preventDefault();
-						updateNote(1);
-						break;
-					case 107:	// NumPad+
-					case 187:	// +
-						e.preventDefault();
-						updateNoteSize(true);
-						break;
-					case 109:	// NumPad-
-					case 189:	// -
-						e.preventDefault();
-						updateNoteSize(false);
-						break;
-					case 70:	// f
-						e.preventDefault();
-						setFlat();
-						break;
-					case 76:	// l
-						e.preventDefault();
-						setSlur();
-						break;
-					case 82:	// r
-						e.preventDefault();
-						setRest();
-						break;
-					case 83:	// s
-						e.preventDefault();
-						setSharp();
-						break;
-					case 88:	// x
-						e.preventDefault();
-
-						require(['fM'], function (fM) {
-							$(window).off('keydown', onKeydown);
-							fM.link.navigate('/game/'+gameController.permlink+'/save/', 'Magic Tune', {
-								title:	'Magic Tune',
-								data:	{
-									data:	JSON.stringify(gameController.exportGame())
-								}
-							});
-						});
-						// console.log(JSON.stringify(gameController.exportGame()));
-						break;
-					default:
-						// console.log(e.which);
-						break;
-					}
-				}
-
-				$(window).on('keydown', onKeydown);
-
-				gameController.moveToTact(0);
+			require(['game/edit'], function (Edit) {
+				// Start the edit mode
+				new Edit(L2P.gameController);
 			});
 		}
 	};
@@ -16801,12 +17399,16 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 	function login(e) {
 		e.preventDefault();
 
+		// Allow autologin
 		sessionStorage.removeItem('l2p_fb_autologin');
 
+		// Start the login-process
 		L2P.facebook.login(function (user) {
 			L2P.$modal.off('hide');
 		});
 	}
+
+	// Login-box
 	$('#frontpage_container [name="facebook_login"]').on('click', function (e) {
 		e.preventDefault();
 
@@ -16827,6 +17429,7 @@ define('l2p',['jquery', 'api', 'game/options', 'facebook', 'bootstrap'], functio
 
 	return L2P;
 });
+
 define('fragments/game',['jquery', 'api', 'game/game-controller', 'game/sound', 'sound-input'], function ($, api, GameController, Sound, SoundInput) {
 	var	games			= [],
 		svgContainer,
